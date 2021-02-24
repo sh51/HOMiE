@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">HOMiE</string>
+    <string name="title_dashboard">Dashboard</string>
+    <string name="title_notifications">Notifications</string>
+    <string name="title_messages">Messages</string>
+</resources>
