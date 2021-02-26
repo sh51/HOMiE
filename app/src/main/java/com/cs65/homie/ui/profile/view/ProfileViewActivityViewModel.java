@@ -20,8 +20,6 @@ public class ProfileViewActivityViewModel extends ViewModel
         = new MutableLiveData<String>("");
     private final MutableLiveData<LatLng> loc
         = new MutableLiveData<LatLng>(new LatLng(0, 0));
-    private final MutableLiveData<String> locStr
-        = new MutableLiveData<String>("");
     private final MutableLiveData<String> gender
         = new MutableLiveData<String>("");
     private final MutableLiveData<LatLng> myLoc
@@ -30,6 +28,7 @@ public class ProfileViewActivityViewModel extends ViewModel
         = new MutableLiveData<Boolean>(false);
     private final MutableLiveData<String> myLocStr
         = new MutableLiveData<String>("");
+    private long myId = -1;
     private final MutableLiveData<String> name
         = new MutableLiveData<String>("");
     private final MutableLiveData<Boolean> pets
@@ -61,10 +60,6 @@ public class ProfileViewActivityViewModel extends ViewModel
     {
         return this.loc;
     }
-    public MutableLiveData<String> getLocStr()
-    {
-        return this.locStr;
-    }
     public MutableLiveData<Boolean> getPets()
     {
         return this.pets;
@@ -81,6 +76,10 @@ public class ProfileViewActivityViewModel extends ViewModel
     {
         return this.myLocStr;
     }
+    public long getMyId()
+    {
+        return this.myId;
+    }
     public MutableLiveData<Boolean> getPlace()
     {
         return this.place;
@@ -96,6 +95,12 @@ public class ProfileViewActivityViewModel extends ViewModel
     public long getUserId()
     {
         return this.userId;
+    }
+    @SuppressWarnings("UnusedReturnValue")
+    public long setMyId(long id)
+    {
+        this.myId = id;
+        return this.myId;
     }
     @SuppressWarnings("UnusedReturnValue")
     public long setUserId(long id)
