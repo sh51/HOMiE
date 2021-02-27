@@ -26,6 +26,9 @@ import java.util.Locale;
 import java.util.function.Consumer;
 
 
+/**
+ * Static profile view activity
+ */
 public class ProfileViewActivity
     extends AppCompatActivity
     implements Consumer<Location>
@@ -35,6 +38,13 @@ public class ProfileViewActivity
         = "BUNDLE_KEY_PROFILE_VIEW_MY_ID";
     public static final String BUNDLE_KEY_USER_ID
         = "BUNDLE_KEY_PROFILE_VIEW_USER_ID";
+    public static final String CURRENT_LOC_FORMAT_STR
+        = "Your current location:%n%s";
+    public static final int GENDER_TEXT_VIEW_CHAR_LIMIT = 30;
+    public static final String PLACE_FORMAT_STR
+        = "%s %.1f miles from you";
+    public static final String PLACE_HAS_STR = "Has a place";
+    public static final String PLACE_WANTS_STR = "Is looking for a place";
 
     private Geocoder geocoder = null;
     private LocationManager locationManager = null;
@@ -50,6 +60,11 @@ public class ProfileViewActivity
     private ProfileViewActivityViewModel vm = null;
 
 
+    /**
+     * Updates the user's location
+     *
+     * @param location  User's location
+     */
     public void accept(Location location)
     {
         if (location != null)
@@ -59,6 +74,21 @@ public class ProfileViewActivity
                 location.getLongitude()
             ));
         }
+    }
+
+    public void onUpdateLocLive(boolean locLive)
+    {
+
+        if (locLive)
+        {
+            this.getCurrentLoc();
+            LatLng loc = this.getLastLoc();
+            if (loc != null)
+            {
+                this.vm.getMyLoc().setValue(loc);
+            }
+        }
+
     }
 
     public void updateViewAvatar(Uri avatar)
@@ -77,6 +107,11 @@ public class ProfileViewActivity
 
     }
 
+    /**
+     * Update the bathroom text view on a change in the private bathroom state
+     *
+     * @param bathroom  Whether or not a private bathroom is applicable
+     */
     public void updateViewBathroomByBathroom(boolean bathroom)
     {
         if (this.vm == null)
@@ -94,6 +129,11 @@ public class ProfileViewActivity
         }
     }
 
+    /**
+     * Update the bathroom text view on a change in the place state
+     *
+     * @param place Whether or not the user in question has a place
+     */
     public void updateViewBathroomByPlace(boolean place)
     {
         if (this.vm == null)
@@ -121,13 +161,26 @@ public class ProfileViewActivity
 
     public void updateViewGender(String gender)
     {
-        // TODO Need to limit the length of this string before passing it along
-        if (this.viewGender != null)
+
+        if (this.viewGender == null)
         {
-            this.viewGender.setText(gender);
+            return;
         }
+
+        // The gender text view has a character limit
+        if (gender.length() > GENDER_TEXT_VIEW_CHAR_LIMIT)
+        {
+            gender = gender.substring(0, GENDER_TEXT_VIEW_CHAR_LIMIT) + "…";
+        }
+        this.viewGender.setText(gender);
+
     }
 
+    /**
+     * Update the location text view upon a change to the app user's location
+     *
+     * @param myLoc     The app user's location
+     */
     @SuppressWarnings("ConstantConditions")
     public void updateViewLocByMyLoc(LatLng myLoc)
     {
@@ -143,6 +196,7 @@ public class ProfileViewActivity
             )
             {
 
+                // Get address represented by the user's current location
                 Address address = Utilities.latLngToAddress(
                     this.geocoder, myLoc
                 );
@@ -151,15 +205,21 @@ public class ProfileViewActivity
                     // Usually there's only one line, and it contains
                     // the whole address
                     String addrStr = address.getAddressLine(0);
-                    // FIXME Magic string
-                    this.viewLoc.setText("Your current location: " + addrStr);
+                    if (addrStr !=  null)
+                    {
+                        this.viewLoc.setText(String.format(
+                            Locale.getDefault(),
+                            CURRENT_LOC_FORMAT_STR,
+                            addrStr
+                        ));
+                    }
                 }
 
             }
             else
             {
-                // This branch represents a static location address that the
-                // user has set
+                // This branch represents a static location address string
+                // that the user has set
                 // This is handled by updateMyLocStr and should not be updated
                 // by this method since this method is only invoked on the myLoc
                 // change.
@@ -169,6 +229,7 @@ public class ProfileViewActivity
         else
         {
 
+            // Show the distance from the app user to the profile's user
             LatLng zero = new LatLng(0, 0);
             LatLng theirLoc = this.vm.getLoc().getValue();
             if (myLoc.equals(zero) || theirLoc.equals(zero))
@@ -182,23 +243,31 @@ public class ProfileViewActivity
 
     }
 
+    /**
+     * Update the location text view upon a change to the app user's location
+     * string
+     *
+     * @param myLoc     The app user's location string
+     */
     public void updateViewLocByMyString(String myLoc)
     {
-
         //noinspection ConstantConditions
         if (
-            this.viewLoc == null
-            || !this.isMe()
-            || this.vm.getMyLocLive().getValue()
+            this.viewLoc != null
+            && this.isMe()
+            && !this.vm.getMyLocLive().getValue()
         )
         {
-            return;
+            this.viewLoc.setText(myLoc);
         }
-
-        this.viewLoc.setText(myLoc);
-
     }
 
+    /**
+     * Update the location text view upon a change to the profile user's
+     * location string
+     *
+     * @param userLoc   The profile user's location
+     */
     @SuppressWarnings("ConstantConditions")
     public void updateViewLocByUserLoc(LatLng userLoc)
     {
@@ -228,56 +297,36 @@ public class ProfileViewActivity
 
     public void updateViewPets(boolean pets)
     {
-
-        if (this.viewPets == null)
+        if (this.viewPets != null)
         {
-            return;
+            // TODO The intention is that the final version will use icons
+            // rather than unicode, but this is good for now
+            if (pets)
+            {
+                this.viewPets.setText(R.string.profile_view_pets_yes);
+            }
+            else
+            {
+                this.viewPets.setText(R.string.profile_view_pets_no);
+            }
         }
-
-        // TODO The intention is that the final version will use icons rather
-        // than unicode, but this is good for now
-        // FIXME Magic strings
-        String which;
-        if (pets)
-        {
-            which = "✓";
-        }
-        else
-        {
-            which = "✖";
-        }
-        this.viewPets.setText(String.format(
-            Locale.getDefault(),
-            "Pet Friendly?  %s", which
-        ));
-
     }
 
     public void updateViewSmoking(boolean smoking)
     {
-
-        if (this.viewSmoking == null)
+        if (this.viewSmoking != null)
         {
-            return;
+            // TODO The intention is that the final version will use icons
+            // rather than unicode, but this is good for now
+            if (smoking)
+            {
+                this.viewSmoking.setText(R.string.profile_view_smoking_yes);
+            }
+            else
+            {
+                this.viewSmoking.setText(R.string.profile_view_smoking_no);
+            }
         }
-
-        // TODO The intention is that the final version will use icons rather
-        // than unicode, but this is good for now
-        // FIXME Magic strings
-        String which;
-        if (smoking)
-        {
-            which = "\uD83D\uDEAC";
-        }
-        else
-        {
-            which = "\uD83D\uDEAD";
-        }
-        this.viewSmoking.setText(String.format(
-            Locale.getDefault(),
-            "Smoking?  %s", which
-        ));
-
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -285,6 +334,13 @@ public class ProfileViewActivity
     {
 
         super.onCreate(savedInstanceState);
+
+        Log.d(
+            MainActivity.TAG,
+            this.getClass().getCanonicalName()
+            + " location permissions: "
+            + Utilities.checkPermissionLocation(this)
+        );
 
         // Get the view model instance
         this.vm = new ViewModelProvider(this).get(
@@ -339,9 +395,6 @@ public class ProfileViewActivity
             return;
         }
 
-        // Fetch Firebase data asynchronously (eventually)
-        this.pingFirebase();
-
         // Setup the location services if we need it.
         this.geocoder = new Geocoder(this, Locale.getDefault());
         this.locationManager
@@ -350,6 +403,12 @@ public class ProfileViewActivity
         locCriteria.setAccuracy(Criteria.ACCURACY_COARSE);
         this.locationProvider
             = this.locationManager.getBestProvider(locCriteria, true);
+        Log.d(
+            MainActivity.TAG,
+            this.getClass().getCanonicalName()
+            + " locationProvider: "
+            + this.locationProvider
+        );
 
         // Load the layout
         this.setContentView(R.layout.activity_profile_view);
@@ -368,7 +427,9 @@ public class ProfileViewActivity
         this.viewBathroom = this.findViewById(R.id.profileViewBathroomTextView);
         if (this.viewBathroom != null)
         {
-            this.vm.getBathroom().observe(this, this::updateViewBathroomByBathroom);
+            this.vm.getBathroom().observe(
+                this, this::updateViewBathroomByBathroom
+            );
             this.vm.getPlace().observe(this, this::updateViewBathroomByPlace);
             this.updateViewBathroom(
                 this.vm.getBathroom().getValue(),
@@ -414,17 +475,26 @@ public class ProfileViewActivity
             this.updateViewSmoking(this.vm.getSmoking().getValue());
         }
 
+        // Set the non-view observer for the location live field
+        this.vm.getMyLocLive().observe(this, this::onUpdateLocLive);
+
+        // Fetch Firebase data asynchronously (eventually, somehow)
+        this.pingFirebase();
+
     }
 
     protected void onResume()
     {
 
+
         super.onResume();
+
+        // If the user uses a live location, update the location on resume
+        // At the moment we don't bother listening to the location
+        // Excessive
+        //
         //noinspection ConstantConditions
-        if (
-            this.vm.getMyLocLive().getValue()
-            && Utilities.checkPermissionLocation(this)
-        )
+        if (this.vm.getMyLocLive().getValue())
         {
             this.getCurrentLoc();
             LatLng loc = this.getLastLoc();
@@ -436,6 +506,10 @@ public class ProfileViewActivity
 
     }
 
+    /**
+     * Make the request to the location manager to asynchronously get the
+     * current location
+     */
     @SuppressLint("MissingPermission")
     private void getCurrentLoc()
     {
@@ -452,6 +526,11 @@ public class ProfileViewActivity
 
     }
 
+    /**
+     * Get the last location known to the location manager
+     *
+     * @return  The last location. May be stale
+     */
     @SuppressLint("MissingPermission")
     private LatLng getLastLoc()
     {
@@ -477,15 +556,23 @@ public class ProfileViewActivity
 
     }
 
+    /**
+     * Whether or not this profile view is of the app user
+     *
+     * @return  Whether or not this profile viwe is of the app user
+     */
     private boolean isMe()
     {
         return this.vm.getMyId() == this.vm.getUserId();
     }
 
+    /**
+     * Load fake data in lieu of Firebase, for testing
+     */
     private void loadFakeData()
     {
 
-        this.vm.getBathroom().setValue(true);
+        this.vm.getBathroom().setValue(false);
         this.vm.getBio().setValue(
             "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do "
             + "eiusmod tempor incididunt ut labore et dolore magna aliqua. "
@@ -501,10 +588,10 @@ public class ProfileViewActivity
         this.vm.getMyLoc().setValue(new LatLng(43.704166, -72.288762));
         this.vm.getMyLocLive().setValue(true);
         this.vm.getMyLocStr().setValue("Sanborn");
-        this.vm.getPets().setValue(true);
-        this.vm.getPlace().setValue(false);
+        this.vm.getPets().setValue(false);
+        this.vm.getPlace().setValue(true);
         this.vm.getProfileName().setValue("John");
-        this.vm.getSmoking().setValue(true);
+        this.vm.getSmoking().setValue(false);
 
     }
 
@@ -515,36 +602,41 @@ public class ProfileViewActivity
 
     private void updateViewBathroom(boolean bathroom, boolean place)
     {
-        if (this.viewBathroom == null)
+        if (this.viewBathroom != null)
         {
-            return;
+            // TODO The intention is that the final version will use icons
+            // rather than unicode, but this is good for now
+            if (bathroom)
+            {
+                if (place)
+                {
+                    this.viewBathroom.setText(
+                        R.string.profile_view_bathroom_yes_place_yes
+                    );
+                }
+                else
+                {
+                    this.viewBathroom.setText(
+                        R.string.profile_view_bathroom_yes_place_no
+                    );
+                }
+            }
+            else
+            {
+                if (place)
+                {
+                    this.viewBathroom.setText(
+                        R.string.profile_view_bathroom_no_place_yes
+                    );
+                }
+                else
+                {
+                    this.viewBathroom.setText(
+                        R.string.profile_view_bathroom_no_place_no
+                    );
+                }
+            }
         }
-
-        // FIXME Magic strings
-        String ownership;
-        if (place)
-        {
-            ownership = "Has";
-        }
-        else
-        {
-            ownership = "Wants";
-        }
-        // TODO The intention is that the final version will use icons rather
-        // than unicode, but this is good for now
-        String which;
-        if (bathroom)
-        {
-            which = "✓";
-        }
-        else
-        {
-            which = "✖";
-        }
-        this.viewBathroom.setText(String.format(
-            "%s Private Bathroom?  %s", ownership, which
-        ));
-
     }
 
     private void updateViewLoc(LatLng myLoc, LatLng theirLoc, boolean place)
@@ -562,19 +654,18 @@ public class ProfileViewActivity
         // TODO Handle unit preference once that is established on the editable
         // end
 
-        // FIXME Magic strings
         String placeStr;
         if (place)
         {
-            placeStr = "Has a place";
+            placeStr = PLACE_HAS_STR;
         }
         else
         {
-            placeStr = "Is looking for a place";
+            placeStr = PLACE_WANTS_STR;
         }
         this.viewLoc.setText(String.format(
             Locale.getDefault(),
-            "%s %.1f miles from you",
+            PLACE_FORMAT_STR,
             placeStr, distance
         ));
 
