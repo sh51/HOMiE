@@ -93,3 +93,6 @@ tags
 
 # Lock files
 *.~lock.*
+
+# Ignore local IDE settings 
+.idea/
