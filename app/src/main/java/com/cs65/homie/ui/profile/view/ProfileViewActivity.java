@@ -117,6 +117,7 @@ public class ProfileViewActivity
 
     }
 
+    // FIXME all of these updateXxxView need to become updateViewXxx
     public void updateBioView(String bio)
     {
         if (this.viewBio != null)
@@ -153,13 +154,14 @@ public class ProfileViewActivity
                 );
                 if (address != null)
                 {
+                    // Usually there's only one line, and it contains
+                    // the whole address
                     String addrStr = address.getAddressLine(0);
                     // FIXME Magic string
                     this.viewLoc.setText("Your current location: " + addrStr);
                 }
 
-            }
-            else
+            } else
             {
                 // This branch represents a static location address that the
                 // user has set
@@ -168,16 +170,19 @@ public class ProfileViewActivity
                 return;
             }
 
-        }
-
-        LatLng zero = new LatLng(0, 0);
-        LatLng theirLoc = this.vm.getLoc().getValue();
-        if (myLoc.equals(zero) || theirLoc.equals(zero))
+        } else
         {
-            return;
-        }
 
-        this.updateLoc(myLoc, theirLoc, this.vm.getPlace().getValue());
+            LatLng zero = new LatLng(0, 0);
+            LatLng theirLoc = this.vm.getLoc().getValue();
+            if (myLoc.equals(zero) || theirLoc.equals(zero))
+            {
+                return;
+            }
+
+            this.updateLoc(myLoc, theirLoc, this.vm.getPlace().getValue());
+
+        }
 
     }
 
@@ -245,7 +250,7 @@ public class ProfileViewActivity
         {
             which = "✖";
         }
-        this.viewBathroom.setText(String.format(
+        this.viewPets.setText(String.format(
             Locale.getDefault(),
             "Pet Friendly?  %s", which
         ));
@@ -374,7 +379,7 @@ public class ProfileViewActivity
             );
         }
         this.viewBio = this.findViewById(R.id.profileViewBioTextView);
-        if (this.viewBio == null)
+        if (this.viewBio != null)
         {
             this.vm.getBio().observe(this, this::updateBioView);
             this.updateBioView(this.vm.getBio().getValue());
@@ -497,6 +502,8 @@ public class ProfileViewActivity
         this.vm.getGender().setValue("Male");
         this.vm.getLoc().setValue(new LatLng(43.624794, -72.323171));
         this.vm.getMyLoc().setValue(new LatLng(43.704166, -72.288762));
+        this.vm.getMyLocLive().setValue(true);
+        this.vm.getMyLocStr().setValue("Sanborn");
         this.vm.getPets().setValue(true);
         this.vm.getPlace().setValue(false);
         this.vm.getProfileName().setValue("John");
