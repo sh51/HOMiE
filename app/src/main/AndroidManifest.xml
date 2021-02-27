@@ -26,6 +26,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".ui.profile.view.ProfileViewActivity" />
+        <activity android:name=".ui.carousel.ImageCarouselFullScreenActivity" />
 
     </application>
 

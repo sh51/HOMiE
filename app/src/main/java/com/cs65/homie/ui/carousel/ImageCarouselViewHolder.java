@@ -9,7 +9,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.cs65.homie.R;
 
 
-public class ImageCarouselViewHolder extends RecyclerView.ViewHolder
+class ImageCarouselViewHolder extends RecyclerView.ViewHolder
 {
 
     private final ImageView imageView;
@@ -17,7 +17,7 @@ public class ImageCarouselViewHolder extends RecyclerView.ViewHolder
     public ImageCarouselViewHolder(@NonNull View itemView)
     {
         super(itemView);
-        this.imageView = (ImageView)itemView.findViewById(
+        this.imageView = itemView.findViewById(
             R.id.imageCarouselItem
         );
     }

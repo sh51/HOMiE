@@ -1,12 +1,12 @@
 package com.cs65.homie.ui.carousel;
 
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.CompositePageTransformer;
@@ -19,7 +19,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class ImageCarouselFragment extends Fragment
+/**
+ * Generic image carousel fragment
+ */
+@SuppressWarnings("Convert2Diamond")
+public class ImageCarouselFragment
+    extends Fragment
+    implements View.OnClickListener
 {
 
     public static final String INTENT_KEY_IMAGE_URIS
@@ -28,13 +34,33 @@ public class ImageCarouselFragment extends Fragment
     private List<Uri> images = new ArrayList<Uri>();
     private ViewPager2 viewPager = null;
 
+
     public List<Uri> getImages()
     {
         return this.images;
     }
 
+    public void onClick(View view)
+    {
+
+        // Spawn the fuller-screen image view
+        Intent intent = new Intent(
+            this.getContext(), ImageCarouselFullScreenActivity.class
+        );
+        intent.putExtra(
+            ImageCarouselFullScreenActivity.BUNDLE_ARG_KEY_URI,
+            this.images.get((int)view.getTag())
+        );
+        this.startActivity(intent);
+
+    }
+
+
     public void onCreate(Bundle savedInstanceState)
     {
+
+        // Since this is a dependent fragment, we don't save state
+        // That is the responsibility of the containing activity/fragment
 
         super.onCreate(savedInstanceState);
 
@@ -61,24 +87,24 @@ public class ImageCarouselFragment extends Fragment
     {
 
         // FIXME The proportions of the movement, padding, etc,
-        // completely break down on landscape
+        // completely break down on landscape.
+        // Since it doesn't work in landscape, and is inflexible overall,
+        // magic number remain for now
         this.viewPager = view.findViewById(R.id.imageCarouselViewPager);
         if (this.viewPager != null)
         {
 
+            // Transformer supports the partial images
             CompositePageTransformer transformer
                 = new CompositePageTransformer();
             transformer.addTransformer(new MarginPageTransformer(20));
-            transformer.addTransformer(new ViewPager2.PageTransformer()
-            {
-                @Override
-                public void transformPage(@NonNull View page, float position)
-                {
-                    page.setScaleY((float)(0.85 + (1 - Math.abs(position)) * 0.15));
-                }
-            });
+            transformer.addTransformer((page, position) -> page.setScaleY(
+                (float)(0.85 + (1 - Math.abs(position)) * 0.15)
+            ));
 
             this.viewPager.setAdapter(new ImageCarouselViewPagerAdapter(this));
+            // Basically we only need the left and right images offscreen
+            // loaded at any one time
             this.viewPager.setOffscreenPageLimit(2);
             View child = this.viewPager.getChildAt(0);
             if (child != null)
@@ -91,6 +117,13 @@ public class ImageCarouselFragment extends Fragment
 
     }
 
+    /**
+     * Set the list of images held by the carousel
+     *
+     * All images will be replaced and reloaded on the invocation of this method
+     *
+     * @param images    Carousel images
+     */
     public void setImages(List<Uri> images)
     {
         this.images = images;

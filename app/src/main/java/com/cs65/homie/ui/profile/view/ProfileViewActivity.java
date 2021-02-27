@@ -38,6 +38,7 @@ import java.util.function.Consumer;
 /**
  * Static profile view activity
  */
+@SuppressWarnings("Convert2Diamond")
 public class ProfileViewActivity
     extends AppCompatActivity
     implements Consumer<Location>, LocationListener
@@ -418,7 +419,6 @@ public class ProfileViewActivity
             return;
         }
 
-
         // Setup the location services if we need it.
         this.geocoder = new Geocoder(this, Locale.getDefault());
         this.locationManager = (LocationManager)this.getSystemService(
@@ -576,12 +576,11 @@ public class ProfileViewActivity
         this.vm.getProfileName().setValue("John");
         this.vm.getSmoking().setValue(false);
 
-        // FIXME These URIs are incorrect
         List<Uri> images = new ArrayList<Uri>();
-        images.add(Uri.parse("android.resource://"+this.getPackageName()+"/drawable/dart0.jpg"));
-        images.add(Uri.parse("android.resource://"+this.getPackageName()+"/drawable/dart1.jpg"));
-        images.add(Uri.parse("android.resource://"+this.getPackageName()+"/drawable/dart2.jpg"));
-        images.add(Uri.parse("android.resource://"+this.getPackageName()+"/drawable/dart3.jpg"));
+        images.add(Uri.parse("android.resource://com.cs65.homie/" + R.drawable.dart0));
+        images.add(Uri.parse("android.resource://com.cs65.homie/" + R.drawable.dart1));
+        images.add(Uri.parse("android.resource://com.cs65.homie/" + R.drawable.dart2));
+        images.add(Uri.parse("android.resource://com.cs65.homie/" + R.drawable.dart3));
         this.vm.getimages().setValue(images);
 
     }

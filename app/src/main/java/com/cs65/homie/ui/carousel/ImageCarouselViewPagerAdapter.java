@@ -9,7 +9,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.cs65.homie.R;
 
 
-public class ImageCarouselViewPagerAdapter
+class ImageCarouselViewPagerAdapter
     extends RecyclerView.Adapter<ImageCarouselViewHolder>
 {
 
@@ -33,26 +33,11 @@ public class ImageCarouselViewPagerAdapter
 
     public void onBindViewHolder(@NonNull ImageCarouselViewHolder holder, int position)
     {
-        //holder.getImageView().setImageURI(
-        //    this.parent.getImages().get(position)
-        //);
-        switch (position)
-        {
-            case 0:
-                holder.getImageView().setImageResource(R.drawable.dart0);
-                break;
-            case 1:
-                holder.getImageView().setImageResource(R.drawable.dart1);
-                break;
-            case 2:
-                holder.getImageView().setImageResource(R.drawable.dart2);
-                break;
-            case 3:
-                holder.getImageView().setImageResource(R.drawable.dart3);
-                break;
-            default:
-                //pass
-        }
+        holder.getImageView().setImageURI(
+            this.parent.getImages().get(position)
+        );
+        holder.getImageView().setOnClickListener(this.parent);
+        holder.getImageView().setTag(position);
     }
 
     public int getItemCount()
