@@ -7,6 +7,9 @@ import androidx.lifecycle.ViewModel;
 
 import com.google.android.gms.maps.model.LatLng;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 /**
  * Static profile view view model
@@ -21,7 +24,11 @@ public class ProfileViewActivityViewModel extends ViewModel
         = new MutableLiveData<Boolean>(false);
     private final MutableLiveData<String> bio
         = new MutableLiveData<String>("");
-    private final MutableLiveData<LatLng> loc
+    private final MutableLiveData<List<Uri>> imageUris
+        = new MutableLiveData<List<Uri>>(
+            new ArrayList<Uri>()
+        );
+    private final MutableLiveData<LatLng>    loc
         = new MutableLiveData<LatLng>(new LatLng(0, 0));
     private final MutableLiveData<String> gender
         = new MutableLiveData<String>("");
@@ -64,6 +71,10 @@ public class ProfileViewActivityViewModel extends ViewModel
     public MutableLiveData<String> getGender()
     {
         return this.gender;
+    }
+    public MutableLiveData<List<Uri>> getimages()
+    {
+        return this.imageUris;
     }
     /**
      * Get the provided location of the profile user

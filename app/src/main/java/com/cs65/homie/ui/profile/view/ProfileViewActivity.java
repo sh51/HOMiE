@@ -18,14 +18,19 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.FragmentContainerView;
+import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.cs65.homie.MainActivity;
 import com.cs65.homie.R;
 import com.cs65.homie.ThreadPerTaskExecutor;
 import com.cs65.homie.Utilities;
+import com.cs65.homie.ui.carousel.ImageCarouselFragment;
 import com.google.android.gms.maps.model.LatLng;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.function.Consumer;
 
@@ -96,6 +101,8 @@ public class ProfileViewActivity
             );
         }
     }
+
+    public void onStatusChanged (String provider, int status, Bundle extras) {}
 
     public void onUpdateLocLive(boolean locLive)
     {
@@ -358,8 +365,6 @@ public class ProfileViewActivity
             + Utilities.checkPermissionLocation(this)
         );
 
-
-
         // Get the view model instance
         this.vm = new ViewModelProvider(this).get(
             ProfileViewActivityViewModel.class
@@ -495,6 +500,15 @@ public class ProfileViewActivity
             this.updateViewSmoking(this.vm.getSmoking().getValue());
         }
 
+        // Load the image carousel
+        ImageCarouselFragment carouselFrag
+            = (ImageCarouselFragment)this.getSupportFragmentManager()
+                .findFragmentById(R.id.profileViewCarouselFrag);
+        if (carouselFrag != null)
+        {
+            this.vm.getimages().observe(this, carouselFrag::setImages);
+        }
+
         // Set the non-view observer for the location live field
         this.vm.getMyLocLive().observe(this, this::onUpdateLocLive);
 
@@ -561,6 +575,14 @@ public class ProfileViewActivity
         this.vm.getPlace().setValue(false);
         this.vm.getProfileName().setValue("John");
         this.vm.getSmoking().setValue(false);
+
+        // FIXME These URIs are incorrect
+        List<Uri> images = new ArrayList<Uri>();
+        images.add(Uri.parse("android.resource://"+this.getPackageName()+"/drawable/dart0.jpg"));
+        images.add(Uri.parse("android.resource://"+this.getPackageName()+"/drawable/dart1.jpg"));
+        images.add(Uri.parse("android.resource://"+this.getPackageName()+"/drawable/dart2.jpg"));
+        images.add(Uri.parse("android.resource://"+this.getPackageName()+"/drawable/dart3.jpg"));
+        this.vm.getimages().setValue(images);
 
     }
 

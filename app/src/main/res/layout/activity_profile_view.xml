@@ -2,7 +2,9 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent" android:layout_height="match_parent">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_marginVertical="5dp">
 
     <ScrollView
         android:layout_width="match_parent"
@@ -44,7 +46,7 @@
                         android:id="@+id/profileViewNameTextView"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_margin="5dp"
+                        android:layout_marginBottom="5dp"
                         android:textSize="32sp"
                         android:textStyle="bold" />
 
@@ -71,34 +73,51 @@
 
             </LinearLayout>
 
-            <TextView
-                android:id="@+id/profileViewSmokingTextView"
+            <androidx.fragment.app.FragmentContainerView
+                android:id="@+id/profileViewCarouselFrag"
+                android:name="com.cs65.homie.ui.carousel.ImageCarouselFragment"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginVertical="5dp"
-                android:textSize="16sp" />
+                android:layout_height="200dp"
+                android:layout_margin="10dp" />
 
-            <TextView
-                android:id="@+id/profileViewPetsTextView"
+            <LinearLayout
+                android:id="@+id/profileViewEtcLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textSize="16sp" />
+                android:layout_marginHorizontal="8dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="20dp"
+                android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/profileViewBathroomTextView"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginVertical="5dp"
-                android:textSize="16sp" />
+                <TextView
+                    android:id="@+id/profileViewSmokingTextView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginVertical="5dp"
+                    android:textSize="16sp" />
 
-            <TextView
-                android:id="@+id/profileViewBioTextView"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginVertical="8dp"
-                android:lineSpacingExtra="2sp"
-                android:textAlignment="center"
-                android:textSize="16sp" />
+                <TextView
+                    android:id="@+id/profileViewPetsTextView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:id="@+id/profileViewBathroomTextView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginVertical="5dp"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:id="@+id/profileViewBioTextView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginVertical="8dp"
+                    android:lineSpacingExtra="2sp"
+                    android:textAlignment="center"
+                    android:textSize="16sp" />
+            </LinearLayout>
 
         </LinearLayout>
     </ScrollView>
