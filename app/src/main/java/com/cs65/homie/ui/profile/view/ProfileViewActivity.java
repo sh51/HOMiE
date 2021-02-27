@@ -73,6 +73,8 @@ public class ProfileViewActivity
         this.workerThread.start();
     }
 
+    ///// ///// /////
+
     public void accept(Location location)
     {
         if (location != null)
@@ -341,6 +343,8 @@ public class ProfileViewActivity
         }
     }
 
+    ///// ///// /////
+
     @SuppressWarnings("ConstantConditions")
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -519,6 +523,8 @@ public class ProfileViewActivity
         }
     }
 
+    ///// ///// /////
+
     /**
      * Whether or not this profile view is of the app user
      *
@@ -552,7 +558,7 @@ public class ProfileViewActivity
         this.vm.getMyLocLive().setValue(true);
         this.vm.getMyLocStr().setValue("Sanborn");
         this.vm.getPets().setValue(false);
-        this.vm.getPlace().setValue(true);
+        this.vm.getPlace().setValue(false);
         this.vm.getProfileName().setValue("John");
         this.vm.getSmoking().setValue(false);
 

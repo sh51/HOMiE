@@ -1,7 +1,9 @@
 package com.cs65.homie;
 
+import android.content.Intent;
 import android.os.Bundle;
 
+import com.cs65.homie.ui.profile.view.ProfileViewActivity;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -12,6 +14,8 @@ import androidx.navigation.ui.NavigationUI;
 
 public class MainActivity extends AppCompatActivity {
 
+    // Needs to be "homies" with an 's' and not "homie" because the package
+    // name "homie" has too many matches in regex logging mode
     public static final String TAG = "HOMIES";
 
     @Override
