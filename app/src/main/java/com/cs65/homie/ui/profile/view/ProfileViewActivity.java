@@ -6,9 +6,13 @@ import android.location.Address;
 import android.location.Criteria;
 import android.location.Geocoder;
 import android.location.Location;
+import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.HandlerThread;
+import android.os.Process;
 import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -31,7 +35,7 @@ import java.util.function.Consumer;
  */
 public class ProfileViewActivity
     extends AppCompatActivity
-    implements Consumer<Location>
+    implements Consumer<Location>, LocationListener
 {
 
     public static final String BUNDLE_KEY_MY_ID
@@ -49,6 +53,7 @@ public class ProfileViewActivity
     private Geocoder geocoder = null;
     private LocationManager locationManager = null;
     private String locationProvider = null;
+    private final HandlerThread workerThread;
     private ImageView viewAvatar = null;
     private TextView viewBathroom = null;
     private TextView viewBio = null;
@@ -59,36 +64,43 @@ public class ProfileViewActivity
     private TextView viewSmoking = null;
     private ProfileViewActivityViewModel vm = null;
 
+    public ProfileViewActivity()
+    {
+        this.workerThread = new HandlerThread(
+            this.getClass().getCanonicalName(),
+            Process.THREAD_PRIORITY_BACKGROUND
+        );
+        this.workerThread.start();
+    }
 
-    /**
-     * Updates the user's location
-     *
-     * @param location  User's location
-     */
     public void accept(Location location)
     {
         if (location != null)
         {
-            this.vm.getMyLoc().postValue(new LatLng(
-                location.getLatitude(),
-                location.getLongitude()
-            ));
+            LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+            if (latLng.latitude != 0 || latLng.longitude != 0)
+            {
+                this.vm.getMyLoc().postValue(latLng);
+            }
+        }
+    }
+
+    public void onLocationChanged(Location location)
+    {
+        if (location.getLatitude() != 0 || location.getLongitude() != 0)
+        {
+            this.vm.getMyLoc().postValue(
+                new LatLng(location.getLatitude(), location.getLongitude())
+            );
         }
     }
 
     public void onUpdateLocLive(boolean locLive)
     {
-
         if (locLive)
         {
-            this.getCurrentLoc();
-            LatLng loc = this.getLastLoc();
-            if (loc != null)
-            {
-                this.vm.getMyLoc().setValue(loc);
-            }
+            this.requestLocUpdate();
         }
-
     }
 
     public void updateViewAvatar(Uri avatar)
@@ -342,6 +354,8 @@ public class ProfileViewActivity
             + Utilities.checkPermissionLocation(this)
         );
 
+
+
         // Get the view model instance
         this.vm = new ViewModelProvider(this).get(
             ProfileViewActivityViewModel.class
@@ -395,19 +409,21 @@ public class ProfileViewActivity
             return;
         }
 
+
         // Setup the location services if we need it.
         this.geocoder = new Geocoder(this, Locale.getDefault());
-        this.locationManager
-            = (LocationManager)this.getSystemService(Context.LOCATION_SERVICE);
+        this.locationManager = (LocationManager)this.getSystemService(
+            Context.LOCATION_SERVICE
+        );
         Criteria locCriteria = new Criteria();
         locCriteria.setAccuracy(Criteria.ACCURACY_COARSE);
-        this.locationProvider
-            = this.locationManager.getBestProvider(locCriteria, true);
+        this.locationProvider = this.locationManager.getBestProvider(
+            locCriteria, true
+        );
         Log.d(
             MainActivity.TAG,
             this.getClass().getCanonicalName()
-            + " locationProvider: "
-            + this.locationProvider
+            + " location provider: " + this.locationProvider
         );
 
         // Load the layout
@@ -483,12 +499,15 @@ public class ProfileViewActivity
 
     }
 
+    protected void onDestroy()
+    {
+        this.workerThread.quitSafely();
+        super.onDestroy();
+    }
+
     protected void onResume()
     {
-
-
         super.onResume();
-
         // If the user uses a live location, update the location on resume
         // At the moment we don't bother listening to the location
         // Excessive
@@ -496,64 +515,8 @@ public class ProfileViewActivity
         //noinspection ConstantConditions
         if (this.vm.getMyLocLive().getValue())
         {
-            this.getCurrentLoc();
-            LatLng loc = this.getLastLoc();
-            if (loc != null)
-            {
-                this.vm.getMyLoc().setValue(loc);
-            }
+            this.requestLocUpdate();
         }
-
-    }
-
-    /**
-     * Make the request to the location manager to asynchronously get the
-     * current location
-     */
-    @SuppressLint("MissingPermission")
-    private void getCurrentLoc()
-    {
-
-        if (this.locationManager != null && this.locationProvider != null)
-        {
-            this.locationManager.getCurrentLocation(
-                this.locationProvider,
-                null,
-                new ThreadPerTaskExecutor(),
-                this
-            );
-        }
-
-    }
-
-    /**
-     * Get the last location known to the location manager
-     *
-     * @return  The last location. May be stale
-     */
-    @SuppressLint("MissingPermission")
-    private LatLng getLastLoc()
-    {
-
-        LatLng loc = null;
-
-        if (this.locationManager != null && this.locationProvider != null)
-        {
-            Location location = this.locationManager.getLastKnownLocation(
-                this.locationProvider
-            );
-            if (location != null)
-            {
-                loc = new LatLng(
-                    location.getLatitude(),
-                    location.getLongitude()
-                );
-            }
-
-        }
-
-        return loc;
-
     }
 
     /**
@@ -598,6 +561,44 @@ public class ProfileViewActivity
     private void pingFirebase()
     {
         this.loadFakeData();
+    }
+
+    @SuppressLint("MissingPermission")
+    private void requestLocUpdate()
+    {
+        if (this.locationManager != null && this.locationProvider != null)
+        {
+
+            // Before the async call, get the last location in the mean time
+            Location loc = this.locationManager.getLastKnownLocation(
+                this.locationProvider
+            );
+            if (loc != null && (loc.getLongitude() != 0 || loc.getLatitude() != 0))
+            {
+                this.vm.getMyLoc().postValue(new LatLng(
+                    loc.getLatitude(), loc.getLongitude()
+                ));
+            }
+
+            if (Build.VERSION.SDK_INT >= Utilities.GET_CURRENT_LOC_SDK)
+            {
+                this.locationManager.getCurrentLocation(
+                    this.locationProvider,
+                    null,
+                    new ThreadPerTaskExecutor(),
+                    this
+                );
+            }
+            else
+            {
+                //noinspection deprecation
+                this.locationManager.requestSingleUpdate(
+                    this.locationProvider,
+                    this,
+                    this.workerThread.getLooper()
+                );
+            }
+        }
     }
 
     private void updateViewBathroom(boolean bathroom, boolean place)
@@ -670,5 +671,7 @@ public class ProfileViewActivity
         ));
 
     }
+
+
 
 }

@@ -23,6 +23,7 @@ public class Utilities
      * Approximate radius of the earth in kilometers
      */
     public static final int EARTH_RADIUS = 6371;
+    public static final int GET_CURRENT_LOC_SDK = 30;
     /**
      *  Miles to kilometers conversion
      */
@@ -32,7 +33,10 @@ public class Utilities
     {
         return checkPermissions(
             activity,
-            new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
+            new String[]{
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            },
             1
         );
     }
