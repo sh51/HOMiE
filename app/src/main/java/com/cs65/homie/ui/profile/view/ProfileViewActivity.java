@@ -49,6 +49,7 @@ public class ProfileViewActivity
     private TextView viewSmoking = null;
     private ProfileViewActivityViewModel vm = null;
 
+
     public void accept(Location location)
     {
         if (location != null)
@@ -60,65 +61,57 @@ public class ProfileViewActivity
         }
     }
 
-    public void updateAvatarUri(Uri avatar)
+    public void updateViewAvatar(Uri avatar)
     {
-        this.viewAvatar.setImageURI(null);
-        this.viewAvatar.setImageURI(avatar);
+
+        if (avatar == null)
+        {
+            // TODO This resource should not be the final placeholder
+            this.viewAvatar.setImageResource(R.drawable.ic_dartmouth_seal);
+        }
+        else
+        {
+            this.viewAvatar.setImageURI(null);
+            this.viewAvatar.setImageURI(avatar);
+        }
+
     }
 
-    public void updateBathroomTextBathroom(boolean bathroom)
+    public void updateViewBathroomByBathroom(boolean bathroom)
     {
         if (this.vm == null)
         {
             Log.d(
                 MainActivity.TAG,
                 this.getClass().getCanonicalName()
-                + ".updateBathroomTextBathroom(), VM is null"
+                + ".updateViewBathroomByBathroom(), VM is null"
             );
         }
         else
         {
             //noinspection ConstantConditions
-            this.updateBathroomText(bathroom, this.vm.getPlace().getValue());
+            this.updateViewBathroom(bathroom, this.vm.getPlace().getValue());
         }
     }
-    public void updateBathroomTextPlace(boolean place)
+
+    public void updateViewBathroomByPlace(boolean place)
     {
-        if (this.vm != null)
+        if (this.vm == null)
+        {
+            Log.d(
+                MainActivity.TAG,
+                this.getClass().getCanonicalName()
+                + ".updateViewBathroomByPlace(), VM is null"
+            );
+        }
+        else
         {
             //noinspection ConstantConditions
-            this.updateBathroomText(this.vm.getBathroom().getValue(), place);
+            this.updateViewBathroom(this.vm.getBathroom().getValue(), place);
         }
     }
 
-    public void updateBathroomText(boolean apartment, boolean bathroom)
-    {
-        if (this.viewBathroom == null)
-        {
-            return;
-        }
-
-        // FIXME Magic strings
-        String ownership = "Has";
-        if (!apartment)
-        {
-            ownership = "Wants";
-        }
-        // TODO The intention is that the final version will use icons rather
-        // than unicode, but this is good for now
-        String which = "✓";
-        if (!bathroom)
-        {
-            which = "✖";
-        }
-        this.viewBathroom.setText(String.format(
-            "%s Private Bathroom?  %s", ownership, which
-        ));
-
-    }
-
-    // FIXME all of these updateXxxView need to become updateViewXxx
-    public void updateBioView(String bio)
+    public void updateViewBio(String bio)
     {
         if (this.viewBio != null)
         {
@@ -126,7 +119,7 @@ public class ProfileViewActivity
         }
     }
 
-    public void updateGenderView(String gender)
+    public void updateViewGender(String gender)
     {
         // TODO Need to limit the length of this string before passing it along
         if (this.viewGender != null)
@@ -136,12 +129,13 @@ public class ProfileViewActivity
     }
 
     @SuppressWarnings("ConstantConditions")
-    public void updateLocViewMyLoc(LatLng myLoc)
+    public void updateViewLocByMyLoc(LatLng myLoc)
     {
 
         if (this.isMe())
         {
 
+            //noinspection StatementWithEmptyBody
             if (
                 this.viewLoc != null
                 && this.geocoder != null
@@ -161,16 +155,18 @@ public class ProfileViewActivity
                     this.viewLoc.setText("Your current location: " + addrStr);
                 }
 
-            } else
+            }
+            else
             {
                 // This branch represents a static location address that the
                 // user has set
                 // This is handled by updateMyLocStr and should not be updated
-                // by this method
-                return;
+                // by this method since this method is only invoked on the myLoc
+                // change.
             }
 
-        } else
+        }
+        else
         {
 
             LatLng zero = new LatLng(0, 0);
@@ -180,32 +176,13 @@ public class ProfileViewActivity
                 return;
             }
 
-            this.updateLoc(myLoc, theirLoc, this.vm.getPlace().getValue());
+            this.updateViewLoc(myLoc, theirLoc, this.vm.getPlace().getValue());
 
         }
 
     }
 
-    @SuppressWarnings("ConstantConditions")
-    public void updateLocViewUserLoc(LatLng userLoc)
-    {
-
-        LatLng zero = new LatLng(0, 0);
-        if (this.isMe())
-        {
-            return;
-        }
-        LatLng myLoc = this.vm.getMyLoc().getValue();
-        if (myLoc.equals(zero) || userLoc.equals(zero))
-        {
-            return;
-        }
-
-        this.updateLoc(myLoc, userLoc, this.vm.getPlace().getValue());
-
-    }
-
-    public void updateLocViewMyStr(String myLoc)
+    public void updateViewLocByMyString(String myLoc)
     {
 
         //noinspection ConstantConditions
@@ -222,7 +199,26 @@ public class ProfileViewActivity
 
     }
 
-    public void updateNameView(String name)
+    @SuppressWarnings("ConstantConditions")
+    public void updateViewLocByUserLoc(LatLng userLoc)
+    {
+
+        LatLng zero = new LatLng(0, 0);
+        if (this.isMe())
+        {
+            return;
+        }
+        LatLng myLoc = this.vm.getMyLoc().getValue();
+        if (myLoc.equals(zero) || userLoc.equals(zero))
+        {
+            return;
+        }
+
+        this.updateViewLoc(myLoc, userLoc, this.vm.getPlace().getValue());
+
+    }
+
+    public void updateViewName(String name)
     {
         if (this.viewName != null)
         {
@@ -230,7 +226,7 @@ public class ProfileViewActivity
         }
     }
 
-    public void updatePetsView(boolean pets)
+    public void updateViewPets(boolean pets)
     {
 
         if (this.viewPets == null)
@@ -257,7 +253,7 @@ public class ProfileViewActivity
 
     }
 
-    public void updateSmokingView(boolean smoking)
+    public void updateViewSmoking(boolean smoking)
     {
 
         if (this.viewSmoking == null)
@@ -299,7 +295,8 @@ public class ProfileViewActivity
             // TODO Handle
             Log.d(
                 MainActivity.TAG,
-                this.getClass().getCanonicalName() + ".onCreate(), ViewModel is null"
+                this.getClass().getCanonicalName()
+                + ".onCreate(), ViewModel is null"
             );
             return;
         }
@@ -342,7 +339,7 @@ public class ProfileViewActivity
             return;
         }
 
-        // Fetch Firebase data asynchronously
+        // Fetch Firebase data asynchronously (eventually)
         this.pingFirebase();
 
         // Setup the location services if we need it.
@@ -361,19 +358,19 @@ public class ProfileViewActivity
         this.viewAvatar = this.findViewById(R.id.profileViewAvatarImageView);
         if (this.viewAvatar != null)
         {
-            this.vm.getAvatarUri().observe(this, this::updateAvatarUri);
+            this.vm.getAvatarUri().observe(this, this::updateViewAvatar);
             Uri avatarUri = this.vm.getAvatarUri().getValue();
             if (avatarUri != null)
             {
-                this.updateAvatarUri(avatarUri);
+                this.updateViewAvatar(avatarUri);
             }
         }
         this.viewBathroom = this.findViewById(R.id.profileViewBathroomTextView);
         if (this.viewBathroom != null)
         {
-            this.vm.getBathroom().observe(this, this::updateBathroomTextBathroom);
-            this.vm.getPlace().observe(this, this::updateBathroomTextPlace);
-            this.updateBathroomText(
+            this.vm.getBathroom().observe(this, this::updateViewBathroomByBathroom);
+            this.vm.getPlace().observe(this, this::updateViewBathroomByPlace);
+            this.updateViewBathroom(
                 this.vm.getBathroom().getValue(),
                 this.vm.getPlace().getValue()
             );
@@ -381,40 +378,40 @@ public class ProfileViewActivity
         this.viewBio = this.findViewById(R.id.profileViewBioTextView);
         if (this.viewBio != null)
         {
-            this.vm.getBio().observe(this, this::updateBioView);
-            this.updateBioView(this.vm.getBio().getValue());
+            this.vm.getBio().observe(this, this::updateViewBio);
+            this.updateViewBio(this.vm.getBio().getValue());
         }
         this.viewGender = this.findViewById(R.id.profileViewGenderTextView);
         if (this.viewGender != null)
         {
-            this.vm.getGender().observe(this, this::updateGenderView);
-            this.updateGenderView(this.vm.getGender().getValue());
+            this.vm.getGender().observe(this, this::updateViewGender);
+            this.updateViewGender(this.vm.getGender().getValue());
         }
         this.viewLoc = this.findViewById(R.id.profileViewLocationTextView);
         if (this.viewLoc != null)
         {
-            this.vm.getLoc().observe(this, this::updateLocViewUserLoc);
-            this.vm.getMyLoc().observe(this, this::updateLocViewMyLoc);
-            this.vm.getMyLocStr().observe(this, this::updateLocViewMyStr);
+            this.vm.getLoc().observe(this, this::updateViewLocByUserLoc);
+            this.vm.getMyLoc().observe(this, this::updateViewLocByMyLoc);
+            this.vm.getMyLocStr().observe(this, this::updateViewLocByMyString);
             // Don't prime with default values
         }
         this.viewName = this.findViewById(R.id.profileViewNameTextView);
         if (this.viewName != null)
         {
-            this.vm.getProfileName().observe(this, this::updateNameView);
-            this.updateNameView(this.vm.getProfileName().getValue());
+            this.vm.getProfileName().observe(this, this::updateViewName);
+            this.updateViewName(this.vm.getProfileName().getValue());
         }
         this.viewPets = this.findViewById(R.id.profileViewPetsTextView);
         if (this.viewPets != null)
         {
-            this.vm.getPets().observe(this, this::updatePetsView);
-            this.updatePetsView(this.vm.getPets().getValue());
+            this.vm.getPets().observe(this, this::updateViewPets);
+            this.updateViewPets(this.vm.getPets().getValue());
         }
         this.viewSmoking = this.findViewById(R.id.profileViewSmokingTextView);
         if (this.viewSmoking != null)
         {
-            this.vm.getSmoking().observe(this, this::updateSmokingView);
-            this.updateSmokingView(this.vm.getSmoking().getValue());
+            this.vm.getSmoking().observe(this, this::updateViewSmoking);
+            this.updateViewSmoking(this.vm.getSmoking().getValue());
         }
 
     }
@@ -516,7 +513,41 @@ public class ProfileViewActivity
         this.loadFakeData();
     }
 
-    private void updateLoc(LatLng myLoc, LatLng theirLoc, boolean place)
+    private void updateViewBathroom(boolean bathroom, boolean place)
+    {
+        if (this.viewBathroom == null)
+        {
+            return;
+        }
+
+        // FIXME Magic strings
+        String ownership;
+        if (place)
+        {
+            ownership = "Has";
+        }
+        else
+        {
+            ownership = "Wants";
+        }
+        // TODO The intention is that the final version will use icons rather
+        // than unicode, but this is good for now
+        String which;
+        if (bathroom)
+        {
+            which = "✓";
+        }
+        else
+        {
+            which = "✖";
+        }
+        this.viewBathroom.setText(String.format(
+            "%s Private Bathroom?  %s", ownership, which
+        ));
+
+    }
+
+    private void updateViewLoc(LatLng myLoc, LatLng theirLoc, boolean place)
     {
 
         if (this.viewLoc == null)
