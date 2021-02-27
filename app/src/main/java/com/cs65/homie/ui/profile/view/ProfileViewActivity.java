@@ -480,7 +480,34 @@ public class ProfileViewActivity
         return this.vm.getMyId() == this.vm.getUserId();
     }
 
-    private void pingFirebase() {}
+    private void loadFakeData()
+    {
+
+        this.vm.getBathroom().setValue(true);
+        this.vm.getBio().setValue(
+            "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do "
+            + "eiusmod tempor incididunt ut labore et dolore magna aliqua. "
+            + "Ut enim ad minim veniam, quis nostrud exercitation ullamco "
+            + "laboris nisi ut aliquip ex ea commodo consequat. Duis aute "
+            + "irure dolor in reprehenderit in voluptate velit esse cillum "
+            + "dolore eu fugiat nulla pariatur. Excepteur sint occaecat "
+            + "cupidatat non proident, sunt in culpa qui officia deserunt "
+            + "mollit anim id est laborum."
+        );
+        this.vm.getGender().setValue("Male");
+        this.vm.getLoc().setValue(new LatLng(43.624794, -72.323171));
+        this.vm.getMyLoc().setValue(new LatLng(43.704166, -72.288762));
+        this.vm.getPets().setValue(true);
+        this.vm.getPlace().setValue(false);
+        this.vm.getProfileName().setValue("John");
+        this.vm.getSmoking().setValue(true);
+
+    }
+
+    private void pingFirebase()
+    {
+        this.loadFakeData();
+    }
 
     private void updateLoc(LatLng myLoc, LatLng theirLoc, boolean place)
     {
