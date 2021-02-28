@@ -1,4 +1,5 @@
 <resources>
+
     <string name="app_name">HOMiE</string>
     <string name="title_dashboard">Dashboard</string>
     <string name="title_notifications">Notifications</string>
@@ -15,5 +16,16 @@
     <string name="profile_view_smoking_yes">Smoking?  🚬</string>
     <string name="profile_view_smoking_no">Smoking?  🚭</string>
     <!-- STATIC PROFILE VIEW -->
+
+    <string name="title_activity_login">LoginActivity</string>
+    <string name="prompt_email">Email</string>
+    <string name="prompt_password">Password</string>
+    <string name="action_sign_in">Sign in or register</string>
+    <string name="action_register_short">Register</string>
+    <string name="action_sign_in_short">Sign in</string>
+    <string name="welcome">"Welcome !"</string>
+    <string name="invalid_username">Not a valid username</string>
+    <string name="invalid_password">Password must be >5 characters</string>
+    <string name="login_failed">"Login failed"</string>
 
 </resources>
