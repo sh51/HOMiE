@@ -17,6 +17,8 @@
     <string name="profile_view_smoking_no">Smoking?  🚭</string>
     <!-- STATIC PROFILE VIEW -->
 
+    <string name="field_ProfilePhoto_text">Profile Photo:</string>
+
     <string name="title_activity_login">LoginActivity</string>
     <string name="prompt_email">Email</string>
     <string name="prompt_password">Password</string>
