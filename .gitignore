@@ -84,6 +84,9 @@ lint/outputs/
 lint/tmp/
 # lint/reports/
 
+# Ignore git .orig files
+**/*.orig
+
 # Vim
 [._]*.s[a-v][a-z]
 [._]*.sw[a-p]
