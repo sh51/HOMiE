@@ -1,6 +1,7 @@
 package com.cs65.homie.ui.profile.view;
 
 import android.annotation.SuppressLint;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.location.Address;
 import android.location.Criteria;
@@ -14,12 +15,13 @@ import android.os.Bundle;
 import android.os.HandlerThread;
 import android.os.Process;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.FragmentContainerView;
-import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.cs65.homie.MainActivity;
@@ -39,8 +41,8 @@ import java.util.function.Consumer;
  * Static profile view activity
  */
 @SuppressWarnings("Convert2Diamond")
-public class ProfileViewActivity
-    extends AppCompatActivity
+public class ProfileViewFragment
+    extends Fragment
     implements Consumer<Location>, LocationListener
 {
 
@@ -68,9 +70,9 @@ public class ProfileViewActivity
     private TextView viewName = null;
     private TextView viewPets = null;
     private TextView viewSmoking = null;
-    private ProfileViewActivityViewModel vm = null;
+    protected ProfileViewFragmentViewModel vm = null;
 
-    public ProfileViewActivity()
+    public ProfileViewFragment()
     {
         this.workerThread = new HandlerThread(
             this.getClass().getCanonicalName(),
@@ -146,7 +148,6 @@ public class ProfileViewActivity
         }
         else
         {
-            //noinspection ConstantConditions
             this.updateViewBathroom(bathroom, this.vm.getPlace().getValue());
         }
     }
@@ -168,7 +169,6 @@ public class ProfileViewActivity
         }
         else
         {
-            //noinspection ConstantConditions
             this.updateViewBathroom(this.vm.getBathroom().getValue(), place);
         }
     }
@@ -203,7 +203,6 @@ public class ProfileViewActivity
      *
      * @param myLoc     The app user's location
      */
-    @SuppressWarnings("ConstantConditions")
     public void updateViewLocByMyLoc(LatLng myLoc)
     {
 
@@ -273,7 +272,6 @@ public class ProfileViewActivity
      */
     public void updateViewLocByMyString(String myLoc)
     {
-        //noinspection ConstantConditions
         if (
             this.viewLoc != null
             && this.isMe()
@@ -290,7 +288,6 @@ public class ProfileViewActivity
      *
      * @param userLoc   The profile user's location
      */
-    @SuppressWarnings("ConstantConditions")
     public void updateViewLocByUserLoc(LatLng userLoc)
     {
 
@@ -353,8 +350,8 @@ public class ProfileViewActivity
 
     ///// ///// /////
 
-    @SuppressWarnings("ConstantConditions")
-    protected void onCreate(Bundle savedInstanceState)
+    // TODO Public now. Resort
+    public void onCreate(Bundle savedInstanceState)
     {
 
         super.onCreate(savedInstanceState);
@@ -362,17 +359,18 @@ public class ProfileViewActivity
         Log.d(
             MainActivity.TAG,
             this.getClass().getCanonicalName()
-            + " location permissions: "
-            + Utilities.checkPermissionLocation(this)
+            + " location permissions: " +
+            Utilities.checkPermissionLocation(this.getActivity())
         );
 
         // Get the view model instance
         this.vm = new ViewModelProvider(this).get(
-            ProfileViewActivityViewModel.class
+            ProfileViewFragmentViewModel.class
         );
         if (this.vm == null)
         {
             // TODO Handle
+            // If it can even happen
             Log.d(
                 MainActivity.TAG,
                 this.getClass().getCanonicalName()
@@ -382,11 +380,10 @@ public class ProfileViewActivity
         }
 
         // Setup My ID
-        if (this.vm.getMyId() < 0 && this.getIntent() != null)
+        if (this.vm.getMyId() < 0 && this.getActivity() != null)
         {
-            this.vm.setMyId(this.getIntent().getLongExtra(
-                BUNDLE_KEY_MY_ID, -1
-            ));
+            // FIXME Using fake data
+            this.vm.setMyId(((MainActivity)this.getActivity()).getFakeMyId());
         }
         if (this.vm.getMyId() < 0)
         {
@@ -394,36 +391,35 @@ public class ProfileViewActivity
             Log.d(
                 MainActivity.TAG, String.format(
                     "%s.onCreate(), MyId is %d",
-                    this.getClass().getCanonicalName(), this.vm.getMyId()
-                )
-            );
+                    this.getClass().getCanonicalName(),
+                    this.vm.getMyId()
+                ));
             return;
         }
 
         // Setup User ID
-        if (this.vm.getUserId() < 0 && this.getIntent() != null)
+        if (this.vm.getUserId() < 0 && this.getActivity() != null)
         {
-            this.vm.setUserId(this.getIntent().getLongExtra(
-                BUNDLE_KEY_USER_ID, -1
-            ));
+            // FIXME Using fake data
+            this.vm.setUserId(((MainActivity)this.getActivity()).getFakeMyId());
         }
         if (this.vm.getUserId() < 0)
         {
             // TODO Handle
-            Log.d(
-                MainActivity.TAG, String.format(
-                    "%s.onCreate(), UserID is %d",
-                    this.getClass().getCanonicalName(), this.vm.getUserId()
-                )
-            );
+            Log.d(MainActivity.TAG, String.format(
+                "%s.onCreate(), UserID is %d",
+                this.getClass().getCanonicalName(),
+                this.vm.getUserId()
+            ));
             return;
         }
 
         // Setup the location services if we need it.
-        this.geocoder = new Geocoder(this, Locale.getDefault());
-        this.locationManager = (LocationManager)this.getSystemService(
-            Context.LOCATION_SERVICE
-        );
+        this.geocoder = new Geocoder(this.getContext(), Locale.getDefault());
+        this.locationManager
+            = (LocationManager) this.getActivity().getSystemService(
+                Context.LOCATION_SERVICE
+            );
         Criteria locCriteria = new Criteria();
         locCriteria.setAccuracy(Criteria.ACCURACY_COARSE);
         this.locationProvider = this.locationManager.getBestProvider(
@@ -432,105 +428,116 @@ public class ProfileViewActivity
         Log.d(
             MainActivity.TAG,
             this.getClass().getCanonicalName()
-            + " location provider: " + this.locationProvider
+            + " location provider: "
+            + this.locationProvider
         );
 
+    }
+
+    public View onCreateView(
+        LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState
+    )
+    {
         // Load the layout
-        this.setContentView(R.layout.activity_profile_view);
+        return inflater.inflate(
+            R.layout.fragment_profile_view, container, false
+        );
+    }
+
+    public void onViewCreated(View view, Bundle savedInstanceState)
+    {
 
         // Set up the observers for all the relevant views
-        this.viewAvatar = this.findViewById(R.id.profileViewAvatarImageView);
+        this.viewAvatar = view.findViewById(R.id.profileViewAvatarImageView);
         if (this.viewAvatar != null)
         {
-            this.vm.getAvatarUri().observe(this, this::updateViewAvatar);
+            this.vm.getAvatarUri().observe(this.getViewLifecycleOwner(), this::updateViewAvatar);
             Uri avatarUri = this.vm.getAvatarUri().getValue();
             if (avatarUri != null)
             {
                 this.updateViewAvatar(avatarUri);
             }
         }
-        this.viewBathroom = this.findViewById(R.id.profileViewBathroomTextView);
+        this.viewBathroom = view.findViewById(R.id.profileViewBathroomTextView);
         if (this.viewBathroom != null)
         {
             this.vm.getBathroom().observe(
-                this, this::updateViewBathroomByBathroom
+                this.getViewLifecycleOwner(), this::updateViewBathroomByBathroom
             );
-            this.vm.getPlace().observe(this, this::updateViewBathroomByPlace);
+            this.vm.getPlace().observe(this.getViewLifecycleOwner(), this::updateViewBathroomByPlace);
             this.updateViewBathroom(
                 this.vm.getBathroom().getValue(),
                 this.vm.getPlace().getValue()
             );
         }
-        this.viewBio = this.findViewById(R.id.profileViewBioTextView);
+        this.viewBio = view.findViewById(R.id.profileViewBioTextView);
         if (this.viewBio != null)
         {
-            this.vm.getBio().observe(this, this::updateViewBio);
+            this.vm.getBio().observe(this.getViewLifecycleOwner(), this::updateViewBio);
             this.updateViewBio(this.vm.getBio().getValue());
         }
-        this.viewGender = this.findViewById(R.id.profileViewGenderTextView);
+        this.viewGender = view.findViewById(R.id.profileViewGenderTextView);
         if (this.viewGender != null)
         {
-            this.vm.getGender().observe(this, this::updateViewGender);
+            this.vm.getGender().observe(this.getViewLifecycleOwner(), this::updateViewGender);
             this.updateViewGender(this.vm.getGender().getValue());
         }
-        this.viewLoc = this.findViewById(R.id.profileViewLocationTextView);
+        this.viewLoc = view.findViewById(R.id.profileViewLocationTextView);
         if (this.viewLoc != null)
         {
-            this.vm.getLoc().observe(this, this::updateViewLocByUserLoc);
-            this.vm.getMyLoc().observe(this, this::updateViewLocByMyLoc);
-            this.vm.getMyLocStr().observe(this, this::updateViewLocByMyString);
+            this.vm.getLoc().observe(this.getViewLifecycleOwner(), this::updateViewLocByUserLoc);
+            this.vm.getMyLoc().observe(this.getViewLifecycleOwner(), this::updateViewLocByMyLoc);
+            this.vm.getMyLocStr().observe(this.getViewLifecycleOwner(), this::updateViewLocByMyString);
             // Don't prime with default values
         }
-        this.viewName = this.findViewById(R.id.profileViewNameTextView);
+        this.viewName = view.findViewById(R.id.profileViewNameTextView);
         if (this.viewName != null)
         {
-            this.vm.getProfileName().observe(this, this::updateViewName);
+            this.vm.getProfileName().observe(this.getViewLifecycleOwner(), this::updateViewName);
             this.updateViewName(this.vm.getProfileName().getValue());
         }
-        this.viewPets = this.findViewById(R.id.profileViewPetsTextView);
+        this.viewPets = view.findViewById(R.id.profileViewPetsTextView);
         if (this.viewPets != null)
         {
-            this.vm.getPets().observe(this, this::updateViewPets);
+            this.vm.getPets().observe(this.getViewLifecycleOwner(), this::updateViewPets);
             this.updateViewPets(this.vm.getPets().getValue());
         }
-        this.viewSmoking = this.findViewById(R.id.profileViewSmokingTextView);
+        this.viewSmoking = view.findViewById(R.id.profileViewSmokingTextView);
         if (this.viewSmoking != null)
         {
-            this.vm.getSmoking().observe(this, this::updateViewSmoking);
+            this.vm.getSmoking().observe(this.getViewLifecycleOwner(), this::updateViewSmoking);
             this.updateViewSmoking(this.vm.getSmoking().getValue());
         }
 
+        // Set the non-view observer for the location live field
+        this.vm.getMyLocLive().observe(this.getViewLifecycleOwner(), this::onUpdateLocLive);
+
         // Load the image carousel
         ImageCarouselFragment carouselFrag
-            = (ImageCarouselFragment)this.getSupportFragmentManager()
-                .findFragmentById(R.id.profileViewCarouselFrag);
+            = (ImageCarouselFragment)this.getChildFragmentManager()
+            .findFragmentById(R.id.profileViewCarouselFrag);
         if (carouselFrag != null)
         {
-            this.vm.getimages().observe(this, carouselFrag::setImages);
+            this.vm.getimages().observe(this.getViewLifecycleOwner(), carouselFrag::setImages);
         }
-
-        // Set the non-view observer for the location live field
-        this.vm.getMyLocLive().observe(this, this::onUpdateLocLive);
 
         // Fetch Firebase data asynchronously (eventually, somehow)
         this.pingFirebase();
 
     }
 
-    protected void onDestroy()
+    public void onDestroy()
     {
         this.workerThread.quitSafely();
         super.onDestroy();
     }
 
-    protected void onResume()
+    public void onResume()
     {
         super.onResume();
         // If the user uses a live location, update the location on resume
         // At the moment we don't bother listening to the location
         // Excessive
-        //
-        //noinspection ConstantConditions
         if (this.vm.getMyLocLive().getValue())
         {
             this.requestLocUpdate();
@@ -577,10 +584,10 @@ public class ProfileViewActivity
         this.vm.getSmoking().setValue(false);
 
         List<Uri> images = new ArrayList<Uri>();
-        images.add(Uri.parse("android.resource://com.cs65.homie/" + R.drawable.dart0));
-        images.add(Uri.parse("android.resource://com.cs65.homie/" + R.drawable.dart1));
-        images.add(Uri.parse("android.resource://com.cs65.homie/" + R.drawable.dart2));
-        images.add(Uri.parse("android.resource://com.cs65.homie/" + R.drawable.dart3));
+        images.add(Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://com.cs65.homie/" + R.drawable.dart0));
+        images.add(Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://com.cs65.homie/" + R.drawable.dart1));
+        images.add(Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://com.cs65.homie/" + R.drawable.dart2));
+        images.add(Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://com.cs65.homie/" + R.drawable.dart3));
         this.vm.getimages().setValue(images);
 
     }

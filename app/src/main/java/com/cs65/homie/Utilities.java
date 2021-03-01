@@ -2,11 +2,19 @@ package com.cs65.homie;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.ColorFilter;
+import android.graphics.LightingColorFilter;
+import android.graphics.Paint;
 import android.location.Address;
 import android.location.Geocoder;
 import android.os.Build;
 import android.util.Log;
+import android.view.Gravity;
+import android.widget.Toast;
 
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -27,6 +35,14 @@ public class Utilities
      */
     public static final int EARTH_RADIUS = 6371;
     public static final int GET_CURRENT_LOC_SDK = 30;
+    /**
+     * Error toast x-offset
+     */
+    public static final int TOAST_X_OFFSET = 0;
+    /**
+     * Error toast y-offset
+     */
+    public static final int TOAST_Y_OFFSET = 100;
     /**
      *  Miles to kilometers conversion
      */
@@ -213,6 +229,63 @@ public class Utilities
                             Manifest.permission.CAMERA}, 0);
 
         }
+
+    }
+
+    public static double pixelDensity(final Context context, double dp)
+    {
+        return dp * context.getResources().getDisplayMetrics().density;
+    }
+
+    /**
+     * Show an error toast
+     *
+     * @param stringId  ID of string to show in the toast
+     * @param activity  Calling activity
+     */
+    public static void showErrorToast(int stringId, Activity activity)
+    {
+
+        Toast toast = Toast.makeText(
+            activity,
+            stringId,
+            Toast.LENGTH_LONG
+        );
+        toast.setGravity(
+            Gravity.BOTTOM, TOAST_X_OFFSET, TOAST_Y_OFFSET
+        );
+        toast.show();
+
+    }
+
+    /**
+     * Convert a string to a bitmap
+     *
+     * @param text      String
+     * @param textSize  Desired text size of bitmap
+     * @param textColor Desired text colour of bitmap
+     *
+     * @return  Bitmap representation of the given string
+     */
+    public static Bitmap stringToBitmap(String text, float textSize, int textColor)
+    {
+
+        // FIXME Input color has no effect
+        Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.LINEAR_TEXT_FLAG);
+        paint.setTextSize(textSize);
+        paint.setColor(textColor);
+        paint.setTextAlign(Paint.Align.LEFT);
+        float baseline = -paint.ascent(); // ascent() is negative
+        int width = (int)paint.measureText(text);
+        int height = (int)(baseline + paint.descent());
+        Bitmap image = Bitmap.createBitmap(
+            width, height, Bitmap.Config.ARGB_8888
+        );
+
+        Canvas canvas = new Canvas(image);
+        canvas.drawText(text, 0, baseline, paint);
+
+        return image;
 
     }
 

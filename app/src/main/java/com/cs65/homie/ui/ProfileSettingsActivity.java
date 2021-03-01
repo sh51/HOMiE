@@ -15,6 +15,8 @@ import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.Spinner;
 import android.widget.Toast;
+
+import com.cs65.homie.ui.login.ui.login.RegistrationActivity;
 import com.soundcloud.android.crop.Crop;
 
 import com.cs65.homie.R;
@@ -78,7 +80,9 @@ public class ProfileSettingsActivity extends AppCompatActivity {
         else {
             this.photoPath = savedProfile.getString(getString(R.string.key_filename), null);
             this.name = savedProfile.getString(getString(R.string.key_name), null);
-            this.email = savedProfile.getString(getString(R.string.key_email), null);
+//            this.email = savedProfile.getString(getString(R.string.key_email), null);
+            // load email from registration intent
+            this.email = getIntent().getStringExtra(RegistrationActivity.KEY_EMAIL);
             this.petFriendly = savedProfile.getString(getString(R.string.key_petFriendly), null);
             this.noneSmoking = savedProfile.getString(getString(R.string.key_noneSmoking), null);
             this.privateBathroom = savedProfile.getString(getString(R.string.key_privateBathroom), null);

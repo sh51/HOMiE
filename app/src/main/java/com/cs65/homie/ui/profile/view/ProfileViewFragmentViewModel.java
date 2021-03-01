@@ -15,7 +15,7 @@ import java.util.List;
  * Static profile view view model
  */
 @SuppressWarnings("Convert2Diamond")
-public class ProfileViewActivityViewModel extends ViewModel
+public class ProfileViewFragmentViewModel extends ViewModel
 {
 
     private final MutableLiveData<Uri> avatarUri

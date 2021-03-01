@@ -15,9 +15,8 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.HOMiE"
         tools:ignore="HardcodedDebugMode">
-        <activity android:name=".ui.login.ui.login.RegistrationActivity"></activity>
+        <activity android:name=".ui.login.ui.login.RegistrationActivity" />
         <activity android:name=".ui.ProfileSettingsActivity" />
-        <activity android:name="com.soundcloud.android.crop.CropImageActivity" />
         <activity
             android:name=".ui.login.ui.login.LoginActivity"
             android:label="@string/title_activity_login" />
@@ -30,8 +29,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".ui.profile.view.ProfileViewActivity" />
         <activity android:name=".ui.carousel.ImageCarouselFullScreenActivity" />
+        <activity android:name="com.soundcloud.android.crop.CropImageActivity" />
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="com.cs65.homie.ui"

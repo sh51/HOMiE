@@ -1,5 +1,6 @@
 package com.cs65.homie.ui.login.ui.login;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Observer;
@@ -18,13 +19,23 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.cs65.homie.Globals;
 import com.cs65.homie.R;
 import com.cs65.homie.ui.ProfileSettingsActivity;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 
 public class RegistrationActivity extends AppCompatActivity {
+    public static final String KEY_EMAIL = "EMAIL";
     private LoginViewModel loginViewModel;
     private final static int CREATE_PROFILE = 1;
+    private EditText usernameEditText, passwordEditText;
+    private Button createAccount_Button;
+    private FirebaseAuth mAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,10 +45,13 @@ public class RegistrationActivity extends AppCompatActivity {
         loginViewModel = new ViewModelProvider(this, new LoginViewModelFactory())
                 .get(LoginViewModel.class);
 
-        EditText usernameEditText = findViewById(R.id.username);
-        EditText passwordEditText = findViewById(R.id.password);
-        Button createAccount_Button = findViewById(R.id.createAccount);
-        createAccount_Button.setEnabled(true);
+        usernameEditText = findViewById(R.id.username);
+        passwordEditText = findViewById(R.id.password);
+        createAccount_Button = findViewById(R.id.createAccount);
+        // Initialize Firebase Auth, a shared instance
+        mAuth = FirebaseAuth.getInstance();
+        // disabled at first as the fields are empty
+        createAccount_Button.setEnabled(false);
 
         loginViewModel.getLoginFormState().observe(this, new Observer<LoginFormState>() {
             @Override
@@ -92,26 +106,75 @@ public class RegistrationActivity extends AppCompatActivity {
 
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                Log.d(Globals.TAG, "RegistrationEditorAction");
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
-                    loginViewModel.login(usernameEditText.getText().toString(),
+//                    loginViewModel.login(usernameEditText.getText().toString(),
+//                            passwordEditText.getText().toString());
+                    if (createAccount_Button.isEnabled()) onCreateAccount(usernameEditText.getText().toString(),
                             passwordEditText.getText().toString());
                 }
                 return false;
             }
         });
 
-        createAccount_Button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                loginViewModel.loginDataChanged(usernameEditText.getText().toString(),
-                        passwordEditText.getText().toString());
-                Intent intent = new Intent(RegistrationActivity.this, ProfileSettingsActivity.class);
-                startActivityForResult(intent, CREATE_PROFILE);
-                finish();
-
-
-            }
+        createAccount_Button.setOnClickListener(v -> {
+            onCreateAccount(usernameEditText.getText().toString(),
+                    passwordEditText.getText().toString());
         });
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        // Check if user is signed in (non-null) and update UI accordingly.
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if(currentUser != null){
+            // TD: handle the case where the user is already logged in
+        }
+    }
+
+    // go to dashboard after successful registration
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == CREATE_PROFILE) {
+            Log.d(Globals.TAG, "Successful registration.");
+            finish();
+        }
+    }
+
+    private boolean onCreateAccount(String email, String password) {
+//        loginViewModel.loginDataChanged(usernameEditText.getText().toString(),
+//                passwordEditText.getText().toString());
+        // create account with Firebase auth
+        mAuth.createUserWithEmailAndPassword(email, password)
+                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if (task.isSuccessful()) {
+                            // Sign in success, update UI with the signed-in user's information
+                            Log.d(Globals.TAG, "createUserWithEmail:success");
+                            FirebaseUser user = mAuth.getCurrentUser();
+                            // Navigate to CreateProfile
+                            Intent intent = new Intent(RegistrationActivity.this, ProfileSettingsActivity.class);
+                            intent.putExtra(KEY_EMAIL, email);
+                            // TD: update UserProfile: display name & photoUri
+                            startActivityForResult(intent, CREATE_PROFILE);
+
+
+                        } else {
+                            // If sign in fails, display a message to the user.
+                            Log.d(Globals.TAG, "createUserWithEmail:failure", task.getException());
+                            finish();
+                        }
+
+                        // ...
+                    }
+                });
+
+
+        return true;
     }
 
 }
