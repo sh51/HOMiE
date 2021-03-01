@@ -34,7 +34,7 @@
                     android:layout_height="wrap_content"
                     android:layout_margin="5dp"
                     android:contentDescription="@string/avatar_description"
-                    android:src="@drawable/default_profile"></ImageView>
+                    android:src="@drawable/default_profile"/>
 
                 <Button
                     android:id="@+id/button_ChangePhoto"
@@ -42,7 +42,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:onClick="onChangePhotoClicked"
-                    android:text="@string/button_ChangePhoto_text"></Button>
+                    android:text="@string/button_ChangePhoto_text"/>
             </LinearLayout>
 
             <LinearLayout
