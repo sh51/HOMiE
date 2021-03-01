@@ -5,6 +5,7 @@ import android.location.Location;
 import java.util.List;
 
 public class Profile {
+    private String id;
     private String firstName;
     private String password;
     private String email;
@@ -157,5 +158,13 @@ public class Profile {
 
     public void setAvatarImage(String avatarImage) {
         this.avatarImage = avatarImage;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 }
