@@ -15,6 +15,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.HOMiE"
         tools:ignore="HardcodedDebugMode">
+        <activity android:name=".ui.login.ui.login.RegistrationActivity"></activity>
         <activity android:name=".ui.ProfileSettingsActivity" />
         <activity android:name="com.soundcloud.android.crop.CropImageActivity" />
         <activity
@@ -31,6 +32,15 @@
         </activity>
         <activity android:name=".ui.profile.view.ProfileViewActivity" />
         <activity android:name=".ui.carousel.ImageCarouselFullScreenActivity" />
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="com.cs65.homie.ui"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
     </application>
 
 </manifest>

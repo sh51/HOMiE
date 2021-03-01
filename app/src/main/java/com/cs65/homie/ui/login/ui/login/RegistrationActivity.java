@@ -1,47 +1,43 @@
 package com.cs65.homie.ui.login.ui.login;
 
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import androidx.annotation.Nullable;
-import androidx.annotation.StringRes;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProvider;
 
 import com.cs65.homie.R;
 import com.cs65.homie.ui.ProfileSettingsActivity;
-import com.cs65.homie.ui.profile.view.ProfileViewActivity;
 
-public class LoginActivity extends AppCompatActivity {
 
+public class RegistrationActivity extends AppCompatActivity {
     private LoginViewModel loginViewModel;
-    private static final int REGISTRATION_REQUEST = 0;
-    private static final int LOGIN_SUCCESS = 1;
+    private final static int CREATE_PROFILE = 1;
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
+        setContentView(R.layout.activity_registration);
+
         loginViewModel = new ViewModelProvider(this, new LoginViewModelFactory())
                 .get(LoginViewModel.class);
 
         EditText usernameEditText = findViewById(R.id.username);
         EditText passwordEditText = findViewById(R.id.password);
-        Button login_signin_Button = findViewById(R.id.login_signin);
-        Button login_register_Button = findViewById(R.id.login_register);
-//        final ProgressBar loadingProgressBar = findViewById(R.id.loading);
-        login_register_Button.setEnabled(true);
+        Button createAccount_Button = findViewById(R.id.createAccount);
+        createAccount_Button.setEnabled(true);
 
         loginViewModel.getLoginFormState().observe(this, new Observer<LoginFormState>() {
             @Override
@@ -49,8 +45,7 @@ public class LoginActivity extends AppCompatActivity {
                 if (loginFormState == null) {
                     return;
                 }
-                login_register_Button.setEnabled(true);
-                login_signin_Button.setEnabled(loginFormState.isDataValid());
+                createAccount_Button.setEnabled(loginFormState.isDataValid());
                 if (loginFormState.getUsernameError() != null) {
                     usernameEditText.setError(getString(loginFormState.getUsernameError()));
                 }
@@ -66,13 +61,6 @@ public class LoginActivity extends AppCompatActivity {
             public void onChanged(@Nullable LoginResult loginResult) {
                 if (loginResult == null) {
                     return;
-                }
-//                loadingProgressBar.setVisibility(View.GONE);
-                if (loginResult.getError() != null) {
-                    showLoginFailed(loginResult.getError());
-                }
-                if (loginResult.getSuccess() != null) {
-                    updateUiWithUser(loginResult.getSuccess());
                 }
                 setResult(Activity.RESULT_OK);
 
@@ -112,25 +100,13 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
-        login_signin_Button.setOnClickListener(new View.OnClickListener() {
+        createAccount_Button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                loadingProgressBar.setVisibility(View.VISIBLE);
-                loginViewModel.login(usernameEditText.getText().toString(),
+                loginViewModel.loginDataChanged(usernameEditText.getText().toString(),
                         passwordEditText.getText().toString());
-                Intent intent = new Intent(getApplicationContext(), ProfileViewActivity.class);
-                startActivityForResult(intent, LOGIN_SUCCESS);
-                finish();
-            }
-        });
-
-        login_register_Button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(getApplicationContext(), RegistrationActivity.class);
-                startActivityForResult(intent, REGISTRATION_REQUEST);
-//                loginViewModel.loginDataChanged(usernameEditText.getText().toString(),
-//                        passwordEditText.getText().toString());
+                Intent intent = new Intent(RegistrationActivity.this, ProfileSettingsActivity.class);
+                startActivityForResult(intent, CREATE_PROFILE);
                 finish();
 
 
@@ -138,13 +114,4 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
-    private void updateUiWithUser(LoggedInUserView model) {
-        String welcome = getString(R.string.welcome) + model.getDisplayName();
-        // TODO : initiate successful logged in experience
-        Toast.makeText(getApplicationContext(), welcome, Toast.LENGTH_LONG).show();
-    }
-
-    private void showLoginFailed(@StringRes Integer errorString) {
-        Toast.makeText(getApplicationContext(), errorString, Toast.LENGTH_SHORT).show();
-    }
 }

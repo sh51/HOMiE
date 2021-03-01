@@ -37,7 +37,7 @@ public class ProfileSettingsActivity extends AppCompatActivity {
 
     public static final int CAMERA_REQUEST_CODE = 1;
 
-    private static final String DEBUGGING_TAG = "ajb";
+    private static final String TAG = "ajb";
 
 //    private SharedPreferences savedProfile;
 
@@ -46,7 +46,9 @@ public class ProfileSettingsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile_settings);
 
+
         SharedPreferences savedProfile = getSharedPreferences(getString(R.string.saved_preferences), MODE_PRIVATE);
+
 
         this.editedName = (EditText) findViewById(R.id.editText_Name);
         this.editedEmail = (EditText) findViewById(R.id.editText_Email);
@@ -86,7 +88,6 @@ public class ProfileSettingsActivity extends AppCompatActivity {
         }
 
 //        this.photoView.setImageURI(this.photoUri);
-
         this.loadProfile();
 
     }
@@ -103,7 +104,7 @@ public class ProfileSettingsActivity extends AppCompatActivity {
     }
 
     public void onChangePhotoClicked(View view) {
-        Log.d(DEBUGGING_TAG, "onChangedPhotoClicked");
+        Log.d(TAG, "onChangedPhotoClicked");
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         intent.putExtra(MediaStore.EXTRA_OUTPUT, this.photoUri);
         startActivityForResult(intent, CAMERA_REQUEST_CODE);
@@ -112,14 +113,14 @@ public class ProfileSettingsActivity extends AppCompatActivity {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
         super.onActivityResult(requestCode, resultCode, intent);
-        Log.d(DEBUGGING_TAG, Integer.toString(resultCode));
+        Log.d(TAG, Integer.toString(resultCode));
         if(resultCode != RESULT_OK) return;
         if(requestCode == CAMERA_REQUEST_CODE) {
-            Log.d(DEBUGGING_TAG, "requested camera");
+            Log.d(TAG, "requested camera");
             Crop.of(photoUri, photoUri).asSquare().start(this);
         }
         else if (requestCode == Crop.REQUEST_CROP) {
-            Log.d(DEBUGGING_TAG, "requested crop");
+            Log.d(TAG, "requested crop");
             Uri tempUri = Crop.getOutput(intent);
             photoView.setImageURI(null);
             photoView.setImageURI(tempUri);
@@ -148,7 +149,6 @@ public class ProfileSettingsActivity extends AppCompatActivity {
      * load user data that has already been saved
      */
     private void loadProfile(){
-        Log.d(DEBUGGING_TAG, "in load profile");
 //        this.savedProfile = getSharedPreferences(getString(R.string.saved_preferences), MODE_PRIVATE);
         if (this.name != null) editedName.setText(this.name);
         if (this.email != null) editedEmail.setText(this.email);
@@ -165,7 +165,7 @@ public class ProfileSettingsActivity extends AppCompatActivity {
      * after calling saveProfile(), let user know that data is saved
      */
     private void saveProfile(){
-        Log.d(DEBUGGING_TAG, "in saveProfile");
+        Log.d(TAG, "in saveProfile");
         this.name = editedName.getText().toString();
         this.email = editedEmail.getText().toString();
 
@@ -183,7 +183,7 @@ public class ProfileSettingsActivity extends AppCompatActivity {
         editedProfile.putString(getString(R.string.key_filename), this.photoPath);
         editedProfile.apply();
         Toast.makeText(this, R.string.toast_saved, Toast.LENGTH_SHORT).show();
-        Log.d(DEBUGGING_TAG, "toasted");
+        Log.d(TAG, "toasted");
 
     }
 }

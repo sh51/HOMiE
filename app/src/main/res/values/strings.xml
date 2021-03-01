@@ -59,8 +59,8 @@
     <string name="prompt_password">Password</string>
     <string name="action_register_short">Register</string>
     <string name="action_sign_in_short">Sign in</string>
-    <string name="registration_greeting">"Create an account to find your new roommate! You can complete your profile later."</string>
-    <string name="registration_button">"Create my account"</string>
+    <string name="registration_greeting">Create an account to find your new roommate! You can complete your profile later.</string>
+    <string name="registration_button">Create my account</string>
     <string name="welcome">"Welcome !"</string>
     <string name="invalid_email">Not a valid email</string>
     <string name="invalid_password">Password must be >5 characters</string>
