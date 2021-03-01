@@ -20,14 +20,11 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.cs65.homie.R;
-import com.cs65.homie.ui.ProfileSettingsActivity;
-import com.cs65.homie.ui.profile.view.ProfileViewActivity;
 
 public class LoginActivity extends AppCompatActivity {
 
     private LoginViewModel loginViewModel;
     private static final int REGISTRATION_REQUEST = 0;
-    private static final int LOGIN_SUCCESS = 1;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -118,8 +115,8 @@ public class LoginActivity extends AppCompatActivity {
 //                loadingProgressBar.setVisibility(View.VISIBLE);
                 loginViewModel.login(usernameEditText.getText().toString(),
                         passwordEditText.getText().toString());
-                Intent intent = new Intent(getApplicationContext(), ProfileViewActivity.class);
-                startActivityForResult(intent, LOGIN_SUCCESS);
+                // No longer spawning profile view activity
+                // Land on nav after logging in
                 finish();
             }
         });
