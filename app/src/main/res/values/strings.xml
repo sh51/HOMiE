@@ -22,6 +22,7 @@
     <string name="field_Name_text">Name </string>
     <string name="field_Email_text">Email</string>
     <string name="field_Password_text">Password</string>
+    <string name="field_HousingSearchOptions_text">Do you have Housing</string>
     <string name="saved_preferences">SavedPreferences</string>
     <string name="button_Save_text">Save</string>
     <string name="button_Cancel_text">Cancel</string>
@@ -33,11 +34,15 @@
     <string name="radio_Female_text">Female</string>
     <string name="radio_Male_text">Male</string>
     <string name="radio_NoPref_text">No Preference</string>
+    <string-array name="spinner_HousingSearchOptions">
+        <item>Looking for Housing </item>
+        <item>Have Housing. Just looking for a Roommate. </item>
+    </string-array>
     <string name="switch_NoneSmoking">No Smoking</string>
     <string name="switch_PetFriendly">Pet-friendly</string>
     <string name="switch_PrivateBathroom">Private Bathroom</string>
     <string name="image_content_desc">Select Profile Photo from Camera or Gallery</string>
-    <string name="toast_saved">Success! \nProfile changes saved.</string>
+    <string name="toast_saved">Success! \n Profile changes saved.</string>
     <string name="key_filename">prefKey_filename</string>
     <string name="key_name">prefKey_name</string>
     <string name="key_email">prefKey_email</string>
@@ -46,16 +51,18 @@
     <string name="key_petFriendly">prefKey_petFriendly</string>
     <string name="key_noneSmoking">prefKey_noneSmoking</string>
     <string name="key_privateBathroom">prefKey_privateBathroom</string>
+    <string name="key_lookingForHousing">prefKey_lookingForHousing</string>
     <!-- EDIT PROFILE SETTINGS -->
 
     <string name="title_activity_login">LoginActivity</string>
     <string name="prompt_email">Email</string>
     <string name="prompt_password">Password</string>
-    <string name="action_sign_in">Sign in or register</string>
     <string name="action_register_short">Register</string>
     <string name="action_sign_in_short">Sign in</string>
+    <string name="registration_greeting">"Create an account to find your new roommate! You can complete your profile later."</string>
+    <string name="registration_button">"Create my account"</string>
     <string name="welcome">"Welcome !"</string>
-    <string name="invalid_username">Not a valid username</string>
+    <string name="invalid_email">Not a valid email</string>
     <string name="invalid_password">Password must be >5 characters</string>
     <string name="login_failed">"Login failed"</string>
 

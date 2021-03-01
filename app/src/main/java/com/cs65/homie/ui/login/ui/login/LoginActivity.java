@@ -1,16 +1,8 @@
 package com.cs65.homie.ui.login.ui.login;
 
 import android.app.Activity;
-
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProvider;
-
+import android.content.Intent;
 import android.os.Bundle;
-
-import androidx.annotation.Nullable;
-import androidx.annotation.StringRes;
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.KeyEvent;
@@ -18,13 +10,17 @@ import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
+import androidx.annotation.StringRes;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
+
 import com.cs65.homie.R;
-import com.cs65.homie.ui.login.ui.login.LoginViewModel;
-import com.cs65.homie.ui.login.ui.login.LoginViewModelFactory;
+import com.cs65.homie.ui.ProfileSettingsActivity;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -117,6 +113,17 @@ public class LoginActivity extends AppCompatActivity {
 //                loadingProgressBar.setVisibility(View.VISIBLE);
                 loginViewModel.login(usernameEditText.getText().toString(),
                         passwordEditText.getText().toString());
+            }
+        });
+
+        login_register_Button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                loginViewModel.loginDataChanged(usernameEditText.getText().toString(),
+                        passwordEditText.getText().toString());
+                finish();
+
+
             }
         });
     }

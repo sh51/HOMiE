@@ -13,6 +13,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RadioButton;
+import android.widget.Spinner;
 import android.widget.Toast;
 import com.soundcloud.android.crop.Crop;
 
@@ -27,9 +28,12 @@ public class ProfileSettingsActivity extends AppCompatActivity {
     private String tempImgFileName = "temp.png";
     private EditText editedName, editedEmail, changedPassword;
     private RadioButton radioFemale, radioMale, radioNoPref;
+    private Spinner housingSearchOptions;
 
     private Uri photoUri;
-    private String photoPath, name, email, password, genderPref, petFriendly, noneSmoking, privateBathroom;
+    private String photoPath, name, email, password,
+            genderPref, housingSearch,
+            petFriendly, noneSmoking, privateBathroom;
 
     public static final int CAMERA_REQUEST_CODE = 1;
 
@@ -51,6 +55,7 @@ public class ProfileSettingsActivity extends AppCompatActivity {
         this.radioMale = (RadioButton) findViewById(R.id.radioButton_male);
         this.radioNoPref = (RadioButton) findViewById(R.id.radioButton_nopref);
         this.photoView = (ImageView) findViewById(R.id.photoView);
+        this.housingSearchOptions = (Spinner) findViewById(R.id.spinnerNeedHousing);
 
         Utilities.checkPermission(this);
 
@@ -66,6 +71,7 @@ public class ProfileSettingsActivity extends AppCompatActivity {
             this.noneSmoking = savedProfile.getString(getString(R.string.key_noneSmoking), null);
             this.privateBathroom = savedProfile.getString(getString(R.string.key_privateBathroom), null);
             this.genderPref = savedProfile.getString(getString(R.string.key_genderpref), null);
+            this.housingSearch = savedProfile.getString(getString(R.string.key_lookingForHousing), null);
         }
         else {
             this.photoPath = savedProfile.getString(getString(R.string.key_filename), null);
@@ -75,6 +81,8 @@ public class ProfileSettingsActivity extends AppCompatActivity {
             this.noneSmoking = savedProfile.getString(getString(R.string.key_noneSmoking), null);
             this.privateBathroom = savedProfile.getString(getString(R.string.key_privateBathroom), null);
             this.genderPref = savedProfile.getString(getString(R.string.key_genderpref), null);
+            this.housingSearch = savedProfile.getString(getString(R.string.key_lookingForHousing), null);
+
         }
 
 //        this.photoView.setImageURI(this.photoUri);
@@ -145,8 +153,9 @@ public class ProfileSettingsActivity extends AppCompatActivity {
         if (this.name != null) editedName.setText(this.name);
         if (this.email != null) editedEmail.setText(this.email);
         if (this.genderPref != null) {
-            if (this.genderPref == getString(R.string.radio_NoPref_text)) radioNoPref.setChecked(true);
-            else radioMale.setChecked(true);
+            if (this.genderPref == getString(R.string.radio_Male_text)) radioMale.setChecked(true);
+            else if (this.genderPref == getString(R.string.radio_Female_text)) radioFemale.setChecked(true);
+            else radioNoPref.setChecked(true);
         }
         if (this.photoPath != null) photoView.setImageURI(Uri.fromFile(new File(this.photoPath)));
     }
@@ -167,6 +176,7 @@ public class ProfileSettingsActivity extends AppCompatActivity {
         editedProfile.putString(getString(R.string.key_email), this.email);
         editedProfile.putString(getString(R.string.key_password), this.password);
         editedProfile.putString(getString(R.string.key_genderpref), this.genderPref);
+        editedProfile.putString(getString(R.string.key_lookingForHousing), this.housingSearch);
         editedProfile.putString(getString(R.string.key_petFriendly), this.petFriendly);
         editedProfile.putString(getString(R.string.key_noneSmoking), this.noneSmoking);
         editedProfile.putString(getString(R.string.key_privateBathroom), this.privateBathroom);

@@ -130,6 +130,20 @@
 
         </RadioGroup>
 
+
+        <TextView
+            android:id="@+id/textView_HousingSearchOptions"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/field_HousingSearchOptions_text" />
+        <Spinner
+            android:id="@+id/spinnerNeedHousing"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_margin="10dp"
+            android:entries="@array/spinner_HousingSearchOptions"/>
+
         <Switch
             android:id="@+id/switchPetFriendly"
             android:layout_width="match_parent"

@@ -3,6 +3,7 @@ package com.cs65.homie;
 import android.content.Intent;
 import android.os.Bundle;
 
+import com.cs65.homie.ui.ProfileSettingsActivity;
 import com.cs65.homie.ui.login.ui.login.LoginActivity;
 import com.cs65.homie.ui.profile.view.ProfileViewActivity;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -35,6 +36,7 @@ public class MainActivity extends AppCompatActivity {
 
         Intent intent = new Intent(this, LoginActivity.class);
         startActivity(intent);
+
     }
 
 }
