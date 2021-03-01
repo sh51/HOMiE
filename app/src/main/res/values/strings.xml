@@ -5,6 +5,7 @@
     <string name="title_notifications">Notifications</string>
     <string name="title_messages">Messages</string>
     <string name="title_profile_view">Profile</string>
+    <string name="title_match">Match with a Homie!</string>
 
     <!-- STATIC PROFILE VIEW -->
     <string name="profile_view_avatar_content_description">User Avatar</string>
@@ -16,6 +17,10 @@
     <string name="profile_view_pets_no">Pet Friendly?  ✖</string>
     <string name="profile_view_smoking_yes">Smoking?  🚬</string>
     <string name="profile_view_smoking_no">Smoking?  🚭</string>
+    <string name="profile_view_match_accept_description">Accept this homie!</string>
+    <string name="profile_view_match_reject_description">Reject this homie</string>
+    <string name="profile_view_match_accept">➕</string>
+    <string name="profile_view_match_reject">✖</string>
     <!-- STATIC PROFILE VIEW -->
 
     <!-- EDIT PROFILE SETTINGS -->
