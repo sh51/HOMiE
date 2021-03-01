@@ -16,6 +16,7 @@
         android:theme="@style/Theme.HOMiE"
         tools:ignore="HardcodedDebugMode">
         <activity android:name=".ui.ProfileSettingsActivity"></activity>
+        <activity android:name="com.soundcloud.android.crop.CropImageActivity" />
         <activity
             android:name=".ui.login.ui.login.LoginActivity"
             android:label="@string/title_activity_login" />

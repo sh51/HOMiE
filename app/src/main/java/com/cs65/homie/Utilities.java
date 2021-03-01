@@ -8,6 +8,9 @@ import android.location.Geocoder;
 import android.os.Build;
 import android.util.Log;
 
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+
 import com.google.android.gms.maps.model.LatLng;
 
 import java.io.IOException;
@@ -195,6 +198,22 @@ public class Utilities
     public static double kilometersToMiles(double km)
     {
         return km / MILES_TO_KILOMETERS;
+    }
+
+    public static void checkPermission(Activity activity){
+        if (Build.VERSION.SDK_INT < 23)
+            return;
+        if ((ContextCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED)
+                || (ContextCompat.checkSelfPermission(activity, Manifest.permission.CAMERA)
+                != PackageManager.PERMISSION_GRANTED)) {
+
+            ActivityCompat.requestPermissions(activity,
+                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                            Manifest.permission.CAMERA}, 0);
+
+        }
+
     }
 
 }

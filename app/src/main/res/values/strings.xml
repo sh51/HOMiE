@@ -17,7 +17,36 @@
     <string name="profile_view_smoking_no">Smoking?  🚭</string>
     <!-- STATIC PROFILE VIEW -->
 
+    <!-- EDIT PROFILE SETTINGS -->
     <string name="field_ProfilePhoto_text">Profile Photo:</string>
+    <string name="field_Name_text">Name </string>
+    <string name="field_Email_text">Email</string>
+    <string name="field_Password_text">Password</string>
+    <string name="saved_preferences">SavedPreferences</string>
+    <string name="button_Save_text">Save</string>
+    <string name="button_Cancel_text">Cancel</string>
+    <string name="avatar_description">Change Avatar</string>
+    <string name="button_ChangePhoto_text">Change Avatar</string>
+    <string name="edit_Name_hint">Your Name</string>
+    <string name="edit_Email_hint">Your Email</string>
+    <string name="edit_Password_hint">New Password</string>
+    <string name="radio_Female_text">Female</string>
+    <string name="radio_Male_text">Male</string>
+    <string name="radio_NoPref_text">No Preference</string>
+    <string name="switch_NoneSmoking">No Smoking</string>
+    <string name="switch_PetFriendly">Pet-friendly</string>
+    <string name="switch_PrivateBathroom">Private Bathroom</string>
+    <string name="image_content_desc">Select Profile Photo from Camera or Gallery</string>
+    <string name="toast_saved">Success! \nProfile changes saved.</string>
+    <string name="key_filename">prefKey_filename</string>
+    <string name="key_name">prefKey_name</string>
+    <string name="key_email">prefKey_email</string>
+    <string name="key_password">prefKey_password</string>
+    <string name="key_genderpref">prefKey_genderPref</string>
+    <string name="key_petFriendly">prefKey_petFriendly</string>
+    <string name="key_noneSmoking">prefKey_noneSmoking</string>
+    <string name="key_privateBathroom">prefKey_privateBathroom</string>
+    <!-- EDIT PROFILE SETTINGS -->
 
     <string name="title_activity_login">LoginActivity</string>
     <string name="prompt_email">Email</string>

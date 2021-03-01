@@ -19,26 +19,66 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="200dp"
             android:orientation="horizontal">
 
-            <ImageView
-                android:id="@+id/photoView"
-                android:layout_width="100dp"
-                android:layout_height="100dp"
-                android:layout_margin="5dp"
-                android:src="@drawable/default_profile">
-            </ImageView>
-
-            <Button
-                android:id="@+id/button_ChangePhoto"
+            <LinearLayout
+                style="?android:attr/buttonBarStyle"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="10dp"
-                android:onClick="onChangePhotoClicked"
-                android:text="@string/button_ChangePhoto_text" >
-            </Button>>
+                android:layout_height="match_parent"
+                android:orientation="vertical">
 
+                <ImageView
+                    android:id="@+id/photoView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="5dp"
+                    android:contentDescription="@string/avatar_description"
+                    android:src="@drawable/default_profile"></ImageView>
+
+                <Button
+                    android:id="@+id/button_ChangePhoto"
+                    style="?android:attr/buttonBarButtonStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:onClick="onChangePhotoClicked"
+                    android:text="@string/button_ChangePhoto_text"></Button>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/textView_Email"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/field_Email_text" />
+
+                <EditText
+                    android:id="@+id/editText_Email"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ems="10"
+                    android:hint="@string/edit_Email_hint"
+                    android:inputType="textEmailAddress" />
+
+                <TextView
+                    android:id="@+id/textView_Password"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/field_Password_text" />
+
+                <EditText
+                    android:id="@+id/editText_Password"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ems="10"
+                    android:hint="@string/edit_Password_hint"
+                    android:inputType="textPassword" />
+
+            </LinearLayout>
         </LinearLayout>
 
         <TextView
@@ -55,94 +95,70 @@
             android:hint="@string/edit_Name_hint"
             android:inputType="textPersonName" />
 
-        <TextView
-            android:id="@+id/textView_Email"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/field_Email_text" />
-
-        <EditText
-            android:id="@+id/editText_Email"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:ems="10"
-            android:hint="@string/edit_Email_hint"
-            android:inputType="textEmailAddress" />
-
-        <TextView
-            android:id="@+id/textView_Phone"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/field_Phone_text" />
-
-        <EditText
-            android:id="@+id/editText_Phone"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:ems="10"
-            android:hint="@string/edit_Phone_hint"
-            android:inputType="phone" />
-
-        <TextView
-            android:id="@+id/textView_Gender"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/field_Gender_text" />
-
         <RadioGroup
             android:id="@+id/radioGroup_gender"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:orientation="horizontal">
 
             <RadioButton
                 android:id="@+id/radioButton_female"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="75dp"
-                android:paddingHorizontal="10dp"
+                android:layout_marginEnd="20dp"
                 android:onClick="onGenderRadioToggled"
+                android:paddingHorizontal="10dp"
                 android:text="@string/radio_Female_text" />
 
             <RadioButton
                 android:id="@+id/radioButton_male"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="75dp"
-                android:paddingHorizontal="10dp"
+                android:layout_marginStart="20dp"
                 android:onClick="onGenderRadioToggled"
+                android:paddingHorizontal="10dp"
                 android:text="@string/radio_Male_text" />
+
+            <RadioButton
+                android:id="@+id/radioButton_nopref"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:onClick="onGenderRadioToggled"
+                android:paddingHorizontal="10dp"
+                android:text="@string/radio_NoPref_text" />
+
         </RadioGroup>
 
-        <TextView
-            android:id="@+id/textView_Class"
+        <Switch
+            android:id="@+id/switchPetFriendly"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/field_Class_text" />
+            android:text="@string/switch_PetFriendly" />
+        <Switch
+            android:id="@+id/switchNoneSmoking"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/switch_NoneSmoking" />
+        <Switch
+            android:id="@+id/switchPrivateBathroom"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/switch_PrivateBathroom" />
 
-        <EditText
-            android:id="@+id/editText_Class"
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/textBio"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:ems="10"
-            android:hint="@string/edit_Class_hint"
-            android:inputType="number" />
+            android:layout_height="match_parent">
 
-        <TextView
-            android:id="@+id/textView_Major"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/field_Major_text" />
-
-        <EditText
-            android:id="@+id/editText_Major"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:ems="10"
-            android:hint="@string/edit_Major_hint"
-            android:inputType="text" />
+            <com.google.android.material.textfield.TextInputEditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Tell your future roommate about yourself!" />
+        </com.google.android.material.textfield.TextInputLayout>
 
         <LinearLayout
+            style="?android:attr/buttonBarStyle"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_marginHorizontal="35dp"
@@ -151,20 +167,22 @@
 
             <Button
                 android:id="@+id/button_Save"
+                style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="165dp"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="2dp"
-                android:paddingHorizontal="25dp"
                 android:onClick="onSaveClicked"
+                android:paddingHorizontal="25dp"
                 android:text="@string/button_Save_text" />
 
             <Button
                 android:id="@+id/button_Cancel"
+                style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="165dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="2dp"
-                android:paddingHorizontal="25dp"
                 android:onClick="onCancelClicked"
+                android:paddingHorizontal="25dp"
                 android:text="@string/button_Cancel_text" />
         </LinearLayout>
 

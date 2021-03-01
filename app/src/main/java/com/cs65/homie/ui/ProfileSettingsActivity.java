@@ -14,6 +14,10 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.Toast;
+import com.soundcloud.android.crop.Crop;
+
+import com.cs65.homie.R;
+import com.cs65.homie.Utilities;
 
 import java.io.File;
 
@@ -21,11 +25,11 @@ public class ProfileSettingsActivity extends AppCompatActivity {
 
     private ImageView photoView;
     private String tempImgFileName = "temp.png";
-    private EditText editedName, editedEmail, editedPhone, editedClass, editedMajor;
-    private RadioButton radioFemale, radioMale;
+    private EditText editedName, editedEmail, changedPassword;
+    private RadioButton radioFemale, radioMale, radioNoPref;
 
     private Uri photoUri;
-    private String photoPath, name, email, phone, gender, classYr, major;
+    private String photoPath, name, email, password, genderPref, petFriendly, noneSmoking, privateBathroom;
 
     public static final int CAMERA_REQUEST_CODE = 1;
 
@@ -36,42 +40,41 @@ public class ProfileSettingsActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_profile_settings);
 
         SharedPreferences savedProfile = getSharedPreferences(getString(R.string.saved_preferences), MODE_PRIVATE);
 
         this.editedName = (EditText) findViewById(R.id.editText_Name);
         this.editedEmail = (EditText) findViewById(R.id.editText_Email);
-        this.editedPhone = (EditText) findViewById(R.id.editText_Phone);
+        this.changedPassword = (EditText) findViewById(R.id.editText_Password);
         this.radioFemale = (RadioButton) findViewById(R.id.radioButton_female);
         this.radioMale = (RadioButton) findViewById(R.id.radioButton_male);
-        this.editedClass = (EditText) findViewById(R.id.editText_Class);
-        this.editedMajor = (EditText) findViewById(R.id.editText_Major);
+        this.radioNoPref = (RadioButton) findViewById(R.id.radioButton_nopref);
         this.photoView = (ImageView) findViewById(R.id.photoView);
 
-        Util.checkPermission(this);
+        Utilities.checkPermission(this);
 
         File tempImgFile = new File(getExternalFilesDir(null), tempImgFileName);
         this.photoUri = FileProvider.getUriForFile(
-                this, "com.example.abigail_bartolome_myruns1", tempImgFile);
+                this, "com.cs65.homie.ui", tempImgFile);
 
         if (savedInstanceState != null) {
             this.photoPath = savedInstanceState.getString(getString(R.string.key_filename));
-            this.name = savedInstanceState.getString(getString(R.string.key_name));
+            this.name = savedProfile.getString(getString(R.string.key_name), null);
             this.email = savedInstanceState.getString(getString(R.string.key_email));
-            this.phone = savedInstanceState.getString(getString(R.string.key_phone));
-            this.gender = savedInstanceState.getString(getString(R.string.key_gender));
-            this.classYr = savedInstanceState.getString(getString(R.string.key_class));
-            this.major = savedInstanceState.getString(getString(R.string.key_major));
+            this.petFriendly = savedProfile.getString(getString(R.string.key_petFriendly), null);
+            this.noneSmoking = savedProfile.getString(getString(R.string.key_noneSmoking), null);
+            this.privateBathroom = savedProfile.getString(getString(R.string.key_privateBathroom), null);
+            this.genderPref = savedProfile.getString(getString(R.string.key_genderpref), null);
         }
         else {
             this.photoPath = savedProfile.getString(getString(R.string.key_filename), null);
             this.name = savedProfile.getString(getString(R.string.key_name), null);
             this.email = savedProfile.getString(getString(R.string.key_email), null);
-            this.phone = savedProfile.getString(getString(R.string.key_phone), null);
-            this.classYr = savedProfile.getString(getString(R.string.key_class), null);
-            this.major = savedProfile.getString(getString(R.string.key_major), null);
-            this.gender = savedProfile.getString(getString(R.string.key_gender), null);
+            this.petFriendly = savedProfile.getString(getString(R.string.key_petFriendly), null);
+            this.noneSmoking = savedProfile.getString(getString(R.string.key_noneSmoking), null);
+            this.privateBathroom = savedProfile.getString(getString(R.string.key_privateBathroom), null);
+            this.genderPref = savedProfile.getString(getString(R.string.key_genderpref), null);
         }
 
 //        this.photoView.setImageURI(this.photoUri);
@@ -126,9 +129,11 @@ public class ProfileSettingsActivity extends AppCompatActivity {
 
     public void onGenderRadioToggled(View view) {
         if (view.getId() == R.id.radioButton_female)
-            this.gender = getString(R.string.radio_Female_text);
+            this.genderPref = getString(R.string.radio_Female_text);
         else if (view.getId() == R.id.radioButton_male)
-            this.gender = getString(R.string.radio_Male_text);
+            this.genderPref = getString(R.string.radio_Male_text);
+        else if (view.getId() == R.id.radioButton_nopref)
+            this.genderPref = getString(R.string.radio_NoPref_text);
     }
 
     /**
@@ -139,11 +144,8 @@ public class ProfileSettingsActivity extends AppCompatActivity {
 //        this.savedProfile = getSharedPreferences(getString(R.string.saved_preferences), MODE_PRIVATE);
         if (this.name != null) editedName.setText(this.name);
         if (this.email != null) editedEmail.setText(this.email);
-        if (this.phone != null) editedPhone.setText(this.phone);
-        if (this.classYr != null) editedClass.setText(this.classYr);
-        if (this.major != null) editedMajor.setText(this.major);
-        if (this.gender != null) {
-            if (this.gender == getString(R.string.radio_Female_text)) radioFemale.setChecked(true);
+        if (this.genderPref != null) {
+            if (this.genderPref == getString(R.string.radio_NoPref_text)) radioNoPref.setChecked(true);
             else radioMale.setChecked(true);
         }
         if (this.photoPath != null) photoView.setImageURI(Uri.fromFile(new File(this.photoPath)));
@@ -157,19 +159,17 @@ public class ProfileSettingsActivity extends AppCompatActivity {
         Log.d(DEBUGGING_TAG, "in saveProfile");
         this.name = editedName.getText().toString();
         this.email = editedEmail.getText().toString();
-        this.phone = editedPhone.getText().toString();
-        this.classYr = editedClass.getText().toString();
-        this.major = editedMajor.getText().toString();
 
         SharedPreferences savedProfile = getSharedPreferences(getString(R.string.saved_preferences), MODE_PRIVATE);
 
         SharedPreferences.Editor editedProfile = savedProfile.edit();
         editedProfile.putString(getString(R.string.key_name), this.name);
         editedProfile.putString(getString(R.string.key_email), this.email);
-        editedProfile.putString(getString(R.string.key_phone), this.phone);
-        editedProfile.putString(getString(R.string.key_class), this.classYr);
-        editedProfile.putString(getString(R.string.key_major), this.major);
-        editedProfile.putString(getString(R.string.key_gender), this.gender);
+        editedProfile.putString(getString(R.string.key_password), this.password);
+        editedProfile.putString(getString(R.string.key_genderpref), this.genderPref);
+        editedProfile.putString(getString(R.string.key_petFriendly), this.petFriendly);
+        editedProfile.putString(getString(R.string.key_noneSmoking), this.noneSmoking);
+        editedProfile.putString(getString(R.string.key_privateBathroom), this.privateBathroom);
         editedProfile.putString(getString(R.string.key_filename), this.photoPath);
         editedProfile.apply();
         Toast.makeText(this, R.string.toast_saved, Toast.LENGTH_SHORT).show();
