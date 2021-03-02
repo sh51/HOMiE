@@ -706,6 +706,4 @@ public class ProfileViewFragment
 
     }
 
-
-
 }

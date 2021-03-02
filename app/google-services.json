@@ -1,0 +1,68 @@
+{
+  "project_info": {
+    "project_number": "649039666730",
+    "project_id": "homies-cs65",
+    "storage_bucket": "homies-cs65.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:649039666730:android:ec05c1d81b709151afad53",
+        "android_client_info": {
+          "package_name": "com.cs65.homie"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "649039666730-mbepo65utp5trd9r64n6fv4j8abt771e.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCSupzH8iBFm16i3kjB7dHvmaqpGavCgJM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "649039666730-mbepo65utp5trd9r64n6fv4j8abt771e.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:649039666730:android:b2b6ae5521fd6ee7afad53",
+        "android_client_info": {
+          "package_name": "com.homies.homiesapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "649039666730-mbepo65utp5trd9r64n6fv4j8abt771e.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCSupzH8iBFm16i3kjB7dHvmaqpGavCgJM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "649039666730-mbepo65utp5trd9r64n6fv4j8abt771e.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
