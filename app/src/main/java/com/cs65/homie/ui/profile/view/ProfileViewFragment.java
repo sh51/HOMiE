@@ -515,7 +515,7 @@ public class ProfileViewFragment
         // Load the image carousel
         ImageCarouselFragment carouselFrag
             = (ImageCarouselFragment)this.getChildFragmentManager()
-            .findFragmentById(R.id.profileViewCarouselFrag);
+            .findFragmentById(R.id.profileViewCarouselFragView);
         if (carouselFrag != null)
         {
             this.vm.getimages().observe(this.getViewLifecycleOwner(), carouselFrag::setImages);

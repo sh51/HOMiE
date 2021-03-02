@@ -4,12 +4,15 @@ import android.content.ContentResolver;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.cs65.homie.MainActivity;
 import com.cs65.homie.R;
 import com.cs65.homie.Utilities;
+import com.cs65.homie.ui.gestures.OnSwipeGestureListener;
+import com.cs65.homie.ui.gestures.SwipeGesture;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -20,9 +23,12 @@ import java.util.List;
 /**
  * Matching fragment, to handle matching functionality
  */
+@SuppressWarnings("Convert2Diamond")
 public class ProfileMatchFragment
     extends ProfileViewFragment
-    implements View.OnClickListener
+    implements OnSwipeGestureListener,
+    View.OnClickListener,
+    View.OnTouchListener
 {
 
     private FloatingActionButton buttonMatch = null;
@@ -35,11 +41,11 @@ public class ProfileMatchFragment
         // For now, toasts
         if (view.equals(buttonMatch))
         {
-            Utilities.showErrorToast(R.string.profile_view_match_accept_description, this.getActivity());
+            this.handleMatch();
         }
         else if (view.equals(this.buttonReject))
         {
-            Utilities.showErrorToast(R.string.profile_view_match_reject_description, this.getActivity());
+            this.handleReject();
         }
     }
 
@@ -50,6 +56,41 @@ public class ProfileMatchFragment
         return super.onCreateView(inflater, container, savedInstanceState);
     }
 
+
+    public void onSwipeLeft()
+    {
+        this.handleReject();
+    }
+
+    public void onSwipeRight()
+    {
+        this.handleMatch();
+    }
+
+    /**
+     * Do nothing on up swipes
+     */
+    public void onSwipeDown() {}
+
+    /**
+     * Do nothing on down swipes
+     */
+    public void onSwipeUp() {}
+
+    /**
+     * Capture a touch event, and do not let it propagate (return true)
+     *
+     * @param view  View that was touched. Always the image carousel fragment.
+     * @param event Touch event
+     *
+     * @return      True
+     */
+    public boolean onTouch(View view, MotionEvent event)
+    {
+        view.performClick();
+        return true;
+    }
+
     public void onViewCreated(View view, Bundle savedInstanceState)
     {
 
@@ -58,14 +99,30 @@ public class ProfileMatchFragment
         // FIXME Using fake data, need to set to the other user
         super.vm.setUserId(((MainActivity)this.getActivity()).getFakeUserId());
 
-        // The match buttons require more padding
+        View scrollLayout = view.findViewById(R.id.profileViewScrollLayout);
+        if (scrollLayout != null)
+        {
+            new SwipeGesture(
+                this.getContext(), scrollLayout, this
+            );
+        }
+
         View topLayout = view.findViewById(R.id.profileViewLayout);
         if (topLayout != null)
         {
+            // The match buttons require more padding
             topLayout.setPadding(
                 0, 0, 0,
                 (int)Math.round(Utilities.pixelDensity(this.getContext(), 80.0))
             );
+        }
+
+        // We need to steal propagating touches from the carousel view
+        // to not trigger swipes that are captured on the scroll view level
+        View carouselView = view.findViewById(R.id.profileViewCarouselFragView);
+        if (carouselView != null)
+        {
+            carouselView.setOnTouchListener(this);
         }
 
         // Set up the listener for the match buttons
@@ -87,6 +144,25 @@ public class ProfileMatchFragment
         // TODO Using fake data for now
         this.loadFakeData();
 
+    }
+
+    ///// ///// /////
+
+    private void handleMatch()
+    {
+        // TODO Need a real implementation
+        Utilities.showErrorToast(
+            R.string.profile_view_match_accept_description,
+            this.getActivity());
+    }
+
+    private void handleReject()
+    {
+        // TODO Need a real implementation
+        Utilities.showErrorToast(
+            R.string.profile_view_match_reject_description,
+            this.getActivity()
+        );
     }
 
     /**

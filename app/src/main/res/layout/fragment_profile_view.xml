@@ -8,6 +8,7 @@
     tools:context=".ui.profile.view.ProfileViewFragment">
 
     <ScrollView
+        android:id="@+id/profileViewScrollLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
@@ -75,11 +76,11 @@
             </LinearLayout>
 
             <androidx.fragment.app.FragmentContainerView
-            android:id="@+id/profileViewCarouselFrag"
-            android:name="com.cs65.homie.ui.carousel.ImageCarouselFragment"
-            android:layout_width="match_parent"
-            android:layout_height="200dp"
-            android:layout_margin="10dp" />
+                android:id="@+id/profileViewCarouselFragView"
+                android:name="com.cs65.homie.ui.carousel.ImageCarouselFragment"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:layout_margin="10dp" />
 
             <LinearLayout
                 android:id="@+id/profileViewEtcLayout"
