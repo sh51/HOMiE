@@ -87,12 +87,113 @@ public class ProfileViewFragment
     {
         if (location != null)
         {
-            LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+            LatLng latLng = new LatLng(
+                location.getLatitude(), location.getLongitude()
+            );
             if (latLng.latitude != 0 || latLng.longitude != 0)
             {
                 this.vm.getMyLoc().postValue(latLng);
             }
         }
+    }
+
+    public void onCreate(Bundle savedInstanceState)
+    {
+
+        super.onCreate(savedInstanceState);
+
+        Log.d(
+            MainActivity.TAG,
+            this.getClass().getCanonicalName()
+                + " location permissions: " +
+                Utilities.checkPermissionLocation(this.getActivity())
+        );
+
+        // Get the view model instance
+        this.vm = new ViewModelProvider(this).get(
+            ProfileViewFragmentViewModel.class
+        );
+        if (this.vm == null)
+        {
+            // TODO Handle
+            // If it can even happen
+            Log.d(
+                MainActivity.TAG,
+                this.getClass().getCanonicalName()
+                    + ".onCreate(), ViewModel is null"
+            );
+            return;
+        }
+
+        // Setup My ID
+        if (this.vm.getMyId() < 0 && this.getActivity() != null)
+        {
+            // FIXME Using fake data
+            this.vm.setMyId(((MainActivity)this.getActivity()).getFakeMyId());
+        }
+        if (this.vm.getMyId() < 0)
+        {
+            // TODO Handle
+            Log.d(
+                MainActivity.TAG, String.format(
+                    "%s.onCreate(), MyId is %d",
+                    this.getClass().getCanonicalName(),
+                    this.vm.getMyId()
+                ));
+            return;
+        }
+
+        // Setup User ID
+        if (this.vm.getUserId() < 0 && this.getActivity() != null)
+        {
+            // FIXME Using fake data
+            this.vm.setUserId(((MainActivity)this.getActivity()).getFakeMyId());
+        }
+        if (this.vm.getUserId() < 0)
+        {
+            // TODO Handle
+            Log.d(MainActivity.TAG, String.format(
+                "%s.onCreate(), UserID is %d",
+                this.getClass().getCanonicalName(),
+                this.vm.getUserId()
+            ));
+            return;
+        }
+
+        // Setup the location services if we need it.
+        this.geocoder = new Geocoder(this.getContext(), Locale.getDefault());
+        this.locationManager
+            = (LocationManager) this.getActivity().getSystemService(
+            Context.LOCATION_SERVICE
+        );
+        Criteria locCriteria = new Criteria();
+        locCriteria.setAccuracy(Criteria.ACCURACY_COARSE);
+        this.locationProvider = this.locationManager.getBestProvider(
+            locCriteria, true
+        );
+        Log.d(
+            MainActivity.TAG,
+            this.getClass().getCanonicalName()
+                + " location provider: "
+                + this.locationProvider
+        );
+
+    }
+
+    public View onCreateView(
+        LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState
+    )
+    {
+        // Load the layout
+        return inflater.inflate(
+            R.layout.fragment_profile_view, container, false
+        );
+    }
+
+    public void onDestroy()
+    {
+        this.workerThread.quitSafely();
+        super.onDestroy();
     }
 
     public void onLocationChanged(Location location)
@@ -105,14 +206,132 @@ public class ProfileViewFragment
         }
     }
 
-    public void onStatusChanged (String provider, int status, Bundle extras) {}
-
     public void onUpdateLocLive(boolean locLive)
     {
         if (locLive)
         {
             this.requestLocUpdate();
         }
+    }
+
+    public void onResume()
+    {
+        super.onResume();
+        // If the user uses a live location, update the location on resume
+        // At the moment we don't bother listening to the location
+        // Excessive
+        if (this.vm.getMyLocLive().getValue())
+        {
+            this.requestLocUpdate();
+        }
+    }
+
+    // Unimplemented. We do not care about location provider status events
+    public void onStatusChanged (String provider, int status, Bundle extras) {}
+
+    public void onViewCreated(View view, Bundle savedInstanceState)
+    {
+
+        // Set up the observers for all the relevant views
+        this.viewAvatar = view.findViewById(R.id.profileViewAvatarImageView);
+        if (this.viewAvatar != null)
+        {
+            this.vm.getAvatarUri().observe(
+                this.getViewLifecycleOwner(), this::updateViewAvatar
+            );
+            Uri avatarUri = this.vm.getAvatarUri().getValue();
+            if (avatarUri != null)
+            {
+                this.updateViewAvatar(avatarUri);
+            }
+        }
+        this.viewBathroom = view.findViewById(R.id.profileViewBathroomTextView);
+        if (this.viewBathroom != null)
+        {
+            this.vm.getBathroom().observe(
+                this.getViewLifecycleOwner(), this::updateViewBathroomByBathroom
+            );
+            this.vm.getPlace().observe(
+                this.getViewLifecycleOwner(), this::updateViewBathroomByPlace
+            );
+            this.updateViewBathroom(
+                this.vm.getBathroom().getValue(),
+                this.vm.getPlace().getValue()
+            );
+        }
+        this.viewBio = view.findViewById(R.id.profileViewBioTextView);
+        if (this.viewBio != null)
+        {
+            this.vm.getBio().observe(
+                this.getViewLifecycleOwner(), this::updateViewBio
+            );
+            this.updateViewBio(this.vm.getBio().getValue());
+        }
+        this.viewGender = view.findViewById(R.id.profileViewGenderTextView);
+        if (this.viewGender != null)
+        {
+            this.vm.getGender().observe(
+                this.getViewLifecycleOwner(), this::updateViewGender
+            );
+            this.updateViewGender(this.vm.getGender().getValue());
+        }
+        this.viewLoc = view.findViewById(R.id.profileViewLocationTextView);
+        if (this.viewLoc != null)
+        {
+            this.vm.getLoc().observe(
+                this.getViewLifecycleOwner(), this::updateViewLocByUserLoc);
+            this.vm.getMyLoc().observe(
+                this.getViewLifecycleOwner(), this::updateViewLocByMyLoc
+            );
+            this.vm.getMyLocStr().observe(
+                this.getViewLifecycleOwner(), this::updateViewLocByMyString
+            );
+            // Don't prime locations with default values
+        }
+        this.viewName = view.findViewById(R.id.profileViewNameTextView);
+        if (this.viewName != null)
+        {
+            this.vm.getProfileName().observe(
+                this.getViewLifecycleOwner(), this::updateViewName
+            );
+            this.updateViewName(this.vm.getProfileName().getValue());
+        }
+        this.viewPets = view.findViewById(R.id.profileViewPetsTextView);
+        if (this.viewPets != null)
+        {
+            this.vm.getPets().observe(
+                this.getViewLifecycleOwner(), this::updateViewPets
+            );
+            this.updateViewPets(this.vm.getPets().getValue());
+        }
+        this.viewSmoking = view.findViewById(R.id.profileViewSmokingTextView);
+        if (this.viewSmoking != null)
+        {
+            this.vm.getSmoking().observe(
+                this.getViewLifecycleOwner(), this::updateViewSmoking
+            );
+            this.updateViewSmoking(this.vm.getSmoking().getValue());
+        }
+
+        // Set the non-view observer for the location live field
+        this.vm.getMyLocLive().observe(
+            this.getViewLifecycleOwner(), this::onUpdateLocLive
+        );
+
+        // Load the image carousel
+        ImageCarouselFragment carouselFrag
+            = (ImageCarouselFragment)this.getChildFragmentManager()
+            .findFragmentById(R.id.profileViewCarouselFragView);
+        if (carouselFrag != null)
+        {
+            this.vm.getimages().observe(
+                this.getViewLifecycleOwner(), carouselFrag::setImages
+            );
+        }
+
+        // Fetch Firebase data asynchronously (eventually, somehow)
+        this.pingFirebase();
+
     }
 
     public void updateViewAvatar(Uri avatar)
@@ -348,201 +567,6 @@ public class ProfileViewFragment
         }
     }
 
-    ///// ///// /////
-
-    // TODO Public now. Resort
-    public void onCreate(Bundle savedInstanceState)
-    {
-
-        super.onCreate(savedInstanceState);
-
-        Log.d(
-            MainActivity.TAG,
-            this.getClass().getCanonicalName()
-            + " location permissions: " +
-            Utilities.checkPermissionLocation(this.getActivity())
-        );
-
-        // Get the view model instance
-        this.vm = new ViewModelProvider(this).get(
-            ProfileViewFragmentViewModel.class
-        );
-        if (this.vm == null)
-        {
-            // TODO Handle
-            // If it can even happen
-            Log.d(
-                MainActivity.TAG,
-                this.getClass().getCanonicalName()
-                + ".onCreate(), ViewModel is null"
-            );
-            return;
-        }
-
-        // Setup My ID
-        if (this.vm.getMyId() < 0 && this.getActivity() != null)
-        {
-            // FIXME Using fake data
-            this.vm.setMyId(((MainActivity)this.getActivity()).getFakeMyId());
-        }
-        if (this.vm.getMyId() < 0)
-        {
-            // TODO Handle
-            Log.d(
-                MainActivity.TAG, String.format(
-                    "%s.onCreate(), MyId is %d",
-                    this.getClass().getCanonicalName(),
-                    this.vm.getMyId()
-                ));
-            return;
-        }
-
-        // Setup User ID
-        if (this.vm.getUserId() < 0 && this.getActivity() != null)
-        {
-            // FIXME Using fake data
-            this.vm.setUserId(((MainActivity)this.getActivity()).getFakeMyId());
-        }
-        if (this.vm.getUserId() < 0)
-        {
-            // TODO Handle
-            Log.d(MainActivity.TAG, String.format(
-                "%s.onCreate(), UserID is %d",
-                this.getClass().getCanonicalName(),
-                this.vm.getUserId()
-            ));
-            return;
-        }
-
-        // Setup the location services if we need it.
-        this.geocoder = new Geocoder(this.getContext(), Locale.getDefault());
-        this.locationManager
-            = (LocationManager) this.getActivity().getSystemService(
-                Context.LOCATION_SERVICE
-            );
-        Criteria locCriteria = new Criteria();
-        locCriteria.setAccuracy(Criteria.ACCURACY_COARSE);
-        this.locationProvider = this.locationManager.getBestProvider(
-            locCriteria, true
-        );
-        Log.d(
-            MainActivity.TAG,
-            this.getClass().getCanonicalName()
-            + " location provider: "
-            + this.locationProvider
-        );
-
-    }
-
-    public View onCreateView(
-        LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState
-    )
-    {
-        // Load the layout
-        return inflater.inflate(
-            R.layout.fragment_profile_view, container, false
-        );
-    }
-
-    public void onViewCreated(View view, Bundle savedInstanceState)
-    {
-
-        // Set up the observers for all the relevant views
-        this.viewAvatar = view.findViewById(R.id.profileViewAvatarImageView);
-        if (this.viewAvatar != null)
-        {
-            this.vm.getAvatarUri().observe(this.getViewLifecycleOwner(), this::updateViewAvatar);
-            Uri avatarUri = this.vm.getAvatarUri().getValue();
-            if (avatarUri != null)
-            {
-                this.updateViewAvatar(avatarUri);
-            }
-        }
-        this.viewBathroom = view.findViewById(R.id.profileViewBathroomTextView);
-        if (this.viewBathroom != null)
-        {
-            this.vm.getBathroom().observe(
-                this.getViewLifecycleOwner(), this::updateViewBathroomByBathroom
-            );
-            this.vm.getPlace().observe(this.getViewLifecycleOwner(), this::updateViewBathroomByPlace);
-            this.updateViewBathroom(
-                this.vm.getBathroom().getValue(),
-                this.vm.getPlace().getValue()
-            );
-        }
-        this.viewBio = view.findViewById(R.id.profileViewBioTextView);
-        if (this.viewBio != null)
-        {
-            this.vm.getBio().observe(this.getViewLifecycleOwner(), this::updateViewBio);
-            this.updateViewBio(this.vm.getBio().getValue());
-        }
-        this.viewGender = view.findViewById(R.id.profileViewGenderTextView);
-        if (this.viewGender != null)
-        {
-            this.vm.getGender().observe(this.getViewLifecycleOwner(), this::updateViewGender);
-            this.updateViewGender(this.vm.getGender().getValue());
-        }
-        this.viewLoc = view.findViewById(R.id.profileViewLocationTextView);
-        if (this.viewLoc != null)
-        {
-            this.vm.getLoc().observe(this.getViewLifecycleOwner(), this::updateViewLocByUserLoc);
-            this.vm.getMyLoc().observe(this.getViewLifecycleOwner(), this::updateViewLocByMyLoc);
-            this.vm.getMyLocStr().observe(this.getViewLifecycleOwner(), this::updateViewLocByMyString);
-            // Don't prime with default values
-        }
-        this.viewName = view.findViewById(R.id.profileViewNameTextView);
-        if (this.viewName != null)
-        {
-            this.vm.getProfileName().observe(this.getViewLifecycleOwner(), this::updateViewName);
-            this.updateViewName(this.vm.getProfileName().getValue());
-        }
-        this.viewPets = view.findViewById(R.id.profileViewPetsTextView);
-        if (this.viewPets != null)
-        {
-            this.vm.getPets().observe(this.getViewLifecycleOwner(), this::updateViewPets);
-            this.updateViewPets(this.vm.getPets().getValue());
-        }
-        this.viewSmoking = view.findViewById(R.id.profileViewSmokingTextView);
-        if (this.viewSmoking != null)
-        {
-            this.vm.getSmoking().observe(this.getViewLifecycleOwner(), this::updateViewSmoking);
-            this.updateViewSmoking(this.vm.getSmoking().getValue());
-        }
-
-        // Set the non-view observer for the location live field
-        this.vm.getMyLocLive().observe(this.getViewLifecycleOwner(), this::onUpdateLocLive);
-
-        // Load the image carousel
-        ImageCarouselFragment carouselFrag
-            = (ImageCarouselFragment)this.getChildFragmentManager()
-            .findFragmentById(R.id.profileViewCarouselFragView);
-        if (carouselFrag != null)
-        {
-            this.vm.getimages().observe(this.getViewLifecycleOwner(), carouselFrag::setImages);
-        }
-
-        // Fetch Firebase data asynchronously (eventually, somehow)
-        this.pingFirebase();
-
-    }
-
-    public void onDestroy()
-    {
-        this.workerThread.quitSafely();
-        super.onDestroy();
-    }
-
-    public void onResume()
-    {
-        super.onResume();
-        // If the user uses a live location, update the location on resume
-        // At the moment we don't bother listening to the location
-        // Excessive
-        if (this.vm.getMyLocLive().getValue())
-        {
-            this.requestLocUpdate();
-        }
-    }
 
     ///// ///// /////
 
@@ -607,7 +631,10 @@ public class ProfileViewFragment
             Location loc = this.locationManager.getLastKnownLocation(
                 this.locationProvider
             );
-            if (loc != null && (loc.getLongitude() != 0 || loc.getLatitude() != 0))
+            if (
+                loc != null
+                && (loc.getLongitude() != 0 || loc.getLatitude() != 0)
+            )
             {
                 this.vm.getMyLoc().postValue(new LatLng(
                     loc.getLatitude(), loc.getLongitude()

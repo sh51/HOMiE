@@ -110,8 +110,8 @@ public class SwipeGesture
         )
         {
             actionConsumed = true;
-            // TODO I don't actually know if these are the correct signs
-            // since this branch is untested
+            // TODO REP doesn't actually know if these are the correct signs,
+            // e.g. is positive down? Since this branch is untested
             if (diffY > 0)
             {
                 listener.onSwipeDown();
