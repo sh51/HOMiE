@@ -402,19 +402,10 @@ public class ProfileViewFragment
 
     public void updateViewGender(String gender)
     {
-
-        if (this.viewGender == null)
+        if (this.viewGender != null)
         {
-            return;
+            this.viewGender.setText(gender);
         }
-
-        // The gender text view has a character limit
-        if (gender.length() > GENDER_TEXT_VIEW_CHAR_LIMIT)
-        {
-            gender = gender.substring(0, GENDER_TEXT_VIEW_CHAR_LIMIT) + "…";
-        }
-        this.viewGender.setText(gender);
-
     }
 
     /**
