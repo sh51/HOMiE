@@ -49,12 +49,15 @@ public class ChatsRecyclerAdapter extends RecyclerView.Adapter<ChatsViewHolder>
         Profile profile = this.vm.getUser(position);
         List<Message> messages
             = this.vm.getMessages(profile.getId()).getValue();
-        if (!messages.isEmpty())
+        if (messages != null && !messages.isEmpty())
         {
             message = messages.get(messages.size() - 1);
         }
 
-        holder.getAvatarView().setImageURI(Uri.parse(profile.getAvatarImage()));
+        if (profile.getAvatarImage() != null)
+        {
+            holder.getAvatarView().setImageURI(Uri.parse(profile.getAvatarImage()));
+        }
         holder.getNameView().setText(profile.getFirstName());
         if (message != null)
         {
