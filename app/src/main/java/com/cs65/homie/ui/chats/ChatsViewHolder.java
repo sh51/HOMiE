@@ -21,6 +21,7 @@ public class ChatsViewHolder extends RecyclerView.ViewHolder
     private final ImageView avatarView;
     private final TextView chatPreviewView;
     private final TextView nameView;
+    private final View textLayoutView;
     private final TextView timeSinceLastMessageView;
 
     public ChatsViewHolder(View itemView)
@@ -31,6 +32,7 @@ public class ChatsViewHolder extends RecyclerView.ViewHolder
         this.avatarView = itemView.findViewById(R.id.chatsAvatarView);
         this.chatPreviewView = itemView.findViewById(R.id.chatsPreviewTextView);
         this.nameView = itemView.findViewById(R.id.chatsNameTextView);
+        this.textLayoutView = itemView.findViewById(R.id.chatsTextLayout);
         this.timeSinceLastMessageView = itemView.findViewById(
             R.id.chatsTimeSinceLastMessageTextView
         );
@@ -52,6 +54,11 @@ public class ChatsViewHolder extends RecyclerView.ViewHolder
         return this.nameView;
     }
 
+    public View getTextLayoutView()
+    {
+        return this.textLayoutView;
+    }
+
     public TextView getTimeSinceLastMessageView()
     {
         return this.timeSinceLastMessageView;
@@ -59,6 +66,11 @@ public class ChatsViewHolder extends RecyclerView.ViewHolder
 
     public void setTimeSinceLastMessage(Date then)
     {
+
+        if (this.getTimeSinceLastMessageView() == null)
+        {
+            return;
+        }
 
         Date now = Calendar.getInstance().getTime();
         LocalDate localDate = LocalDate.ofEpochDay(

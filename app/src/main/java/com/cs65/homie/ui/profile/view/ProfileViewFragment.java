@@ -110,7 +110,7 @@ public class ProfileViewFragment
         );
 
         // Get the view model instance
-        this.vm = new ViewModelProvider(this).get(
+        this.vm = new ViewModelProvider(this.getActivity()).get(
             ProfileViewFragmentViewModel.class
         );
         if (this.vm == null)

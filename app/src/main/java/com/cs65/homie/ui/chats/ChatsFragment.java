@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.DividerItemDecoration;
@@ -28,7 +29,8 @@ import java.util.Map;
 import java.util.TreeMap;
 
 
-public class ChatsFragment extends Fragment
+@SuppressWarnings("Convert2Diamond")
+public class ChatsFragment extends Fragment implements View.OnClickListener
 {
 
     private ChatsRecyclerAdapter adapter = null;
@@ -40,7 +42,7 @@ public class ChatsFragment extends Fragment
 
         super.onCreate(savedInstanceState);
 
-        this.vm = new ViewModelProvider(this).get(ChatsViewModel.class);
+        this.vm = new ViewModelProvider(this.getActivity()).get(ChatsViewModel.class);
 
         if (this.vm == null)
         {
@@ -79,7 +81,7 @@ public class ChatsFragment extends Fragment
                 this.getContext(), layoutManager.getOrientation()
             ));
             recyclerView.setLayoutManager(layoutManager);
-            this.adapter = new ChatsRecyclerAdapter(this.vm);
+            this.adapter = new ChatsRecyclerAdapter(this, this.vm);
             this.recyclerView.setAdapter(this.adapter);
             this.vm.getUsersMessages().observe(
                 this.getViewLifecycleOwner(), this::invalidateRecycler
@@ -141,6 +143,11 @@ public class ChatsFragment extends Fragment
         this.vm.getUsersMessages().setValue(usersMessages);
         this.vm.getUsers().setValue(users);
 
+    }
+
+    public void onClick(View view)
+    {
+        ((MainActivity)this.getActivity()).spawnChatFragment("43");
     }
 
 }

@@ -7,11 +7,15 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
+import com.cs65.homie.ui.chats.ChatFragment;
 import com.cs65.homie.ui.login.ui.login.LoginActivity;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -56,7 +60,7 @@ public class MainActivity extends AppCompatActivity {
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.navigation_messages,
+                R.id.navigation_chats,
                 R.id.navigation_match,
                 R.id.navigation_profile
         ).build();
@@ -68,8 +72,11 @@ public class MainActivity extends AppCompatActivity {
         );
         NavigationUI.setupWithNavController(navView, navController);
 
-        Intent intent = new Intent(this, LoginActivity.class);
-        startActivityForResult(intent, RC_LOGIN);
+        //Intent intent = new Intent(this, LoginActivity.class);
+        //startActivityForResult(intent, RC_LOGIN);
+
+        // TODO The landing activity should probably be profile?
+        // It shouldn't be messages at least.
 
     }
 
@@ -111,6 +118,23 @@ public class MainActivity extends AppCompatActivity {
         }
         return true;
     }
+
+    public void spawnChatFragment(String userId)
+    {
+
+        //final String TAG = "CHAT_FRAG_TAG";
+        Bundle args = new Bundle();
+        args.putString("CHAT_FRAG_ARGS_KEY_USER_ID", userId);
+        FragmentManager activeFragManager = this.getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment).getChildFragmentManager();
+        FragmentTransaction transaction = activeFragManager.beginTransaction();
+        transaction.remove(activeFragManager.getFragments().get(0));
+        transaction.add(R.id.nav_host_fragment, ChatFragment.class, args);
+        transaction.addToBackStack(null);
+        transaction.commit();
+        activeFragManager.executePendingTransactions();
+
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);

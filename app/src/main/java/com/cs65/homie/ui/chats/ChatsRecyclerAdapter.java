@@ -2,7 +2,10 @@ package com.cs65.homie.ui.chats;
 
 import android.net.Uri;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -21,12 +24,14 @@ import java.util.Map;
 public class ChatsRecyclerAdapter extends RecyclerView.Adapter<ChatsViewHolder>
 {
 
+    private final ChatsFragment frag;
     private final ChatsViewModel vm;
     private final Map<String, Integer> userPositions
         = new HashMap<String, Integer>();
 
-    public ChatsRecyclerAdapter(ChatsViewModel vm)
+    public ChatsRecyclerAdapter(ChatsFragment frag, ChatsViewModel vm)
     {
+        this.frag = frag;
         this.vm = vm;
     }
 
@@ -43,6 +48,11 @@ public class ChatsRecyclerAdapter extends RecyclerView.Adapter<ChatsViewHolder>
     public void onBindViewHolder(@NotNull ChatsViewHolder holder, int position)
     {
 
+        ImageView avatarView = holder.getAvatarView();
+        TextView chatPreviewView = holder.getChatPreviewView();
+        TextView nameView = holder.getNameView();
+        View textLayoutView = holder.getTextLayoutView();
+
         // TODO Need to set up separate clicks for avatar (to profile)
         // and the rest (to messages)
         Message message = null;
@@ -54,15 +64,29 @@ public class ChatsRecyclerAdapter extends RecyclerView.Adapter<ChatsViewHolder>
             message = messages.get(messages.size() - 1);
         }
 
-        if (profile.getAvatarImage() != null)
+        if (avatarView != null)
         {
-            holder.getAvatarView().setImageURI(Uri.parse(profile.getAvatarImage()));
+            avatarView.setOnClickListener(this.frag);
+            if (profile.getAvatarImage() != null)
+            {
+                avatarView.setImageURI(Uri.parse(profile.getAvatarImage()));
+            }
         }
-        holder.getNameView().setText(profile.getFirstName());
+        if (nameView != null)
+        {
+            nameView.setText(profile.getFirstName());
+        }
         if (message != null)
         {
-            holder.getChatPreviewView().setText(message.getText());
+            if (chatPreviewView != null)
+            {
+                chatPreviewView.setText(message.getText());
+            }
             holder.setTimeSinceLastMessage(message.getTimestamp());
+        }
+        if (textLayoutView != null)
+        {
+            textLayoutView.setOnClickListener(this.frag);
         }
 
         this.userPositions.put(profile.getId(), position);
