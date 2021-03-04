@@ -7,9 +7,9 @@
 
     <fragment
         android:id="@+id/navigation_messages"
-        android:name="com.cs65.homie.ui.messages.MessagesFragment"
+        android:name="com.cs65.homie.ui.chats.ChatsFragment"
         android:label="@string/title_messages"
-        tools:layout="@layout/fragment_messages" />
+        tools:layout="@layout/fragment_chats" />
 
     <fragment
         android:id="@+id/navigation_match"
