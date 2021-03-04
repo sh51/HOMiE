@@ -2,70 +2,49 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_margin="10dp">
+    android:layout_width="match_parent" android:layout_height="match_parent">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
 
-        <ImageView
-            android:id="@+id/chatsAvatarView"
+        <Space
+            android:id="@+id/chatItemSpacerLeft"
             android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_marginRight="15dp"
-            android:layout_weight="1"
-            app:srcCompat="@drawable/default_profile"
-            tools:srcCompat="@tools:sample/avatars"
-            android:contentDescription="@string/avatar_description"
-            tools:ignore="RtlHardcoded" />
+            android:layout_height="wrap_content"
+            android:layout_weight="0" />
 
         <LinearLayout
-            android:id="@+id/chatsTextLayout"
+            android:id="@+id/chatItemTextBoxLayout"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="5"
             android:orientation="vertical">
 
-            <LinearLayout
+            <TextView
+                android:id="@+id/chatItemMessageTextView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:id="@+id/chatsNameTextView"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="left"
-                    android:layout_marginRight="5dp"
-                    android:ellipsize="end"
-                    android:maxLines="1"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
-                    tools:ignore="RtlHardcoded" />
-
-                <Space
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1" />
-
-                <TextView
-                    android:id="@+id/chatsTimeSinceLastMessageTextView"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="right"
-                    tools:ignore="RtlHardcoded" />
-            </LinearLayout>
+                android:layout_margin="2dp"
+                android:text="TextView" />
 
             <TextView
-                android:id="@+id/chatsPreviewTextView"
-                android:layout_width="wrap_content"
+                android:id="@+id/chatItemMessageTimeView"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:ellipsize="end"
-                android:maxLines="1" />
+                android:layout_weight="5"
+                android:gravity="right"
+                android:text="TextView"
+                android:textColor="#5A5A5A"
+                android:textSize="10sp" />
         </LinearLayout>
 
+        <Space
+            android:id="@+id/chatItemSpacerRight"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0" />
     </LinearLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

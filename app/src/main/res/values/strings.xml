@@ -7,6 +7,12 @@
     <string name="title_profile_view">Profile</string>
     <string name="title_match">Match with a Homie!</string>
 
+    <!-- CHAT -->
+    <string name="chat_back_button_description">Back Button</string>
+    <string name="chat_input_hint">Input Message</string>
+    <string name="chat_send_button_description">Send Message Button</string>
+    <!-- CHAT -->
+
     <!-- STATIC PROFILE VIEW -->
     <string name="profile_view_avatar_content_description">User Avatar</string>
     <string name="profile_view_bathroom_yes_place_yes">Has a private bathroom?  ✓</string>
@@ -60,6 +66,7 @@
     <string name="key_lookingForHousing">prefKey_lookingForHousing</string>
     <!-- EDIT PROFILE SETTINGS -->
 
+    <!-- LOGIN -->
     <string name="title_activity_login">LoginActivity</string>
     <string name="prompt_email">Email</string>
     <string name="prompt_password">Password</string>
@@ -73,5 +80,6 @@
     <string name="login_failed">"Login failed"</string>
     <string name="menu_item_logout">LOGOUT</string>
     <string name="menu_item_login">LOGIN</string>
+    <!-- LOGIN -->
 
 </resources>

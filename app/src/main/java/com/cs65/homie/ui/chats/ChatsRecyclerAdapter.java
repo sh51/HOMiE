@@ -40,7 +40,7 @@ public class ChatsRecyclerAdapter extends RecyclerView.Adapter<ChatsViewHolder>
     {
         return new ChatsViewHolder(
             LayoutInflater.from(parent.getContext()).inflate(
-                R.layout.item_chat, parent, false
+                R.layout.item_chats, parent, false
             )
         );
     }
