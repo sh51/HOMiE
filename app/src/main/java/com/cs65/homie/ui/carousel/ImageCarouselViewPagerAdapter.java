@@ -8,18 +8,21 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.cs65.homie.R;
 
+import org.jetbrains.annotations.NotNull;
+
 
 class ImageCarouselViewPagerAdapter
     extends RecyclerView.Adapter<ImageCarouselViewHolder>
 {
 
-    ImageCarouselFragment parent = null;
+    private final ImageCarouselFragment parent;
 
     public ImageCarouselViewPagerAdapter(ImageCarouselFragment parent)
     {
         this.parent = parent;
     }
 
+    @NotNull
     public ImageCarouselViewHolder onCreateViewHolder(
         ViewGroup parent, int viewType
     )
