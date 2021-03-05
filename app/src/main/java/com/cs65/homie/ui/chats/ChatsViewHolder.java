@@ -99,6 +99,7 @@ public class ChatsViewHolder extends RecyclerView.ViewHolder
         else if (duration < 1000 * 60 * 60 * 24 * 6)
         {
             // FIXME Date formatters need to be static
+            // FIXME They also need to be SimpleDateFormat objects
             output = DateTimeFormatter.ofPattern("E").format(localDate);
         }
         else if (duration < 1000L * 60L * 60L * 24L * 364L)

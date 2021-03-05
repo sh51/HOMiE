@@ -8,7 +8,7 @@
     <fragment
         android:id="@+id/navigation_chats"
         android:name="com.cs65.homie.ui.chats.ChatsFragment"
-        android:label="@string/title_messages"
+        android:label="@string/title_chats"
         tools:layout="@layout/fragment_chats" />
 
     <fragment

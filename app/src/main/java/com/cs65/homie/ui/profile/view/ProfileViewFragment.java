@@ -126,17 +126,19 @@ public class ProfileViewFragment
         }
 
         // Setup My ID
-        if (this.vm.getMyId() < 0 && this.getActivity() != null)
+        // FIXME Default user ID (empty string) is magic
+        if (this.vm.getMyId().equals("") && this.getActivity() != null)
         {
             // FIXME Using fake data
             this.vm.setMyId(((MainActivity)this.getActivity()).getFakeMyId());
         }
-        if (this.vm.getMyId() < 0)
+        // FIXME Default user ID (empty string) is magic
+        if (this.vm.getMyId().equals(""))
         {
             // TODO Handle
             Log.d(
                 MainActivity.TAG, String.format(
-                    "%s.onCreate(), MyId is %d",
+                    "%s.onCreate(), MyId is %s",
                     this.getClass().getCanonicalName(),
                     this.vm.getMyId()
                 ));
@@ -144,16 +146,18 @@ public class ProfileViewFragment
         }
 
         // Setup User ID
-        if (this.vm.getUserId() < 0 && this.getActivity() != null)
+        // FIXME Default user ID (empty string) is magic
+        if (this.vm.getUserId().equals("") && this.getActivity() != null)
         {
             // FIXME Using fake data
             this.vm.setUserId(((MainActivity)this.getActivity()).getFakeMyId());
         }
-        if (this.vm.getUserId() < 0)
+        // FIXME Default user ID (empty string) is magic
+        if (this.vm.getUserId().equals(""))
         {
             // TODO Handle
             Log.d(MainActivity.TAG, String.format(
-                "%s.onCreate(), UserID is %d",
+                "%s.onCreate(), UserID is %s",
                 this.getClass().getCanonicalName(),
                 this.vm.getUserId()
             ));
@@ -568,7 +572,7 @@ public class ProfileViewFragment
      */
     private boolean isMe()
     {
-        return this.vm.getMyId() == this.vm.getUserId();
+        return this.vm.getMyId().equals(this.vm.getUserId());
     }
 
     /**

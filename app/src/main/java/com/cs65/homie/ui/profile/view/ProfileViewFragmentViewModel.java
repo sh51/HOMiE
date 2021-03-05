@@ -28,7 +28,7 @@ public class ProfileViewFragmentViewModel extends ViewModel
         = new MutableLiveData<List<Uri>>(
             new ArrayList<Uri>()
         );
-    private final MutableLiveData<LatLng>    loc
+    private final MutableLiveData<LatLng> loc
         = new MutableLiveData<LatLng>(new LatLng(0, 0));
     private final MutableLiveData<String> gender
         = new MutableLiveData<String>("");
@@ -38,7 +38,7 @@ public class ProfileViewFragmentViewModel extends ViewModel
         = new MutableLiveData<Boolean>(false);
     private final MutableLiveData<String> myLocStr
         = new MutableLiveData<String>("");
-    private long myId = -1;
+    private String myId = "";
     private final MutableLiveData<String> name
         = new MutableLiveData<String>("");
     private final MutableLiveData<Boolean> pets
@@ -47,7 +47,7 @@ public class ProfileViewFragmentViewModel extends ViewModel
         = new MutableLiveData<Boolean>(false);
     private final MutableLiveData<Boolean> smoking
         = new MutableLiveData<Boolean>(false);
-    private long userId = -1;
+    private String userId = "";
 
 
     /**
@@ -130,7 +130,7 @@ public class ProfileViewFragmentViewModel extends ViewModel
      *
      * @return  The Firebase identifier of the user of the app
      */
-    public long getMyId()
+    public String getMyId()
     {
         return this.myId;
     }
@@ -159,7 +159,7 @@ public class ProfileViewFragmentViewModel extends ViewModel
      *
      * @return  The profile user's Firebase ID
      */
-    public long getUserId()
+    public String getUserId()
     {
         return this.userId;
     }
@@ -173,7 +173,7 @@ public class ProfileViewFragmentViewModel extends ViewModel
      * @return      The app user's updated Firebase ID
      */
     @SuppressWarnings("UnusedReturnValue")
-    public long setMyId(long id)
+    public String setMyId(String id)
     {
         this.myId = id;
         return this.myId;
@@ -188,7 +188,7 @@ public class ProfileViewFragmentViewModel extends ViewModel
      * @return      The profile user's updated Firebase ID
      */
     @SuppressWarnings("UnusedReturnValue")
-    public long setUserId(long id)
+    public String setUserId(String id)
     {
         this.userId = id;
         return this.userId;

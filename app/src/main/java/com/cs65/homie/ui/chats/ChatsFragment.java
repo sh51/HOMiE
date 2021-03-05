@@ -74,10 +74,10 @@ public class ChatsFragment extends Fragment implements View.OnClickListener
 
             LinearLayoutManager layoutManager
                 = new LinearLayoutManager(this.getContext());
-            recyclerView.addItemDecoration(new DividerItemDecoration(
+            this.recyclerView.addItemDecoration(new DividerItemDecoration(
                 this.getContext(), layoutManager.getOrientation()
             ));
-            recyclerView.setLayoutManager(layoutManager);
+            this.recyclerView.setLayoutManager(layoutManager);
             this.adapter = new ChatsRecyclerAdapter(this, this.vm);
             this.recyclerView.setAdapter(this.adapter);
             this.vm.getUsersMessages().observe(

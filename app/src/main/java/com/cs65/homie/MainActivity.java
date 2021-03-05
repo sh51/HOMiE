@@ -1,11 +1,14 @@
 package com.cs65.homie;
 
+import android.app.ActionBar;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
 
 import com.cs65.homie.ui.chats.ChatFragment;
 import com.cs65.homie.ui.login.ui.login.LoginActivity;
@@ -13,7 +16,6 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.navigation.NavController;
@@ -31,20 +33,34 @@ public class MainActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     // the menu, login and logout action button
     private MenuItem mLogout, mLogin;
+    private View hostView = null;
+    private BottomNavigationView navView = null;
 
     // Fake app user ID for testing/demoing before Firebase
     // Profile view needs it
     // This eventually needs to be saved to the device somewhere for profile
     // view to operate
-    public long getFakeMyId()
+    public String getFakeMyId()
     {
-        return 42L;
+        return "42";
     }
     // Fake profile user ID for testing/demoing before Firebase
     // Profile view needs it
-    public long getFakeUserId()
+    public String getFakeUserId()
     {
-        return 41L;
+        return "41";
+    }
+
+    public void hideNavView()
+    {
+
+        this.navView.setVisibility(View.GONE);
+
+        ViewGroup.MarginLayoutParams params
+            = (ViewGroup.MarginLayoutParams)this.hostView.getLayoutParams();
+        params.setMargins(0, 0, 0, 0);
+        this.hostView.setLayoutParams(params);
+
     }
 
     @Override
@@ -53,7 +69,9 @@ public class MainActivity extends AppCompatActivity {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        BottomNavigationView navView = findViewById(R.id.nav_view);
+
+        this.hostView = findViewById(R.id.nav_host_fragment);
+        this.navView = findViewById(R.id.nav_view);
 
         mAuth = FirebaseAuth.getInstance();
 
@@ -79,7 +97,6 @@ public class MainActivity extends AppCompatActivity {
         // It shouldn't be messages at least.
 
     }
-
 
     // set up the action bar
     @Override
@@ -119,22 +136,6 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
-    public void spawnChatFragment(String userId)
-    {
-
-        //final String TAG = "CHAT_FRAG_TAG";
-        Bundle args = new Bundle();
-        args.putString("CHAT_FRAG_ARGS_KEY_USER_ID", userId);
-        FragmentManager activeFragManager = this.getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment).getChildFragmentManager();
-        FragmentTransaction transaction = activeFragManager.beginTransaction();
-        transaction.remove(activeFragManager.getFragments().get(0));
-        transaction.add(R.id.nav_host_fragment, ChatFragment.class, args);
-        transaction.addToBackStack(null);
-        transaction.commit();
-        activeFragManager.executePendingTransactions();
-
-    }
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -147,6 +148,39 @@ public class MainActivity extends AppCompatActivity {
                 mLogout.setVisible(true);
             }
         }
+    }
+
+    public void showNavView()
+    {
+
+        this.navView.setVisibility(View.VISIBLE);
+
+        ViewGroup.MarginLayoutParams params
+            = (ViewGroup.MarginLayoutParams)this.hostView.getLayoutParams();
+        params.setMargins(0, 0, 0, this.navView.getHeight());
+        this.hostView.setLayoutParams(params);
+
+    }
+
+    // TODO Comment
+    public void spawnChatFragment(String userId)
+    {
+
+        Bundle args = new Bundle();
+        args.putString(ChatFragment.ARG_KEY_USER_ID, userId);
+        @SuppressWarnings("ConstantConditions")
+        FragmentManager activeFragManager
+            = this.getSupportFragmentManager().findFragmentById(
+            R.id.nav_host_fragment
+        ).getChildFragmentManager();
+        FragmentTransaction transaction = activeFragManager.beginTransaction();
+        transaction.remove(activeFragManager.getFragments().get(0));
+        transaction.add(R.id.nav_host_fragment, ChatFragment.class, args);
+        transaction.setReorderingAllowed(true);
+        transaction.addToBackStack(null);
+        transaction.commit();
+        activeFragManager.executePendingTransactions();
+
     }
 
 }
