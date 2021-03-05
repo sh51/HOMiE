@@ -33,13 +33,15 @@ public class ChatFragment extends Fragment implements View.OnClickListener
 {
 
     public static final String ARG_KEY_USER_ID  = "CHAT_FRAG_ARG_KEY_USER_ID";
+    public static final String BUNDLE_KEY_KEYBOARD_UP
+        = "CHAT_FRAG_BUNDLE_KEY_KEYBOARD_IS_UP";
 
     private ChatRecyclerAdapter adapter = null;
     private EditText inputView = null;
+    //private boolean isKeyboardUp = false;
     private RecyclerView recyclerView = null;
     private String userId = null;
     private ChatsViewModel vm = null;
-
 
     @SuppressLint("NonConstantResourceId")
     public void onClick(View view)
@@ -68,7 +70,6 @@ public class ChatFragment extends Fragment implements View.OnClickListener
 
         super.onCreate(savedInstanceState);
 
-        ((MainActivity)this.requireActivity()).hideNavView();
         if (this.getArguments() != null)
         {
             this.userId = this.getArguments().getString(ARG_KEY_USER_ID, "");
@@ -78,7 +79,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener
             this.userId = savedInstanceState.getString(ARG_KEY_USER_ID, "");
         }
 
-        this.vm = new ViewModelProvider(this.getActivity()).get(ChatsViewModel.class);
+        this.vm = new ViewModelProvider(this.requireActivity()).get(ChatsViewModel.class);
 
     }
 
@@ -99,6 +100,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener
 
         // FIXME if the input view has no text, take away it's focus
 
+        ((MainActivity)this.requireActivity()).hideNavView();
         this.recyclerView = view.findViewById(R.id.chatRecyclerView);
         if (this.recyclerView != null)
         {
@@ -130,7 +132,6 @@ public class ChatFragment extends Fragment implements View.OnClickListener
         {
             sendButtonView.setOnClickListener(this);
         }
-        this.inputView = view.findViewById(R.id.chatTextInputView);
 
         Profile user = this.vm.getUser(this.userId);
         if (user != null)
@@ -155,13 +156,48 @@ public class ChatFragment extends Fragment implements View.OnClickListener
             }
         }
 
+        this.inputView = view.findViewById(R.id.chatTextInputView);
+
+
     }
+
+    // FIXME On rotation to horizontal, the keyboard is hidden if it is shown
+    // before rotation
+    // REPIII tried to fix this, but failed.
+    // Other things have higher priority, but should be fixed if somebody
+    // can figure it out
+    // TODO Sort
+    //public void onResume()
+    //{
+    //    super.onResume();
+    //    if (this.inputView != null)
+    //    {
+    //        InputMethodManager inputManager = ((InputMethodManager) this.requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE));
+    //        if (this.isKeyboardUp)
+    //        {
+    //            inputManager.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
+    //        }
+    //        else
+    //        {
+    //            inputManager.hideSoftInputFromWindow(this.inputView.getWindowToken(), 0);
+    //        }
+    //    }
+    //}
 
     public void onSaveInstanceState(@NotNull Bundle outState)
     {
         super.onSaveInstanceState(outState);
         outState.putString(ARG_KEY_USER_ID, this.userId);
+        //outState.putBoolean(BUNDLE_KEY_KEYBOARD_UP, this.isKeyboardUp);
     }
+
+    // TODO Sort
+    //public void onPause()
+    //{
+    //   super.onPause();
+    //   InputMethodManager inputManager = ((InputMethodManager) this.requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE));
+    //   this.isKeyboardUp = inputManager.isAcceptingText();
+    //}
 
     private void sendMessage(EditText inputView)
     {

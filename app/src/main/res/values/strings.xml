@@ -9,7 +9,7 @@
 
     <!-- CHAT -->
     <string name="chat_back_button_description">Back Button</string>
-    <string name="chat_input_hint">Input Message</string>
+    <string name="chat_input_hint">Compose Message</string>
     <string name="chat_send_button_description">Send Message Button</string>
     <string name="chat_message_sent_toast">Message Sent!</string>
     <!-- CHAT -->
