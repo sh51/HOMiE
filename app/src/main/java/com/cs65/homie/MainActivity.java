@@ -105,9 +105,8 @@ public class MainActivity extends AppCompatActivity {
         );
         NavigationUI.setupWithNavController(navView, navController);
 
-        // TODO Don't forge to restore this REPIII
-        //Intent intent = new Intent(this, LoginActivity.class);
-        //startActivityForResult(intent, RC_LOGIN);
+        Intent intent = new Intent(this, LoginActivity.class);
+        startActivityForResult(intent, RC_LOGIN);
 
         // TODO The landing activity should probably be profile?
         // It shouldn't be messages at least?
