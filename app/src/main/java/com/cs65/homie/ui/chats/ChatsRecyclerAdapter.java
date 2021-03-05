@@ -9,6 +9,7 @@ import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.cs65.homie.MainActivity;
 import com.cs65.homie.R;
 import com.cs65.homie.models.Message;
 import com.cs65.homie.models.Profile;
@@ -53,8 +54,6 @@ public class ChatsRecyclerAdapter extends RecyclerView.Adapter<ChatsViewHolder>
         TextView nameView = holder.getNameView();
         View textLayoutView = holder.getTextLayoutView();
 
-        // TODO Need to set up separate clicks for avatar (to profile)
-        // and the rest (to messages)
         Message message = null;
         Profile profile = this.vm.getUser(position);
         List<Message> messages
@@ -66,7 +65,8 @@ public class ChatsRecyclerAdapter extends RecyclerView.Adapter<ChatsViewHolder>
 
         if (avatarView != null)
         {
-            avatarView.setOnClickListener(this.frag);
+            // TODO Need to set up separate clicks for avatar (to profile)
+            //avatarView.setOnClickListener(this.frag);
             if (profile.getAvatarImage() != null)
             {
                 avatarView.setImageURI(Uri.parse(profile.getAvatarImage()));
@@ -86,7 +86,11 @@ public class ChatsRecyclerAdapter extends RecyclerView.Adapter<ChatsViewHolder>
         }
         if (textLayoutView != null)
         {
-            textLayoutView.setOnClickListener(this.frag);
+            textLayoutView.setOnClickListener(
+                (v) -> ((MainActivity)this.frag.requireActivity()).spawnChatFragment(
+                    profile.getId()
+                )
+            );
         }
 
         this.userPositions.put(profile.getId(), position);

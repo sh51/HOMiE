@@ -25,6 +25,7 @@ import com.cs65.homie.models.Profile;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
@@ -222,6 +223,10 @@ public class ChatFragment extends Fragment implements View.OnClickListener
         );
 
         List<Message> messages = this.vm.getMessages(this.userId).getValue();
+        if (messages == null)
+        {
+            messages = new ArrayList<Message>();
+        }
         //noinspection ConstantConditions
         messages.add(message);
         this.vm.getMessages(this.userId).setValue(messages);

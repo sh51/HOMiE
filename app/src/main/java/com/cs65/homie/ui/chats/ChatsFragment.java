@@ -2,7 +2,6 @@ package com.cs65.homie.ui.chats;
 
 import android.content.ContentResolver;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,7 +13,6 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.cs65.homie.MainActivity;
 import com.cs65.homie.R;
 import com.cs65.homie.models.Message;
 import com.cs65.homie.models.Profile;
@@ -30,7 +28,7 @@ import java.util.TreeMap;
 
 
 @SuppressWarnings("Convert2Diamond")
-public class ChatsFragment extends Fragment implements View.OnClickListener
+public class ChatsFragment extends Fragment
 {
 
     private ChatsRecyclerAdapter adapter = null;
@@ -42,20 +40,8 @@ public class ChatsFragment extends Fragment implements View.OnClickListener
 
         super.onCreate(savedInstanceState);
 
-        this.vm = new ViewModelProvider(this.getActivity()).get(ChatsViewModel.class);
-
-        if (this.vm == null)
-        {
-            // TODO Handle
-            // If it can even happen
-            Log.d(
-                MainActivity.TAG,
-                this.getClass().getCanonicalName()
-                    + ".onCreate(), ViewModel is null"
-            );
-            return;
-        }
-
+        // Returned VM cannot be null
+        this.vm = new ViewModelProvider(this.requireActivity()).get(ChatsViewModel.class);
         this.loadFakeData();
 
     }
@@ -170,11 +156,6 @@ public class ChatsFragment extends Fragment implements View.OnClickListener
         this.vm.getUsersMessages().setValue(usersMessages);
         this.vm.getUsers().setValue(users);
 
-    }
-
-    public void onClick(View view)
-    {
-        ((MainActivity)this.getActivity()).spawnChatFragment("43");
     }
 
 }

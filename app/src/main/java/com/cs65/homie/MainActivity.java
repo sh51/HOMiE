@@ -176,6 +176,8 @@ public class MainActivity extends AppCompatActivity {
     public void spawnChatFragment(String userId)
     {
 
+        // TODO Add animation
+
         Bundle args = new Bundle();
         args.putString(ChatFragment.ARG_KEY_USER_ID, userId);
         @SuppressWarnings("ConstantConditions")

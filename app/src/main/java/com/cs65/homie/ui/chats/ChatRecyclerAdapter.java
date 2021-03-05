@@ -1,6 +1,5 @@
 package com.cs65.homie.ui.chats;
 
-import android.graphics.Color;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,6 +17,7 @@ import org.jetbrains.annotations.NotNull;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 
@@ -133,7 +133,12 @@ public class ChatRecyclerAdapter extends RecyclerView.Adapter<ChatViewHolder>
 
     public int getItemCount()
     {
-        return this.vm.getMessages(this.userId).getValue().size();
+        List<Message> messages = this.vm.getMessages(this.userId).getValue();
+        if (messages != null)
+        {
+            return messages.size();
+        }
+        return 0;
     }
 
     // FIXME Move to the ViewHolder
