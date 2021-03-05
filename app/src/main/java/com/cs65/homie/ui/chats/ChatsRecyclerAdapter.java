@@ -22,7 +22,7 @@ import java.util.Map;
 
 
 @SuppressWarnings("Convert2Diamond")
-public class ChatsRecyclerAdapter extends RecyclerView.Adapter<ChatsViewHolder>
+class ChatsRecyclerAdapter extends RecyclerView.Adapter<ChatsViewHolder>
 {
 
     private final ChatsFragment frag;
@@ -30,7 +30,7 @@ public class ChatsRecyclerAdapter extends RecyclerView.Adapter<ChatsViewHolder>
     private final Map<String, Integer> userPositions
         = new HashMap<String, Integer>();
 
-    public ChatsRecyclerAdapter(ChatsFragment frag, ChatsViewModel vm)
+    ChatsRecyclerAdapter(ChatsFragment frag, ChatsViewModel vm)
     {
         this.frag = frag;
         this.vm = vm;
@@ -86,6 +86,10 @@ public class ChatsRecyclerAdapter extends RecyclerView.Adapter<ChatsViewHolder>
         }
         if (textLayoutView != null)
         {
+            // If the user clicks on a chat, that chat is spawned in a new
+            // fragment
+            // Since spawning requires manipulating the navigator,
+            // MainActivty must handle this task
             textLayoutView.setOnClickListener(
                 (v) -> ((MainActivity)this.frag.requireActivity()).spawnChatFragment(
                     profile.getId()
@@ -99,9 +103,18 @@ public class ChatsRecyclerAdapter extends RecyclerView.Adapter<ChatsViewHolder>
 
     public int getItemCount()
     {
+        //noinspection ConstantConditions
         return this.vm.getUsers().getValue().size();
     }
 
+    /**
+     * Given a User Id, get the recycler view position their chats are
+     * previewed in
+     *
+     * @param id    User Id
+     * @return      The recycler view position the user's chats are previewed
+     *              in. If the user is not in the recycler, returns -1
+     */
     public int getUserPosition(String id)
     {
 

@@ -14,14 +14,10 @@ import com.cs65.homie.models.Message;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 
-public class ChatRecyclerAdapter extends RecyclerView.Adapter<ChatViewHolder>
+class ChatRecyclerAdapter extends RecyclerView.Adapter<ChatViewHolder>
 {
 
     private final ChatsViewModel vm;
@@ -43,21 +39,33 @@ public class ChatRecyclerAdapter extends RecyclerView.Adapter<ChatViewHolder>
         );
     }
 
-    public void onBindViewHolder(ChatViewHolder holder, int position)
+    public void onBindViewHolder(@NotNull ChatViewHolder holder, int position)
     {
 
         Log.d(MainActivity.TAG, String.format(
             "%s.onBindViewHolder(), position: %d",
             this.getClass().getCanonicalName(), position
         ));
-        // TODO Handle get failure
-        Message message = this.vm.getMessages(this.userId).getValue().get(position);
+        List<Message> messages = this.vm.getMessages(this.userId).getValue();
+        if (messages == null || messages.isEmpty())
+        {
+            return;
+        }
+        Message message = messages.get(position);
 
         // We have to do this because the backgrounds are different
         // And we can't load in a different background through code and
         // maintain padding/margins
+        // So we just have two layouts for each message, right aligned and
+        // left aligned
+        // Both are GONE to begin with, and then we show one though code
+        // Views are recycled, so that must be taken into account.
+        // (They might not be gone at this invocation
+        //
+        // App owner's messages are on the right
         if (message.getSenderId().equals(this.userId))
         {
+            // Right chat needs to be hidden
             if (holder.getChatTextBoxLayoutRight() != null)
             {
                 holder.getChatTextBoxLayoutRight().setVisibility(View.GONE);
@@ -68,8 +76,13 @@ public class ChatRecyclerAdapter extends RecyclerView.Adapter<ChatViewHolder>
             }
             if (holder.getChatTimeTextViewLeft() != null)
             {
-                holder.getChatTimeTextViewLeft().setText(this.formatDate(message.getTimestamp()));
+                holder.formatDate(
+                    message.getTimestamp(), holder.getChatTimeTextViewLeft()
+                );
             }
+            // A different spacer is used to right and left align the chat boxes
+            // This spacer is controlled by its layout weight
+            // We need to ensure each weight is correct since views are recycled
             if (holder.getSpacerLeft() != null)
             {
                 LinearLayout.LayoutParams params
@@ -86,6 +99,7 @@ public class ChatRecyclerAdapter extends RecyclerView.Adapter<ChatViewHolder>
                 params.weight = 1;
                 holder.getSpacerRight().setLayoutParams(params);
             }
+            // Finally, show the view
             if (holder.getChatTextBoxLayoutLeft() != null)
             {
                 holder.getChatTextBoxLayoutLeft().setVisibility(View.VISIBLE);
@@ -93,6 +107,8 @@ public class ChatRecyclerAdapter extends RecyclerView.Adapter<ChatViewHolder>
         }
         else
         {
+            // See the notes above
+            // Everything is just repeated for the right chat box here
             if (holder.getChatTextBoxLayoutLeft() != null)
             {
                 holder.getChatTextBoxLayoutLeft().setVisibility(View.GONE);
@@ -103,8 +119,8 @@ public class ChatRecyclerAdapter extends RecyclerView.Adapter<ChatViewHolder>
             }
             if (holder.getChatTimeTextViewRight() != null)
             {
-                holder.getChatTimeTextViewRight().setText(
-                    this.formatDate(message.getTimestamp())
+                holder.formatDate(
+                    message.getTimestamp(), holder.getChatTimeTextViewRight()
                 );
             }
             if (holder.getSpacerLeft() != null)
@@ -139,39 +155,6 @@ public class ChatRecyclerAdapter extends RecyclerView.Adapter<ChatViewHolder>
             return messages.size();
         }
         return 0;
-    }
-
-    // FIXME Move to the ViewHolder
-    private String formatDate(Date then)
-    {
-
-        String formatDate = "";
-        if (then == null)
-        {
-            return formatDate;
-        }
-
-        Date now = Calendar.getInstance().getTime();
-        long diff = now.getTime() - then.getTime();
-
-        if (diff < (1000 * 60 * 60 * 24 * 6))
-        {
-            SimpleDateFormat formatter = new SimpleDateFormat("E, HH:mm", Locale.getDefault());
-            formatDate = formatter.format(then);
-        }
-        else if (diff < (1000L * 60L * 60L * 24L * 355L))
-        {
-            SimpleDateFormat formatter = new SimpleDateFormat("MMM dd, HH:mm", Locale.getDefault());
-            formatDate = formatter.format(then);
-        }
-        else
-        {
-            SimpleDateFormat formatter = new SimpleDateFormat("MMM dd yyyy, HH:mm", Locale.getDefault());
-            formatDate = formatter.format(then);
-        }
-
-        return formatDate;
-
     }
 
 }

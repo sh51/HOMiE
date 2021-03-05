@@ -1,5 +1,6 @@
 package com.cs65.homie;
 
+import android.annotation.SuppressLint;
 import android.app.ActionBar;
 import android.content.Intent;
 import android.os.Bundle;
@@ -51,10 +52,19 @@ public class MainActivity extends AppCompatActivity {
         return "41";
     }
 
+    /**
+     * Hide the navigation bar view, and extend the fragment container's
+     * margins so that the container fills the entire containing view
+     * (because the navigation bar is hidden)
+     */
     public void hideNavView()
     {
 
-        if (this.hostView != null && this.navView != null)
+        if (
+            this.hostView != null
+            && this.navView != null
+            && this.navView.getVisibility() == View.VISIBLE
+        )
         {
 
             this.navView.setVisibility(View.GONE);
@@ -95,11 +105,12 @@ public class MainActivity extends AppCompatActivity {
         );
         NavigationUI.setupWithNavController(navView, navController);
 
+        // TODO Don't forge to restore this REPIII
         //Intent intent = new Intent(this, LoginActivity.class);
         //startActivityForResult(intent, RC_LOGIN);
 
         // TODO The landing activity should probably be profile?
-        // It shouldn't be messages at least.
+        // It shouldn't be messages at least?
 
     }
 
@@ -111,6 +122,7 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
+    @SuppressLint("NonConstantResourceId")
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -155,10 +167,17 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Show the navigation bar view if hidden
+     */
     public void showNavView()
     {
 
-        if (this.hostView != null && this.navView != null)
+        if (
+            this.hostView != null
+            && this.navView != null
+            && this.navView.getVisibility() == View.GONE
+        )
         {
 
             this.navView.setVisibility(View.VISIBLE);
@@ -172,24 +191,41 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    // TODO Comment
+    /**
+     * Spawn a chat fragment between the app's user and the given user Id
+     *
+     * @param userId    The other user in the chat
+     */
     public void spawnChatFragment(String userId)
     {
 
         // TODO Add animation
 
+        // Spawned fragment needs to know whose messages to query
         Bundle args = new Bundle();
         args.putString(ChatFragment.ARG_KEY_USER_ID, userId);
+
         @SuppressWarnings("ConstantConditions")
         FragmentManager activeFragManager
             = this.getSupportFragmentManager().findFragmentById(
             R.id.nav_host_fragment
         ).getChildFragmentManager();
+
         FragmentTransaction transaction = activeFragManager.beginTransaction();
+
+        // Since there are more than one fragment in the navigator, we must
+        // remove the specific fragment we desire (chats). We cannot use
+        // replace()
+        // It is assumed that the chats fragment is active, so it will be first
+        // in the given list
+        // That is the only workflow that can spawn a chat fragment
         transaction.remove(activeFragManager.getFragments().get(0));
         transaction.add(R.id.nav_host_fragment, ChatFragment.class, args);
+
+        // The next two calls makes the back button bring up the chats fragment
         transaction.setReorderingAllowed(true);
         transaction.addToBackStack(null);
+
         transaction.commit();
         activeFragManager.executePendingTransactions();
 

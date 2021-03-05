@@ -6,8 +6,6 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.ColorFilter;
-import android.graphics.LightingColorFilter;
 import android.graphics.Paint;
 import android.location.Address;
 import android.location.Geocoder;
@@ -35,6 +33,9 @@ public class Utilities
      */
     public static final int EARTH_RADIUS = 6371;
     public static final int GET_CURRENT_LOC_SDK = 30;
+    public static final long MILISECONDS_IN_MINUTE = 1000 * 60;
+    public static final long MILISECONDS_IN_HOUR = 1000 * 60 * 60;
+    public static final long MILISECONDS_IN_DAY = 1000 * 60 * 60 * 24;
     /**
      * Error toast x-offset
      */

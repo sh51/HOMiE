@@ -29,7 +29,16 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
+// FIXME On rotation to horizontal, the keyboard is hidden if it is shown
+// before rotation
+// REPIII tried to fix this, but failed.
+// Other things have higher priority, but should be fixed if somebody
+// can figure it out
 
+/**
+ * Fragment for a "chat" (conversation, person-to-person messages)
+ */
+@SuppressWarnings("Convert2Diamond")
 public class ChatFragment extends Fragment implements View.OnClickListener
 {
 
@@ -50,15 +59,9 @@ public class ChatFragment extends Fragment implements View.OnClickListener
         switch (view.getId())
         {
 
-            case R.id.chatButtonBackView:
-                // Finish the fragment
-                this.getParentFragmentManager().popBackStack();
-                break;
             case R.id.chatAvatarImageView:
             case R.id.chatNameTextView:
-                break;
-            case R.id.chatButtonSendView:
-                this.sendMessage(this.inputView);
+                // TODO Spawn profile view fragment
                 break;
             default:
                 // pass
@@ -80,7 +83,9 @@ public class ChatFragment extends Fragment implements View.OnClickListener
             this.userId = savedInstanceState.getString(ARG_KEY_USER_ID, "");
         }
 
-        this.vm = new ViewModelProvider(this.requireActivity()).get(ChatsViewModel.class);
+        this.vm = new ViewModelProvider(
+            this.requireActivity()
+        ).get(ChatsViewModel.class);
 
     }
 
@@ -92,16 +97,62 @@ public class ChatFragment extends Fragment implements View.OnClickListener
 
     public void onDestroy()
     {
+
+        // When destroyed, bring up the navigation view that was hidden upon
+        // creation
         ((MainActivity)this.requireActivity()).showNavView();
         super.onDestroy();
+
     }
+
+    public void onNewMessage(List<Message> messages)
+    {
+        this.adapter.notifyDataSetChanged();
+        this.recyclerView.scrollToPosition(messages.size() - 1);
+    }
+
+    // This is being kept around if the keyboard issues is ever solved
+    //
+    //public void onPause()
+    //{
+    //   super.onPause();
+    //   InputMethodManager inputManager
+    //      = ((InputMethodManager)this.requireActivity().getSystemService(
+    //          Context.INPUT_METHOD_SERVICE)
+    //      );
+    //   this.isKeyboardUp = inputManager.isAcceptingText();
+    //}
+    //public void onResume()
+    //{
+    //    super.onResume();
+    //    if (this.inputView != null)
+    //    {
+    //        InputMethodManager inputManager
+    //            = ((InputMethodManager)this.requireActivity().getSystemService(
+    //                Context.INPUT_METHOD_SERVICE)
+    //            );
+    //        if (this.isKeyboardUp)
+    //        {
+    //            inputManager.toggleSoftInput(
+    //                InputMethodManager.SHOW_FORCED, 0
+    //            );
+    //        }
+    //        else
+    //        {
+    //            inputManager.hideSoftInputFromWindow(
+    //                this.inputView.getWindowToken(), 0
+    //             );
+    //        }
+    //    }
+    //}
 
     public void onViewCreated(@NotNull View view, Bundle savedInstanceState)
     {
 
-        // FIXME if the input view has no text, take away it's focus
-
+        // Prevent navigation from the chat fragment by hiding the
+        // navigation view
         ((MainActivity)this.requireActivity()).hideNavView();
+
         this.recyclerView = view.findViewById(R.id.chatRecyclerView);
         if (this.recyclerView != null)
         {
@@ -112,13 +163,9 @@ public class ChatFragment extends Fragment implements View.OnClickListener
             this.recyclerView.setLayoutManager(layoutManager);
             this.adapter = new ChatRecyclerAdapter(this.vm, this.userId);
             this.recyclerView.setAdapter(this.adapter);
-            // FIXME Bad lambda use
-            // FIXME Bad variable name
             this.vm.getMessages(this.userId).observe(
-                this.getViewLifecycleOwner(), (x) -> {
-                    this.adapter.notifyDataSetChanged();
-                    this.recyclerView.scrollToPosition(x.size() - 1);
-                }
+                this.getViewLifecycleOwner(),
+                this::onNewMessage
             );
 
         }
@@ -126,12 +173,16 @@ public class ChatFragment extends Fragment implements View.OnClickListener
         View backButtonView = view.findViewById(R.id.chatButtonBackView);
         if (backButtonView != null)
         {
-            backButtonView.setOnClickListener(this);
+            backButtonView.setOnClickListener(
+                (v) -> this.getParentFragmentManager().popBackStack()
+            );
         }
         View sendButtonView = view.findViewById(R.id.chatButtonSendView);
         if (sendButtonView != null)
         {
-            sendButtonView.setOnClickListener(this);
+            sendButtonView.setOnClickListener(
+                (v) -> this.sendMessage(this.inputView)
+            );
         }
 
         Profile user = this.vm.getUser(this.userId);
@@ -159,31 +210,8 @@ public class ChatFragment extends Fragment implements View.OnClickListener
 
         this.inputView = view.findViewById(R.id.chatTextInputView);
 
-
     }
 
-    // FIXME On rotation to horizontal, the keyboard is hidden if it is shown
-    // before rotation
-    // REPIII tried to fix this, but failed.
-    // Other things have higher priority, but should be fixed if somebody
-    // can figure it out
-    // TODO Sort
-    //public void onResume()
-    //{
-    //    super.onResume();
-    //    if (this.inputView != null)
-    //    {
-    //        InputMethodManager inputManager = ((InputMethodManager) this.requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE));
-    //        if (this.isKeyboardUp)
-    //        {
-    //            inputManager.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
-    //        }
-    //        else
-    //        {
-    //            inputManager.hideSoftInputFromWindow(this.inputView.getWindowToken(), 0);
-    //        }
-    //    }
-    //}
 
     public void onSaveInstanceState(@NotNull Bundle outState)
     {
@@ -192,13 +220,6 @@ public class ChatFragment extends Fragment implements View.OnClickListener
         //outState.putBoolean(BUNDLE_KEY_KEYBOARD_UP, this.isKeyboardUp);
     }
 
-    // TODO Sort
-    //public void onPause()
-    //{
-    //   super.onPause();
-    //   InputMethodManager inputManager = ((InputMethodManager) this.requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE));
-    //   this.isKeyboardUp = inputManager.isAcceptingText();
-    //}
 
     private void sendMessage(EditText inputView)
     {
@@ -214,10 +235,12 @@ public class ChatFragment extends Fragment implements View.OnClickListener
             return;
         }
 
+        // Create the message object
         Message message = new Message();
         message.setTimestamp(Calendar.getInstance().getTime());
         message.setText(messageText);
         message.setReceiverId(this.userId);
+        // FIXME Using fake data for now
         message.setSenderId(
             ((MainActivity)this.requireActivity()).getFakeMyId()
         );
@@ -227,23 +250,27 @@ public class ChatFragment extends Fragment implements View.OnClickListener
         {
             messages = new ArrayList<Message>();
         }
-        //noinspection ConstantConditions
         messages.add(message);
-        this.vm.getMessages(this.userId).setValue(messages);
 
-        // FIXME Don't ignore all these potential nulls
+        // Put the keyboard back
         InputMethodManager inputManager
-            = (InputMethodManager)this.getContext().getSystemService(
+            = (InputMethodManager)this.requireContext().getSystemService(
                 Context.INPUT_METHOD_SERVICE
             );
         inputManager.hideSoftInputFromWindow(
-            this.getActivity().getCurrentFocus().getWindowToken(), 0
+            this.requireActivity().getCurrentFocus().getWindowToken(), 0
         );
 
+        // Clear the text in the input
         inputView.setText(null);
+
+        // In practice the message will be sent asynchronously to Firebase
+        // For now, toast
         Utilities.showErrorToast(
             R.string.chat_message_sent_toast, this.getActivity()
         );
+
+        this.vm.getMessages(this.userId).setValue(messages);
 
     }
 

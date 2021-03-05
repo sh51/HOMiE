@@ -21,7 +21,7 @@ public class ChatsViewModel extends ViewModel
     private final MutableLiveData<
         TreeMap<String, MutableLiveData<List<Message>>>
     >  usersMessages;
-    private List<String> usersList = new ArrayList<String>();
+    private final List<String> usersList = new ArrayList<String>();
 
     public ChatsViewModel()
     {
@@ -38,6 +38,7 @@ public class ChatsViewModel extends ViewModel
         // Since we don't have a destroy event, we can't release
         // this observation
         // FIXME Due to the circular connection I doubt GC cleans it up either...
+        // Functionality should be moved to the fragment then
         this.users.observeForever(this::updateUsersList);
 
     }

@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.cs65.homie.MainActivity;
 import com.cs65.homie.R;
 import com.cs65.homie.models.Message;
 import com.cs65.homie.models.Profile;
@@ -24,14 +25,19 @@ import java.util.Map;
 import java.util.TreeMap;
 
 
-// FIXME Every chat individual is opening the same conversation
-
-
+/**
+ * A fragment for chats, a view containing all outstanding chats with
+ * other users
+ *
+ * Users can open a chart with other users from this fragment
+ */
 @SuppressWarnings("Convert2Diamond")
 public class ChatsFragment extends Fragment
 {
 
     private ChatsRecyclerAdapter adapter = null;
+    // Defensive coding
+    @SuppressWarnings("FieldCanBeLocal")
     private RecyclerView recyclerView = null;
     private ChatsViewModel vm = null;
 
@@ -41,7 +47,9 @@ public class ChatsFragment extends Fragment
         super.onCreate(savedInstanceState);
 
         // Returned VM cannot be null
-        this.vm = new ViewModelProvider(this.requireActivity()).get(ChatsViewModel.class);
+        this.vm = new ViewModelProvider(
+            this.requireActivity()).get(ChatsViewModel.class
+        );
         this.loadFakeData();
 
     }
@@ -54,6 +62,29 @@ public class ChatsFragment extends Fragment
         );
     }
 
+    public void onMessagesUpdate(List<Message> messages)
+    {
+
+        // if the messages list is not empty, get the other user
+        // (might be sender or receiver) or the first message, and invalidate
+        // that chat recycler view, to update the time and message preview
+        if (!messages.isEmpty())
+        {
+            String receiverId = messages.get(0).getReceiverId();
+            // FIXME Using fake data
+            if (receiverId.equals(((MainActivity) this.requireActivity()).getFakeMyId()))
+            {
+                receiverId = messages.get(0).getSenderId();
+            }
+            int position = this.adapter.getUserPosition(receiverId);
+            if (position >= 0)
+            {
+                this.adapter.notifyItemChanged(position);
+            }
+        }
+
+    }
+
     public void onViewCreated(View view, Bundle savedInstanceState)
     {
 
@@ -64,7 +95,7 @@ public class ChatsFragment extends Fragment
             LinearLayoutManager layoutManager
                 = new LinearLayoutManager(this.getContext());
             this.recyclerView.addItemDecoration(new DividerItemDecoration(
-                this.getContext(), layoutManager.getOrientation()
+                this.requireContext(), layoutManager.getOrientation()
             ));
             this.recyclerView.setLayoutManager(layoutManager);
             this.adapter = new ChatsRecyclerAdapter(this, this.vm);
@@ -72,6 +103,17 @@ public class ChatsFragment extends Fragment
             this.vm.getUsersMessages().observe(
                 this.getViewLifecycleOwner(), this::invalidateRecycler
             );
+            // Observe all the messages live data
+            //noinspection ConstantConditions
+            for (
+                MutableLiveData<List<Message>> messages
+                : this.vm.getUsersMessages().getValue().values()
+            )
+            {
+                messages.observe(
+                    this.getViewLifecycleOwner(), this::onMessagesUpdate
+                );
+            }
 
         }
 
@@ -85,21 +127,13 @@ public class ChatsFragment extends Fragment
         if (this.adapter != null)
         {
             this.adapter.notifyDataSetChanged();
+            // Any one of the messages may have changed,
+            // so we must observe them all
             for (MutableLiveData<List<Message>> messages : usersMessages.values())
             {
-                // FIXME Horrible, rotten, terrible use of lambda
-                messages.observe(this.getViewLifecycleOwner(), (messagesList) ->
-                {
-                    if (!messagesList.isEmpty())
-                    {
-                        String receiverId = messagesList.get(0).getReceiverId();
-                        int position = this.adapter.getUserPosition(receiverId);
-                        if (position >= 0)
-                        {
-                            this.adapter.notifyItemChanged(position);
-                        }
-                    }
-                });
+                messages.observe(
+                    this.getViewLifecycleOwner(), this::onMessagesUpdate
+                );
             }
         }
 
@@ -148,7 +182,9 @@ public class ChatsFragment extends Fragment
         TreeMap<String, MutableLiveData<List<Message>>> usersMessages = this.vm.getUsersMessages().getValue();
         TreeMap<String, Profile> users = this.vm.getUsers().getValue();
 
+        //noinspection ConstantConditions
         usersMessages.put(profile1.getId(), new MutableLiveData<List<Message>>(messages));
+        //noinspection ConstantConditions
         users.put(profile1.getId(), profile1);
         usersMessages.put(profile2.getId(), new MutableLiveData<List<Message>>());
         users.put(profile2.getId(), profile2);
