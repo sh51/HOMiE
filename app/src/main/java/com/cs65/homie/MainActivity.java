@@ -199,8 +199,6 @@ public class MainActivity extends AppCompatActivity {
     public void spawnChatFragment(String userId)
     {
 
-        // TODO Add animation
-
         // Spawned fragment needs to know whose messages to query
         Bundle args = new Bundle();
         args.putString(ChatFragment.ARG_KEY_USER_ID, userId);
@@ -212,6 +210,10 @@ public class MainActivity extends AppCompatActivity {
         ).getChildFragmentManager();
 
         FragmentTransaction transaction = activeFragManager.beginTransaction();
+        transaction.setCustomAnimations(
+            R.anim.frag_enter, R.anim.frag_exit,
+            R.anim.frag_enter_pop, R.anim.frag_exit_pop
+        );
 
         // Since there are more than one fragment in the navigator, we must
         // remove the specific fragment we desire (chats). We cannot use
