@@ -54,12 +54,17 @@ public class MainActivity extends AppCompatActivity {
     public void hideNavView()
     {
 
-        this.navView.setVisibility(View.GONE);
+        if (this.hostView != null && this.navView != null)
+        {
 
-        ViewGroup.MarginLayoutParams params
-            = (ViewGroup.MarginLayoutParams)this.hostView.getLayoutParams();
-        params.setMargins(0, 0, 0, 0);
-        this.hostView.setLayoutParams(params);
+            this.navView.setVisibility(View.GONE);
+
+            ViewGroup.MarginLayoutParams params
+                = (ViewGroup.MarginLayoutParams)this.hostView.getLayoutParams();
+            params.setMargins(0, 0, 0, 0);
+            this.hostView.setLayoutParams(params);
+
+        }
 
     }
 
@@ -153,12 +158,17 @@ public class MainActivity extends AppCompatActivity {
     public void showNavView()
     {
 
-        this.navView.setVisibility(View.VISIBLE);
+        if (this.hostView != null && this.navView != null)
+        {
 
-        ViewGroup.MarginLayoutParams params
-            = (ViewGroup.MarginLayoutParams)this.hostView.getLayoutParams();
-        params.setMargins(0, 0, 0, this.navView.getHeight());
-        this.hostView.setLayoutParams(params);
+            this.navView.setVisibility(View.VISIBLE);
+
+            ViewGroup.MarginLayoutParams params
+                = (ViewGroup.MarginLayoutParams)this.hostView.getLayoutParams();
+            params.setMargins(0, 0, 0, this.navView.getHeight());
+            this.hostView.setLayoutParams(params);
+
+        }
 
     }
 

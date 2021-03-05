@@ -1,10 +1,15 @@
 package com.cs65.homie.ui.chats;
 
+import android.graphics.Color;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.cs65.homie.MainActivity;
 import com.cs65.homie.R;
 import com.cs65.homie.models.Message;
 
@@ -41,15 +46,87 @@ public class ChatRecyclerAdapter extends RecyclerView.Adapter<ChatViewHolder>
     public void onBindViewHolder(ChatViewHolder holder, int position)
     {
 
-        Message message = this.vm.getMessages(this.userId)
-            .getValue().get(position);
-        if (holder.getChatTextBoxLayout() != null)
+        Log.d(MainActivity.TAG, String.format(
+            "%s.onBindViewHolder(), position: %d",
+            this.getClass().getCanonicalName(), position
+        ));
+        // TODO Handle get failure
+        Message message = this.vm.getMessages(this.userId).getValue().get(position);
+
+        // We have to do this because the backgrounds are different
+        // And we can't load in a different background through code and
+        // maintain padding/margins
+        if (message.getSenderId().equals(this.userId))
         {
-            holder.getChatMessageTextView().setText(message.getText());
+            if (holder.getChatTextBoxLayoutRight() != null)
+            {
+                holder.getChatTextBoxLayoutRight().setVisibility(View.GONE);
+            }
+            if (holder.getChatTextBoxLayoutLeft() != null)
+            {
+                holder.getChatMessageTextViewLeft().setText(message.getText());
+            }
+            if (holder.getChatTimeTextViewLeft() != null)
+            {
+                holder.getChatTimeTextViewLeft().setText(this.formatDate(message.getTimestamp()));
+            }
+            if (holder.getSpacerLeft() != null)
+            {
+                LinearLayout.LayoutParams params
+                    = (LinearLayout.LayoutParams)holder.getSpacerLeft()
+                    .getLayoutParams();
+                params.weight = 0;
+                holder.getSpacerLeft().setLayoutParams(params);
+            }
+            if (holder.getSpacerRight() != null)
+            {
+                LinearLayout.LayoutParams params
+                    = (LinearLayout.LayoutParams)holder.getSpacerRight()
+                        .getLayoutParams();
+                params.weight = 1;
+                holder.getSpacerRight().setLayoutParams(params);
+            }
+            if (holder.getChatTextBoxLayoutLeft() != null)
+            {
+                holder.getChatTextBoxLayoutLeft().setVisibility(View.VISIBLE);
+            }
         }
-        if (holder.getChatTimeTextView() != null)
+        else
         {
-            holder.getChatTimeTextView().setText(this.formatDate(message.getTimestamp()));
+            if (holder.getChatTextBoxLayoutLeft() != null)
+            {
+                holder.getChatTextBoxLayoutLeft().setVisibility(View.GONE);
+            }
+            if (holder.getChatTextBoxLayoutRight() != null)
+            {
+                holder.getChatMessageTextViewRight().setText(message.getText());
+            }
+            if (holder.getChatTimeTextViewRight() != null)
+            {
+                holder.getChatTimeTextViewRight().setText(
+                    this.formatDate(message.getTimestamp())
+                );
+            }
+            if (holder.getSpacerLeft() != null)
+            {
+                LinearLayout.LayoutParams params
+                    = (LinearLayout.LayoutParams)holder.getSpacerLeft()
+                        .getLayoutParams();
+                params.weight = 1;
+                holder.getSpacerLeft().setLayoutParams(params);
+            }
+            if (holder.getSpacerRight() != null)
+            {
+                LinearLayout.LayoutParams params
+                    = (LinearLayout.LayoutParams)holder.getSpacerRight()
+                    .getLayoutParams();
+                params.weight = 0;
+                holder.getSpacerRight().setLayoutParams(params);
+            }
+            if (holder.getChatTextBoxLayoutRight() != null)
+            {
+                holder.getChatTextBoxLayoutRight().setVisibility(View.VISIBLE);
+            }
         }
 
     }

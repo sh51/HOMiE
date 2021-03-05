@@ -26,6 +26,9 @@ import java.util.Map;
 import java.util.TreeMap;
 
 
+// FIXME Every chat individual is opening the same conversation
+
+
 @SuppressWarnings("Convert2Diamond")
 public class ChatsFragment extends Fragment implements View.OnClickListener
 {

@@ -11,39 +11,72 @@ import com.cs65.homie.R;
 public class ChatViewHolder extends RecyclerView.ViewHolder
 {
 
-    private final TextView chatMessageTextView;
-    private final TextView chatTimeTextView;
-    private final View chatTextBoxLayout;
+    private final TextView chatMessageTextViewRight;
+    private final TextView chatTimeTextViewRight;
+    private final View chatTextBoxLayoutRight;
+    private final TextView chatMessageTextViewLeft;
+    private final TextView chatTimeTextViewLeft;
+    private final View chatTextBoxLayoutLeft;
     private final View spacerLeft;
     private final View spacerRight;
-
 
     public ChatViewHolder(View itemView)
     {
 
         super(itemView);
 
-        this.chatMessageTextView = itemView.findViewById(R.id.chatItemMessageTextView);
-        this.chatTimeTextView = itemView.findViewById(R.id.chatItemMessageTimeView);
-        this.chatTextBoxLayout = itemView.findViewById(R.id.chatItemTextBoxLayout);
+        this.chatMessageTextViewLeft = itemView.findViewById(
+            R.id.chatItemMessageTextViewLeft
+        );
+        this.chatTimeTextViewLeft = itemView.findViewById(
+            R.id.chatItemMessageTimeViewLeft
+        );
+        this.chatTextBoxLayoutLeft = itemView.findViewById(
+            R.id.chatItemTextBoxLayoutLeft
+        );
+        this.chatMessageTextViewRight= itemView.findViewById(
+            R.id.chatItemMessageTextViewRight
+        );
+        this.chatTimeTextViewRight= itemView.findViewById(
+            R.id.chatItemMessageTimeViewRight
+        );
+        this.chatTextBoxLayoutRight = itemView.findViewById(
+            R.id.chatItemTextBoxLayoutRight
+        );
         this.spacerLeft = itemView.findViewById(R.id.chatItemSpacerLeft);
         this.spacerRight = itemView.findViewById(R.id.chatItemSpacerRight);
 
     }
 
-    TextView getChatMessageTextView()
+
+    TextView getChatMessageTextViewLeft()
     {
-        return this.chatMessageTextView;
+        return this.chatMessageTextViewLeft;
     }
 
-    TextView getChatTimeTextView()
+    TextView getChatTimeTextViewLeft()
     {
-        return this.chatTimeTextView;
+        return this.chatTimeTextViewLeft;
     }
 
-    View getChatTextBoxLayout()
+    View getChatTextBoxLayoutLeft()
     {
-        return this.chatTextBoxLayout;
+        return this.chatTextBoxLayoutLeft;
+    }
+
+    TextView getChatMessageTextViewRight()
+    {
+        return this.chatMessageTextViewRight;
+    }
+
+    TextView getChatTimeTextViewRight()
+    {
+        return this.chatTimeTextViewRight;
+    }
+
+    View getChatTextBoxLayoutRight()
+    {
+        return this.chatTextBoxLayoutRight;
     }
 
     View getSpacerLeft()

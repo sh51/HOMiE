@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -23,7 +22,6 @@ import com.cs65.homie.R;
 import com.cs65.homie.Utilities;
 import com.cs65.homie.models.Message;
 import com.cs65.homie.models.Profile;
-import com.google.android.material.textfield.TextInputEditText;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -99,21 +97,25 @@ public class ChatFragment extends Fragment implements View.OnClickListener
     public void onViewCreated(@NotNull View view, Bundle savedInstanceState)
     {
 
+        // FIXME if the input view has no text, take away it's focus
+
         this.recyclerView = view.findViewById(R.id.chatRecyclerView);
         if (this.recyclerView != null)
         {
 
             LinearLayoutManager layoutManager
                 = new LinearLayoutManager(this.getContext());
-            //this.recyclerView.addItemDecoration(new DividerItemDecoration(
-            //    this.getContext(), layoutManager.getOrientation()
-            //));
+            layoutManager.setStackFromEnd(true);
             this.recyclerView.setLayoutManager(layoutManager);
             this.adapter = new ChatRecyclerAdapter(this.vm, this.userId);
             this.recyclerView.setAdapter(this.adapter);
             // FIXME Bad lambda use
+            // FIXME Bad variable name
             this.vm.getMessages(this.userId).observe(
-                this.getViewLifecycleOwner(), (x) -> { this.adapter.notifyDataSetChanged(); }
+                this.getViewLifecycleOwner(), (x) -> {
+                    this.adapter.notifyDataSetChanged();
+                    this.recyclerView.scrollToPosition(x.size() - 1);
+                }
             );
 
         }
@@ -188,7 +190,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener
         messages.add(message);
         this.vm.getMessages(this.userId).setValue(messages);
 
-        // TODO Don't ignore all these nulls
+        // FIXME Don't ignore all these potential nulls
         InputMethodManager inputManager
             = (InputMethodManager)this.getContext().getSystemService(
                 Context.INPUT_METHOD_SERVICE
@@ -197,7 +199,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener
             this.getActivity().getCurrentFocus().getWindowToken(), 0
         );
 
-        inputView.setText("");
+        inputView.setText(null);
         Utilities.showErrorToast(
             R.string.chat_message_sent_toast, this.getActivity()
         );
