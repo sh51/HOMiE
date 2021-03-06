@@ -19,6 +19,8 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import java.util.ArrayList;
 import java.util.List;
 
+// TODO Clicking the avatar should put it into full screen (if set)
+
 
 /**
  * Matching fragment, to handle matching functionality
@@ -97,7 +99,7 @@ public class ProfileMatchFragment
         super.onViewCreated(view, savedInstanceState);
 
         // FIXME Using fake data, need to set to the other user
-        super.vm.setUserId(((MainActivity)this.getActivity()).getFakeUserId());
+        super.vm.setUserId(((MainActivity)this.requireActivity()).getFakeUserId());
 
         View scrollLayout = view.findViewById(R.id.profileViewScrollLayout);
         if (scrollLayout != null)
@@ -111,9 +113,10 @@ public class ProfileMatchFragment
         if (topLayout != null)
         {
             // The match buttons require more padding
+            // FIXME At least comment the magic numbers
             topLayout.setPadding(
                 0, 0, 0,
-                (int)Math.round(Utilities.pixelDensity(this.getContext(), 80.0))
+                (int)Math.round(Utilities.pixelDensity(this.requireContext(), 80.0))
             );
         }
 

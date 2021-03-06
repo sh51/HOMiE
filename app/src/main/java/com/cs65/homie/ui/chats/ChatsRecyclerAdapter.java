@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.cs65.homie.MainActivity;
 import com.cs65.homie.R;
+import com.cs65.homie.Utilities;
 import com.cs65.homie.models.Message;
 import com.cs65.homie.models.Profile;
 
@@ -67,7 +68,20 @@ class ChatsRecyclerAdapter extends RecyclerView.Adapter<ChatsViewHolder>
         {
             // TODO Need to set up separate clicks for avatar (to profile)
             //avatarView.setOnClickListener(this.frag);
-            if (profile.getAvatarImage() != null)
+            if (
+                profile.getAvatarImage() == null
+                || profile.getAvatarImage().equals("")
+            )
+            {
+                if (
+                    profile.getFirstName() != null
+                    && !profile.getFirstName().equals("")
+                )
+                avatarView.setImageBitmap(
+                    Utilities.nameToDrawable(profile.getFirstName())
+                );
+            }
+            else
             {
                 avatarView.setImageURI(Uri.parse(profile.getAvatarImage()));
             }

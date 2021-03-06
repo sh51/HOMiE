@@ -260,7 +260,7 @@ public class Utilities
         paint.setTextSize(AVATAR_ICON_TEXT_SIZE);
         paint.setColor(Color.WHITE);
         paint.setTextAlign(Paint.Align.LEFT);
-        float baseline = -paint.ascent(); // ascent() is negative
+        float baseline = -paint.ascent();
         int width = (int)paint.measureText(abbr);
         int height = (int)(baseline + paint.descent());
         Bitmap image = Bitmap.createBitmap(

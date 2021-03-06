@@ -201,7 +201,22 @@ public class ChatFragment extends Fragment implements View.OnClickListener
             if (avatarView != null)
             {
                 avatarView.setOnClickListener(this);
-                if (user.getAvatarImage() != null)
+                if (
+                    user.getAvatarImage() == null
+                    || user.getAvatarImage().equals("")
+                )
+                {
+                    if (
+                        user.getFirstName() != null
+                        && !user.getFirstName().equals("")
+                    )
+                    {
+                        avatarView.setImageBitmap(
+                            Utilities.nameToDrawable(user.getFirstName())
+                        );
+                    }
+                }
+                else
                 {
                     avatarView.setImageURI(Uri.parse(user.getAvatarImage()));
                 }
