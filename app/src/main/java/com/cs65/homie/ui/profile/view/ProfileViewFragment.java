@@ -110,20 +110,10 @@ public class ProfileViewFragment
         );
 
         // Get the view model instance
-        this.vm = new ViewModelProvider(this.getActivity()).get(
+        // ViewModel can never be null
+        this.vm = new ViewModelProvider(this).get(
             ProfileViewFragmentViewModel.class
         );
-        if (this.vm == null)
-        {
-            // TODO Handle
-            // If it can even happen
-            Log.d(
-                MainActivity.TAG,
-                this.getClass().getCanonicalName()
-                    + ".onCreate(), ViewModel is null"
-            );
-            return;
-        }
 
         // Setup My ID
         // FIXME Default user ID (empty string) is magic
@@ -342,7 +332,16 @@ public class ProfileViewFragment
     {
         if (avatar == null)
         {
-            this.viewAvatar.setImageResource(R.drawable.ic_profile_24px);
+            String name = this.vm.getProfileName().getValue();
+            assert name != null;
+            if (name.equals(""))
+            {
+                this.viewAvatar.setImageResource(R.drawable.ic_profile_24px);
+            }
+            else
+            {
+                this.viewAvatar.setImageBitmap(Utilities.nameToDrawable(name));
+            }
         }
         else
         {
@@ -368,6 +367,7 @@ public class ProfileViewFragment
         }
         else
         {
+            //noinspection ConstantConditions
             this.updateViewBathroom(bathroom, this.vm.getPlace().getValue());
         }
     }
@@ -389,6 +389,7 @@ public class ProfileViewFragment
         }
         else
         {
+            //noinspection ConstantConditions
             this.updateViewBathroom(this.vm.getBathroom().getValue(), place);
         }
     }

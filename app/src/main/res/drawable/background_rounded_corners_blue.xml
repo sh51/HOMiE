@@ -3,10 +3,10 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/background_rounded_corners_blue"
     >
-    <solid android:color="#ff4287f5"/>
+    <solid android:color="@color/chat_blue"/>
 
     <stroke android:width="3dp"
-        android:color="#ffffffff"
+        android:color="@color/white"
         />
 
     <padding android:left="1dp"

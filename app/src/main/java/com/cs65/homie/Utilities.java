@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.location.Address;
 import android.location.Geocoder;
@@ -21,13 +22,19 @@ import com.google.android.gms.maps.model.LatLng;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 @SuppressWarnings("ALL")
 public class Utilities
 {
 
+    public static final int AVATAR_ICON_ABBR_LENGTH = 2;
+    public static final int AVATAR_ICON_CANVAS_PADDING = 96;
+    public static final int AVATAR_ICON_TEXT_SIZE = 512;
+    public static final int COLOR_CHAT_BLUE = 0xFF4287F5;
     /**
      * Approximate radius of the earth in kilometers
      */
@@ -48,6 +55,9 @@ public class Utilities
      *  Miles to kilometers conversion
      */
     public static double MILES_TO_KILOMETERS = 1.609344;
+
+    private static final Map<String, Bitmap> nameBitmaps
+        = new HashMap<String, Bitmap>();
 
     public static boolean checkPermissionLocation(final Activity activity)
     {
@@ -233,6 +243,48 @@ public class Utilities
 
     }
 
+    public static Bitmap nameToDrawable(String name)
+    {
+
+        String abbr = name;
+        if (name.length() > AVATAR_ICON_ABBR_LENGTH)
+        {
+            abbr = name.substring(0, AVATAR_ICON_ABBR_LENGTH);
+        }
+        if (Utilities.nameBitmaps.containsKey(abbr))
+        {
+            return Utilities.nameBitmaps.get(abbr);
+        }
+
+        Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        paint.setTextSize(AVATAR_ICON_TEXT_SIZE);
+        paint.setColor(Color.WHITE);
+        paint.setTextAlign(Paint.Align.LEFT);
+        float baseline = -paint.ascent(); // ascent() is negative
+        int width = (int)paint.measureText(abbr);
+        int height = (int)(baseline + paint.descent());
+        Bitmap image = Bitmap.createBitmap(
+            width + AVATAR_ICON_CANVAS_PADDING * 2,
+            height + AVATAR_ICON_CANVAS_PADDING * 2,
+            Bitmap.Config.ARGB_8888
+        );
+
+        Canvas canvas = new Canvas(image);
+        // The color resource doesn't work if inputted here
+        canvas.drawColor(COLOR_CHAT_BLUE);
+        canvas.drawText(
+            abbr,
+            AVATAR_ICON_CANVAS_PADDING,
+            baseline + AVATAR_ICON_CANVAS_PADDING,
+            paint
+        );
+
+        Utilities.nameBitmaps.put(abbr, image);
+
+        return image;
+
+    }
+
     public static double pixelDensity(final Context context, double dp)
     {
         return dp * context.getResources().getDisplayMetrics().density;
@@ -256,37 +308,6 @@ public class Utilities
             Gravity.BOTTOM, TOAST_X_OFFSET, TOAST_Y_OFFSET
         );
         toast.show();
-
-    }
-
-    /**
-     * Convert a string to a bitmap
-     *
-     * @param text      String
-     * @param textSize  Desired text size of bitmap
-     * @param textColor Desired text colour of bitmap
-     *
-     * @return  Bitmap representation of the given string
-     */
-    public static Bitmap stringToBitmap(String text, float textSize, int textColor)
-    {
-
-        // FIXME Input color has no effect
-        Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.LINEAR_TEXT_FLAG);
-        paint.setTextSize(textSize);
-        paint.setColor(textColor);
-        paint.setTextAlign(Paint.Align.LEFT);
-        float baseline = -paint.ascent(); // ascent() is negative
-        int width = (int)paint.measureText(text);
-        int height = (int)(baseline + paint.descent());
-        Bitmap image = Bitmap.createBitmap(
-            width, height, Bitmap.Config.ARGB_8888
-        );
-
-        Canvas canvas = new Canvas(image);
-        canvas.drawText(text, 0, baseline, paint);
-
-        return image;
 
     }
 
