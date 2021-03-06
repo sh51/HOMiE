@@ -191,6 +191,9 @@ public class ProfileMatchFragment
         this.vm.getPlace().setValue(true);
         this.vm.getProfileName().setValue("Jane");
         this.vm.getSmoking().setValue(true);
+        this.vm.getAvatarUri().setValue(
+            Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://com.cs65.homie/" + R.drawable.ai)
+        );
 
         List<Uri> images = new ArrayList<Uri>();
         images.add(Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://com.cs65.homie/" + R.drawable.dart0));

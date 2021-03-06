@@ -340,18 +340,15 @@ public class ProfileViewFragment
 
     public void updateViewAvatar(Uri avatar)
     {
-
         if (avatar == null)
         {
-            // TODO This resource should not be the final placeholder
-            this.viewAvatar.setImageResource(R.drawable.ic_dartmouth_seal);
+            this.viewAvatar.setImageResource(R.drawable.ic_profile_24px);
         }
         else
         {
             this.viewAvatar.setImageURI(null);
             this.viewAvatar.setImageURI(avatar);
         }
-
     }
 
     /**
@@ -601,6 +598,7 @@ public class ProfileViewFragment
         this.vm.getPlace().setValue(false);
         this.vm.getProfileName().setValue("John");
         this.vm.getSmoking().setValue(false);
+        this.vm.getAvatarUri().setValue(null);
 
         List<Uri> images = new ArrayList<Uri>();
         images.add(Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://com.cs65.homie/" + R.drawable.dart0));

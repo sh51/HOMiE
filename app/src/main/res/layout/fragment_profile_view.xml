@@ -36,7 +36,7 @@
                     android:scaleType="centerCrop"
                     android:contentDescription="@string/profile_view_avatar_content_description"
                     app:shapeAppearanceOverlay="@style/roundedImageViewRounded"
-                    app:srcCompat="@drawable/ai" />
+                    app:srcCompat="@drawable/ic_profile_24px" />
 
                 <LinearLayout
                     android:id="@+id/viewProfileNameLayout"

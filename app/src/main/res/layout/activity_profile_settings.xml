@@ -34,7 +34,7 @@
                     android:layout_height="wrap_content"
                     android:layout_margin="5dp"
                     android:contentDescription="@string/avatar_description"
-                    android:src="@drawable/default_profile"/>
+                    android:src="@drawable/ic_profile_24px"/>
 
                 <Button
                     android:id="@+id/button_ChangePhoto"
