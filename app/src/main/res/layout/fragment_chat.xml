@@ -29,8 +29,9 @@
                 android:src="@drawable/ic_back_24px"
                 tools:srcCompat="@tools:sample/avatars" />
 
-            <ImageView
+            <com.google.android.material.imageview.ShapeableImageView
                 android:id="@+id/chatAvatarImageView"
+                app:shapeAppearanceOverlay="@style/roundedImageViewOval"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_gravity="center_vertical"
