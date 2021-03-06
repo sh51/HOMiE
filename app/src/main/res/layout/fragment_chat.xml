@@ -27,7 +27,8 @@
                 android:layout_marginRight="5dp"
                 android:layout_weight="1"
                 android:contentDescription="@string/chat_back_button_description"
-                android:src="@drawable/ic_back_24px" />
+                android:src="@drawable/ic_back_24px"
+                tools:ignore="RtlHardcoded" />
 
 
             <com.google.android.material.imageview.ShapeableImageView
@@ -39,7 +40,8 @@
                 android:layout_weight="1"
                 android:contentDescription="@string/avatar_description"
                 android:src="@drawable/ic_profile_24px"
-                app:shapeAppearanceOverlay="@style/roundedImageViewOval" />
+                app:shapeAppearanceOverlay="@style/roundedImageViewOval"
+                tools:ignore="RtlHardcoded" />
 
             <TextView
                 android:id="@+id/chatNameTextView"
