@@ -14,6 +14,7 @@ import androidx.viewpager2.widget.MarginPageTransformer;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.cs65.homie.R;
+import com.cs65.homie.ui.ImageFullScreenActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,10 +46,10 @@ public class ImageCarouselFragment
 
         // Spawn the fuller-screen image view
         Intent intent = new Intent(
-            this.getContext(), ImageCarouselFullScreenActivity.class
+            this.getContext(), ImageFullScreenActivity.class
         );
         intent.putExtra(
-            ImageCarouselFullScreenActivity.BUNDLE_ARG_KEY_URI,
+            ImageFullScreenActivity.BUNDLE_ARG_KEY_URI,
             this.images.get((int)view.getTag())
         );
         this.startActivity(intent);

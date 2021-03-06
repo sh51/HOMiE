@@ -3,6 +3,7 @@ package com.cs65.homie.ui.profile.view;
 import android.annotation.SuppressLint;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
 import android.location.Address;
 import android.location.Criteria;
 import android.location.Geocoder;
@@ -29,6 +30,7 @@ import com.cs65.homie.R;
 import com.cs65.homie.ThreadPerTaskExecutor;
 import com.cs65.homie.Utilities;
 import com.cs65.homie.ui.carousel.ImageCarouselFragment;
+import com.cs65.homie.ui.ImageFullScreenActivity;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
@@ -46,13 +48,14 @@ public class ProfileViewFragment
     implements Consumer<Location>, LocationListener
 {
 
+    @SuppressWarnings("unused")
     public static final String BUNDLE_KEY_MY_ID
         = "BUNDLE_KEY_PROFILE_VIEW_MY_ID";
+    @SuppressWarnings("unused")
     public static final String BUNDLE_KEY_USER_ID
         = "BUNDLE_KEY_PROFILE_VIEW_USER_ID";
     public static final String CURRENT_LOC_FORMAT_STR
         = "Your current location:%n%s";
-    public static final int GENDER_TEXT_VIEW_CHAR_LIMIT = 30;
     public static final String PLACE_FORMAT_STR
         = "%s %.1f miles from you";
     public static final String PLACE_HAS_STR = "Has a place";
@@ -95,6 +98,25 @@ public class ProfileViewFragment
                 this.vm.getMyLoc().postValue(latLng);
             }
         }
+    }
+
+    public void onAvatarClick(View view)
+    {
+
+        if (
+            this.vm.getAvatarUri().getValue() != null
+        )
+        {
+            Intent intent = new Intent(
+                this.getContext(), ImageFullScreenActivity.class
+            );
+            intent.putExtra(
+                ImageFullScreenActivity.BUNDLE_ARG_KEY_URI,
+                this.vm.getAvatarUri().getValue()
+            );
+            this.startActivity(intent);
+        }
+
     }
 
     public void onCreate(Bundle savedInstanceState)
@@ -157,7 +179,7 @@ public class ProfileViewFragment
         // Setup the location services if we need it.
         this.geocoder = new Geocoder(this.getContext(), Locale.getDefault());
         this.locationManager
-            = (LocationManager) this.getActivity().getSystemService(
+            = (LocationManager) this.requireActivity().getSystemService(
             Context.LOCATION_SERVICE
         );
         Criteria locCriteria = new Criteria();
@@ -214,6 +236,7 @@ public class ProfileViewFragment
         // If the user uses a live location, update the location on resume
         // At the moment we don't bother listening to the location
         // Excessive
+        //noinspection ConstantConditions
         if (this.vm.getMyLocLive().getValue())
         {
             this.requestLocUpdate();
@@ -230,6 +253,7 @@ public class ProfileViewFragment
         this.viewAvatar = view.findViewById(R.id.profileViewAvatarImageView);
         if (this.viewAvatar != null)
         {
+            this.viewAvatar.setOnClickListener(this::onAvatarClick);
             this.vm.getAvatarUri().observe(
                 this.getViewLifecycleOwner(), this::updateViewAvatar
             );
@@ -248,6 +272,7 @@ public class ProfileViewFragment
             this.vm.getPlace().observe(
                 this.getViewLifecycleOwner(), this::updateViewBathroomByPlace
             );
+            //noinspection ConstantConditions
             this.updateViewBathroom(
                 this.vm.getBathroom().getValue(),
                 this.vm.getPlace().getValue()
@@ -296,6 +321,7 @@ public class ProfileViewFragment
             this.vm.getPets().observe(
                 this.getViewLifecycleOwner(), this::updateViewPets
             );
+            //noinspection ConstantConditions
             this.updateViewPets(this.vm.getPets().getValue());
         }
         this.viewSmoking = view.findViewById(R.id.profileViewSmokingTextView);
@@ -304,6 +330,7 @@ public class ProfileViewFragment
             this.vm.getSmoking().observe(
                 this.getViewLifecycleOwner(), this::updateViewSmoking
             );
+            //noinspection ConstantConditions
             this.updateViewSmoking(this.vm.getSmoking().getValue());
         }
 
@@ -415,13 +442,14 @@ public class ProfileViewFragment
      *
      * @param myLoc     The app user's location
      */
+    @SuppressWarnings("StatementWithEmptyBody")
     public void updateViewLocByMyLoc(LatLng myLoc)
     {
 
         if (this.isMe())
         {
 
-            //noinspection StatementWithEmptyBody
+            //noinspection ConstantConditions
             if (
                 this.viewLoc != null
                 && this.geocoder != null
@@ -465,11 +493,13 @@ public class ProfileViewFragment
             // Show the distance from the app user to the profile's user
             LatLng zero = new LatLng(0, 0);
             LatLng theirLoc = this.vm.getLoc().getValue();
+            assert theirLoc != null;
             if (myLoc.equals(zero) || theirLoc.equals(zero))
             {
                 return;
             }
 
+            //noinspection ConstantConditions
             this.updateViewLoc(myLoc, theirLoc, this.vm.getPlace().getValue());
 
         }
@@ -484,6 +514,7 @@ public class ProfileViewFragment
      */
     public void updateViewLocByMyString(String myLoc)
     {
+        //noinspection ConstantConditions
         if (
             this.viewLoc != null
             && this.isMe()
@@ -509,11 +540,13 @@ public class ProfileViewFragment
             return;
         }
         LatLng myLoc = this.vm.getMyLoc().getValue();
+        assert myLoc != null;
         if (myLoc.equals(zero) || userLoc.equals(zero))
         {
             return;
         }
 
+        //noinspection ConstantConditions
         this.updateViewLoc(myLoc, userLoc, this.vm.getPlace().getValue());
 
     }

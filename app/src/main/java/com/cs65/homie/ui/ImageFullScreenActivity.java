@@ -1,4 +1,4 @@
-package com.cs65.homie.ui.carousel;
+package com.cs65.homie.ui;
 
 import android.net.Uri;
 import android.os.Bundle;
@@ -18,7 +18,7 @@ import org.jetbrains.annotations.NotNull;
  *
  * Does not support true full screen and zoom
  */
-public class ImageCarouselFullScreenActivity
+public class ImageFullScreenActivity
     extends AppCompatActivity
     implements View.OnClickListener
 {
