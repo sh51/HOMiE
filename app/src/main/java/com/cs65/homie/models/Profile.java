@@ -23,6 +23,7 @@ public class Profile {
     private boolean isPetFriendly;
     private boolean isSmoking;
     private String avatarImage;
+    private int gender = 0;
 
     public String getFirstName() {
         return firstName;
@@ -140,8 +141,8 @@ public class Profile {
         return isPetFriendly;
     }
 
-    public void setPetFriendly(boolean petFriendly) {
-        isPetFriendly = petFriendly;
+    public void setisPetFriendly(boolean isPetFriendly) {
+        this.isPetFriendly = isPetFriendly;
     }
 
     public boolean isSmoking() {
@@ -166,5 +167,13 @@ public class Profile {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public int getGender() {
+        return gender;
+    }
+
+    public void setGender(int gender) {
+        this.gender = gender;
     }
 }

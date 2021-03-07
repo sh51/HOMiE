@@ -222,10 +222,10 @@ public class ProfileMatchFragment
                                 // Update UI
                                 bathroom.setValue((boolean)document.getData().get("privateBathroom"));
                                 bio.setValue((String)document.getData().get("bio"));
-                                pets.setValue((boolean)document.getData().get("isPetFriendly"));
+                                pets.setValue((boolean)document.getData().get("petFriendly"));
                                 hasPlace.setValue((boolean)document.getData().get("hasApartment"));
-                                isSmoking.setValue((boolean)document.getData().get("isSmoking"));
-                                name.setValue((String)document.getData().get("firstname"));
+                                isSmoking.setValue((boolean)document.getData().get("smoking"));
+                                name.setValue((String)document.getData().get("firstName"));
 
                                 int genderCode = Math.toIntExact((long)document.getData().get("gender"));
                                 if (genderCode == 1) {

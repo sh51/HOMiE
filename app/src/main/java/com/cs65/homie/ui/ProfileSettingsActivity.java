@@ -1,8 +1,5 @@
 package com.cs65.homie.ui;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.FileProvider;
-
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
@@ -16,11 +13,19 @@ import android.widget.RadioButton;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-import com.cs65.homie.ui.login.ui.login.RegistrationActivity;
-import com.soundcloud.android.crop.Crop;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.FileProvider;
 
 import com.cs65.homie.R;
 import com.cs65.homie.Utilities;
+import com.cs65.homie.models.Profile;
+import com.cs65.homie.ui.login.ui.login.RegistrationActivity;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.soundcloud.android.crop.Crop;
 
 import java.io.File;
 
@@ -175,6 +180,7 @@ public class ProfileSettingsActivity extends AppCompatActivity {
 
         SharedPreferences savedProfile = getSharedPreferences(getString(R.string.saved_preferences), MODE_PRIVATE);
 
+        // Not sure if we want to cache this so I'll leave this here, but we should also create a profile at this point
         SharedPreferences.Editor editedProfile = savedProfile.edit();
         editedProfile.putString(getString(R.string.key_name), this.name);
         editedProfile.putString(getString(R.string.key_email), this.email);
@@ -189,5 +195,31 @@ public class ProfileSettingsActivity extends AppCompatActivity {
         Toast.makeText(this, R.string.toast_saved, Toast.LENGTH_SHORT).show();
         Log.d(TAG, "toasted");
 
+        // Firebase
+        Profile newProfile = new Profile();
+        newProfile.setFirstName(this.name);
+        newProfile.setEmail(this.email);
+        newProfile.setPassword(this.password);
+
+
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db.collection("profiles")
+                .add(newProfile)
+                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                    @Override
+                    public void onSuccess(DocumentReference documentReference) {
+                        Log.d(TAG, "DocumentSnapshot added with ID: " + documentReference.getId());
+
+                        // TODO: Set current account ID
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.w(TAG, "Error adding document", e);
+
+                        // TODO: Registration failed, handle
+                    }
+                });
     }
 }
