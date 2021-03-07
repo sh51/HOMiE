@@ -75,55 +75,58 @@ public class SwipeGesture
 
         velocityX = Math.abs(velocityX);
         velocityY = Math.abs(velocityY);
-        float diffX = e2.getX() - e1.getX();
-        float diffY = e2.getY() - e1.getY();
-        float diffXAbs = Math.abs(diffX);
-        float diffYAbs = Math.abs(diffY);
-        float ratio = diffXAbs / diffYAbs;
 
-        Log.d(
-            MainActivity.TAG, String.format(
-            "Swipe Gesture, diffX: %f\tdiffY: %f\tVelX: %f\tVelY: %f",
-            diffX, diffY, velocityX, velocityY
-        ));
+        if (e2 != null && e1 != null) {
 
-        if (
-            ratio > RELATIVE_X_THRESHOLD
-            && diffXAbs > SWIPE_THRESHOLD
-            && velocityX > SWIPE_VELOCITY_THRESHOLD
-        )
-        {
-            actionConsumed = true;
-            if (diffX > 0)
+            float diffX = e2.getX() - e1.getX();
+            float diffY = e2.getY() - e1.getY();
+            float diffXAbs = Math.abs(diffX);
+            float diffYAbs = Math.abs(diffY);
+            float ratio = diffXAbs / diffYAbs;
+
+            Log.d(
+                    MainActivity.TAG, String.format(
+                            "Swipe Gesture, diffX: %f\tdiffY: %f\tVelX: %f\tVelY: %f",
+                            diffX, diffY, velocityX, velocityY
+                    ));
+
+            if (
+                    ratio > RELATIVE_X_THRESHOLD
+                            && diffXAbs > SWIPE_THRESHOLD
+                            && velocityX > SWIPE_VELOCITY_THRESHOLD
+            )
             {
-                this.listener.onSwipeLeft();
+                actionConsumed = true;
+                if (diffX > 0)
+                {
+                    this.listener.onSwipeLeft();
+                }
+                else
+                {
+                    this.listener.onSwipeRight();
+                }
             }
-            else
+            else if (
+                    ratio > RELATIVE_Y_THRESHOLD
+                            && diffYAbs > SWIPE_THRESHOLD
+                            && velocityY > SWIPE_VELOCITY_THRESHOLD
+            )
             {
-                this.listener.onSwipeRight();
-            }
-        }
-        else if (
-            ratio > RELATIVE_Y_THRESHOLD
-            && diffYAbs > SWIPE_THRESHOLD
-            && velocityY > SWIPE_VELOCITY_THRESHOLD
-        )
-        {
-            actionConsumed = true;
-            // TODO REP doesn't actually know if these are the correct signs,
-            // e.g. is positive down? Since this branch is untested
-            if (diffY > 0)
-            {
-                listener.onSwipeDown();
-            }
-            else
-            {
-                listener.onSwipeUp();
+                actionConsumed = true;
+                // TODO REP doesn't actually know if these are the correct signs,
+                // e.g. is positive down? Since this branch is untested
+                if (diffY > 0)
+                {
+                    listener.onSwipeDown();
+                }
+                else
+                {
+                    listener.onSwipeUp();
+                }
             }
         }
 
         return actionConsumed;
-
     }
 
     public boolean onTouch(View view, MotionEvent event)
