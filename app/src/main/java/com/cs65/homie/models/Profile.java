@@ -6,10 +6,18 @@ import java.util.List;
 
 public class Profile {
     private String id;
+
+    // // Auth implemented with Firebase-auth
+//    private String password;
+//    private String email;
+    // TODO move these to firebase-auth
     private String firstName;
-    private String password;
-    private String email;
+    private String avatarImage;
+
+
+    private String uid;
     private String bio;
+    private int gender;
     private List<String> keywords;
     private List<String> images;
     private double minPrice;
@@ -22,9 +30,26 @@ public class Profile {
     private boolean hasApartment;
     private boolean isPetFriendly;
     private boolean isSmoking;
-    private String avatarImage;
-    private int gender = 0;
 
+
+    public Profile() {
+//        firstName = "Matt";
+        bio = "Diehard tennis player, love hula hooping more than anything.";
+        gender = 1;
+        minPrice = 600;
+        maxPrice = 1000;
+        privateBathroom = true;
+        address = "Dartmouth College";
+        radius = 5; // imperial by default
+        hasApartment = false;
+        isPetFriendly = true;
+        isSmoking = true;
+    }
+
+    public Profile(boolean withApartment) {
+        this();
+        hasApartment = withApartment;
+    }
     public String getFirstName() {
         return firstName;
     }
@@ -33,21 +58,21 @@ public class Profile {
         this.firstName = firstName;
     }
 
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
+//    public String getPassword() {
+//        return password;
+//    }
+//
+//    public void setPassword(String password) {
+//        this.password = password;
+//    }
+//
+//    public String getEmail() {
+//        return email;
+//    }
+//
+//    public void setEmail(String email) {
+//        this.email = email;
+//    }
 
     public String getBio() {
         return bio;
@@ -176,4 +201,15 @@ public class Profile {
     public void setGender(int gender) {
         this.gender = gender;
     }
+<<<<<<< HEAD
+=======
+
+    public String getUid() {
+        return uid;
+    }
+
+    public void setUid(String uid) {
+        this.uid = uid;
+    }
+>>>>>>> 9feb15b (corrected login logic & upload profile)
 }

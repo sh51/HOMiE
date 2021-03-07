@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.cs65.homie.ui.ProfileSettingsActivity;
+import com.cs65.homie.models.Profile;
 import com.cs65.homie.ui.chats.ChatFragment;
 import com.cs65.homie.ui.login.ui.login.LoginActivity;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -44,6 +45,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int EDIT_PROFILE = 0;
 
     private FirebaseAuth mAuth;
+    private Intent loginIntent;
     // the menu, login and logout action button
     private MenuItem mLogout, mLogin;
     private View hostView = null;
@@ -110,6 +112,7 @@ public class MainActivity extends AppCompatActivity {
         this.navView = findViewById(R.id.nav_view);
 
         mAuth = FirebaseAuth.getInstance();
+        loginIntent = new Intent(this, LoginActivity.class);
 
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
@@ -126,9 +129,6 @@ public class MainActivity extends AppCompatActivity {
         );
         NavigationUI.setupWithNavController(this.navView, this.navController);
 
-        // FIXME This spawns the login activity on every single screen rotation
-        Intent intent = new Intent(this, LoginActivity.class);
-        startActivityForResult(intent, RC_LOGIN);
 
         // TODO The landing activity should probably be profile?
         // It shouldn't be messages at least?
