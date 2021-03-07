@@ -237,7 +237,6 @@ public class ProfileMatchFragment
     private void loadFakeData()
     {
         // TODO: Where will we get this? We aren't currently storing it
-
         this.vm.getBathroom().setValue(true);
         this.vm.getBio().setValue(
             "i Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do "
@@ -276,7 +275,7 @@ public class ProfileMatchFragment
 
         // Get firebase wrapper (in-built)
         // Fetch profiles and loads them
-        // TODO: We need some stratagey of marking unliked and matched profiles to avoid showing the same profile twice and avoid showing our own profile
+        // TODO: We need some stratagey of marking unliked and matched profiles to avoid showing the same profile twice
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         db.collection("profiles")
                 .get()
