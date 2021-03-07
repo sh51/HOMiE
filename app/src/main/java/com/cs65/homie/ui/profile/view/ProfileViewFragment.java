@@ -826,6 +826,7 @@ public class ProfileViewFragment
 
         // Get firebase wrapper (in-built)
         // Fetch profiles and loads them
+
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         if (isMe()) {
             db.collection("profiles").whereEqualTo(FieldPath.documentId(), this.vm.getMyId()).get()
