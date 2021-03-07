@@ -182,31 +182,14 @@ public class ProfileMatchFragment
      */
     private void loadFakeData()
     {
-
-        this.vm.getBathroom().setValue(true);
-        this.vm.getBio().setValue(
-            "i Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do "
-                + "eiusmod tempor incididunt ut labore et dolore magna aliqua. "
-                + "Ut enim ad minim veniam, quis nostrud exercitation ullamco "
-                + "laboris nisi ut aliquip ex ea commodo consequat. Duis aute "
-                + "irure dolor in reprehenderit in voluptate velit esse cillum "
-                + "dolore eu fugiat nulla pariatur. Excepteur sint occaecat "
-                + "cupidatat non proident, sunt in culpa qui officia deserunt "
-                + "mollit anim id est laborum."
-        );
-        this.vm.getGender().setValue("Female");
+        // TODO: Where will we get this? We aren't currently storing it
         this.vm.getLoc().setValue(new LatLng(43.624794, -72.323171));
         this.vm.getMyLoc().setValue(new LatLng(43.704166, -72.288762));
         this.vm.getMyLocLive().setValue(true);
         this.vm.getMyLocStr().setValue("Sanborn");
-        this.vm.getPets().setValue(true);
-        this.vm.getPlace().setValue(true);
-        this.vm.getProfileName().setValue("Jane");
-        this.vm.getSmoking().setValue(true);
         this.vm.getAvatarUri().setValue(
             Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://com.cs65.homie/" + R.drawable.ai)
         );
-
         List<Uri> images = new ArrayList<Uri>();
         images.add(Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://com.cs65.homie/" + R.drawable.dart0));
         images.add(Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://com.cs65.homie/" + R.drawable.dart1));
@@ -214,7 +197,19 @@ public class ProfileMatchFragment
         images.add(Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://com.cs65.homie/" + R.drawable.dart3));
         this.vm.getimages().setValue(images);
 
+
+        // Firebase section --------------------
         MutableLiveData<String> bio = this.vm.getBio();
+        MutableLiveData<Boolean> bathroom = this.vm.getBathroom();
+        MutableLiveData<String> gender = this.vm.getGender();
+        MutableLiveData<Boolean> pets = this.vm.getPets();
+        MutableLiveData<Boolean> hasPlace = this.vm.getPlace();
+        MutableLiveData<Boolean> isSmoking = this.vm.getSmoking();
+        MutableLiveData<String> name = this.vm.getProfileName();
+
+        // Get firebase wrapper (in-built)
+        // Fetch profiles and loads them
+        // TODO: We need some stratagey of marking unliked and matched profiles to avoid showing the same profile twice
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         db.collection("profiles")
                 .get()
@@ -223,11 +218,27 @@ public class ProfileMatchFragment
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful()) {
                             for (QueryDocumentSnapshot document : task.getResult()) {
-                                Log.d("firebase - tyler", document.getId() + " => " + document.getData());
-                                bio.setValue(document.getId() + " => " + document.getData());
+
+                                // Update UI
+                                bathroom.setValue((boolean)document.getData().get("privateBathroom"));
+                                bio.setValue((String)document.getData().get("bio"));
+                                pets.setValue((boolean)document.getData().get("isPetFriendly"));
+                                hasPlace.setValue((boolean)document.getData().get("hasApartment"));
+                                isSmoking.setValue((boolean)document.getData().get("isSmoking"));
+                                name.setValue((String)document.getData().get("firstname"));
+
+                                int genderCode = Math.toIntExact((long)document.getData().get("gender"));
+                                if (genderCode == 1) {
+                                    gender.setValue("Female");
+                                } else {
+                                    gender.setValue("Male");
+                                }
+
+                                break;
+
                             }
                         } else {
-                            Log.w("firebase - tyler", "Error getting documents.", task.getException());
+                            Log.w("firebase - homies", "Error getting documents.", task.getException());
                         }
                     }
                 });
