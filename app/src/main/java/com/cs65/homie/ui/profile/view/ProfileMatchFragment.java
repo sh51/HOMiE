@@ -3,10 +3,14 @@ package com.cs65.homie.ui.profile.view;
 import android.content.ContentResolver;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+
+import androidx.annotation.NonNull;
+import androidx.lifecycle.MutableLiveData;
 
 import com.cs65.homie.MainActivity;
 import com.cs65.homie.R;
@@ -14,7 +18,12 @@ import com.cs65.homie.Utilities;
 import com.cs65.homie.ui.gestures.OnSwipeGestureListener;
 import com.cs65.homie.ui.gestures.SwipeGesture;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -176,7 +185,7 @@ public class ProfileMatchFragment
 
         this.vm.getBathroom().setValue(true);
         this.vm.getBio().setValue(
-            "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do "
+            "i Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do "
                 + "eiusmod tempor incididunt ut labore et dolore magna aliqua. "
                 + "Ut enim ad minim veniam, quis nostrud exercitation ullamco "
                 + "laboris nisi ut aliquip ex ea commodo consequat. Duis aute "
@@ -204,6 +213,24 @@ public class ProfileMatchFragment
         images.add(Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://com.cs65.homie/" + R.drawable.dart2));
         images.add(Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://com.cs65.homie/" + R.drawable.dart3));
         this.vm.getimages().setValue(images);
+
+        MutableLiveData<String> bio = this.vm.getBio();
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db.collection("profiles")
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                Log.d("firebase - tyler", document.getId() + " => " + document.getData());
+                                bio.setValue(document.getId() + " => " + document.getData());
+                            }
+                        } else {
+                            Log.w("firebase - tyler", "Error getting documents.", task.getException());
+                        }
+                    }
+                });
 
     }
 
