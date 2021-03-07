@@ -209,7 +209,7 @@ public class ProfileMatchFragment
 
         // Get firebase wrapper (in-built)
         // Fetch profiles and loads them
-        // TODO: We need some stratagey of marking unliked and matched profiles to avoid showing the same profile twice
+        // TODO: We need some stratagey of marking unliked and matched profiles to avoid showing the same profile twice and avoid showing our own profile
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         db.collection("profiles")
                 .get()
@@ -233,9 +233,6 @@ public class ProfileMatchFragment
                                 } else {
                                     gender.setValue("Male");
                                 }
-
-                                break;
-
                             }
                         } else {
                             Log.w("firebase - homies", "Error getting documents.", task.getException());

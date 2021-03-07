@@ -22,7 +22,9 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.cs65.homie.MainActivity;
@@ -32,6 +34,11 @@ import com.cs65.homie.Utilities;
 import com.cs65.homie.ui.carousel.ImageCarouselFragment;
 import com.cs65.homie.ui.ImageFullScreenActivity;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -612,26 +619,10 @@ public class ProfileViewFragment
     private void loadFakeData()
     {
 
-        this.vm.getBathroom().setValue(false);
-        this.vm.getBio().setValue(
-            "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do "
-            + "eiusmod tempor incididunt ut labore et dolore magna aliqua. "
-            + "Ut enim ad minim veniam, quis nostrud exercitation ullamco "
-            + "laboris nisi ut aliquip ex ea commodo consequat. Duis aute "
-            + "irure dolor in reprehenderit in voluptate velit esse cillum "
-            + "dolore eu fugiat nulla pariatur. Excepteur sint occaecat "
-            + "cupidatat non proident, sunt in culpa qui officia deserunt "
-            + "mollit anim id est laborum."
-        );
-        this.vm.getGender().setValue("Male");
         this.vm.getLoc().setValue(new LatLng(43.624794, -72.323171));
         this.vm.getMyLoc().setValue(new LatLng(43.704166, -72.288762));
         this.vm.getMyLocLive().setValue(true);
         this.vm.getMyLocStr().setValue("Sanborn");
-        this.vm.getPets().setValue(false);
-        this.vm.getPlace().setValue(false);
-        this.vm.getProfileName().setValue("John");
-        this.vm.getSmoking().setValue(false);
         this.vm.getAvatarUri().setValue(null);
 
         List<Uri> images = new ArrayList<Uri>();
@@ -640,6 +631,52 @@ public class ProfileViewFragment
         images.add(Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://com.cs65.homie/" + R.drawable.dart2));
         images.add(Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://com.cs65.homie/" + R.drawable.dart3));
         this.vm.getimages().setValue(images);
+
+
+        // Firebase section --------------------
+        MutableLiveData<String> bio = this.vm.getBio();
+        MutableLiveData<Boolean> bathroom = this.vm.getBathroom();
+        MutableLiveData<String> gender = this.vm.getGender();
+        MutableLiveData<Boolean> pets = this.vm.getPets();
+        MutableLiveData<Boolean> hasPlace = this.vm.getPlace();
+        MutableLiveData<Boolean> isSmoking = this.vm.getSmoking();
+        MutableLiveData<String> name = this.vm.getProfileName();
+
+        // Get firebase wrapper (in-built)
+        // Fetch profiles and loads them
+        // TODO: We need some stratagey of marking unliked and matched profiles to avoid showing the same profile twice
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db.collection("profiles")
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+
+                                // Update UI
+                                bathroom.setValue((boolean)document.getData().get("privateBathroom"));
+                                bio.setValue((String)document.getData().get("bio"));
+                                pets.setValue((boolean)document.getData().get("isPetFriendly"));
+                                hasPlace.setValue((boolean)document.getData().get("hasApartment"));
+                                isSmoking.setValue((boolean)document.getData().get("isSmoking"));
+                                name.setValue((String)document.getData().get("firstname"));
+
+                                int genderCode = Math.toIntExact((long)document.getData().get("gender"));
+                                if (genderCode == 1) {
+                                    gender.setValue("Female");
+                                } else {
+                                    gender.setValue("Male");
+                                }
+
+                                break;
+
+                            }
+                        } else {
+                            Log.w("firebase - homies", "Error getting documents.", task.getException());
+                        }
+                    }
+                });
 
     }
 
