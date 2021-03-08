@@ -28,6 +28,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.cs65.homie.FirebaseHelper;
 import com.cs65.homie.MainActivity;
 import com.cs65.homie.R;
 import com.cs65.homie.ThreadPerTaskExecutor;
@@ -59,6 +60,8 @@ public class ProfileViewFragment
     extends Fragment
     implements Consumer<Location>, LocationListener
 {
+
+    private FirebaseHelper mHelper;
 
     @SuppressWarnings("unused")
     public static final String BUNDLE_KEY_MY_ID
@@ -147,6 +150,11 @@ public class ProfileViewFragment
         this.vm = new ViewModelProvider(this).get(
                 ProfileViewFragmentViewModel.class
         );
+
+
+//        // quick fix
+//        mHelper = FirebaseHelper.getInstance();
+//        this.vm.setMyId(mHelper.getUid());
 
 
         // If no current USERid, go to profile page
