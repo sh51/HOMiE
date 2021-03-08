@@ -322,6 +322,9 @@ public class Utilities
 //        void run(List<Message> msgs);
         void run(Message msg);
     }
+    public interface onMessagesUnloadedCallbackInterface {
+        void run();
+    }
     public interface onChatUpdatedCallbackInterface {
         void run(Message msg);
     }

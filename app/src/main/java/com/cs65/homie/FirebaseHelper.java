@@ -215,21 +215,6 @@ public class FirebaseHelper {
 
         DatabaseReference ref = rdb.getReference("chats/" + cid);
 
-
-//         // check if chat exists
-//        ref.addListenerForSingleValueEvent(new ValueEventListener() {
-//            @Override
-//            public void onDataChange(DataSnapshot dataSnapshot) {
-//                if (dataSnapshot.getValue() == null) Log.d(Globals.TAG, "Chat not found.");
-//                else Log.d(Globals.TAG, "Chat found.");
-//            }
-//
-//            @Override
-//            public void onCancelled(DatabaseError databaseError) {
-//                Log.d(Globals.TAG, "Read ref failed.");
-//            }
-//        });
-
         // push message to the messages list
         ref.push().setValue(msg, new DatabaseReference.CompletionListener() {
             @Override
@@ -263,7 +248,7 @@ public class FirebaseHelper {
             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                 Message msg = snapshot.getValue(Message.class);
                 msg.setMid(snapshot.getKey());
-                Log.d(Globals.TAG, "Got message with id: " + snapshot.getKey());
+//                Log.d(Globals.TAG, "Got message with id: " + snapshot.getKey());
                 callback.run(msg);
             }
 
@@ -297,33 +282,16 @@ public class FirebaseHelper {
         chatListeners.put(uid, chatListener);
         ref.orderByChild("timestamp").addChildEventListener(chatListener);
         Log.d(Globals.TAG, "childEventListner added");
-
-//        ref.orderByChild("timestamp").addListenerForSingleValueEvent(new ValueEventListener() {
-//            @Override
-//            public void onDataChange(@NonNull DataSnapshot snapshot) {
-//                List<Message> msgs = new ArrayList<>();
-//                Log.d(Globals.TAG, String.valueOf(snapshot.getChildrenCount()));
-//                snapshot.getChildren().forEach(dataSnapshot -> {
-//                    msgs.add(dataSnapshot.getValue(Message.class));
-//                });
-//
-//                callback.run(msgs);
-//            }
-//
-//            @Override
-//            public void onCancelled(@NonNull DatabaseError error) {
-//
-//            }
-//        });
     }
 
     // unload messages of certain user - this should happen when an unmatch event occurs
-    public void unloadMessages(String uid, Utilities.onMessagesLoadedCallbackInterface callback) {
+    public void unloadMessages(String uid, Utilities.onMessagesUnloadedCallbackInterface callback) {
         ChildEventListener chatListener = chatListeners.get(uid);
         if (chatListener != null) {
             String currId = getUid();
             DatabaseReference ref = rdb.getReference("chats/" + getPairId(currId, uid));
             ref.removeEventListener(chatListener);
+            callback.run();
         }
     }
 

@@ -300,14 +300,8 @@ public class ChatFragment extends Fragment implements View.OnClickListener
 
         // go to definition for description
         mHelper.sendMessage(this.userId, messageText, (msg) -> {
-            List<Message> messages = this.vm.getMessages(this.userId).getValue();
-            if (messages == null)
-            {
-                messages = new ArrayList<Message>();
-            }
-            messages.add(msg);
-
-            this.vm.getMessages(this.userId).setValue(messages);
+            // scroll to bottom when message sent
+            recyclerView.scrollToPosition(this.vm.getMessages(this.userId).getValue().size() -  1);
         });
 
         // Put the keyboard back
