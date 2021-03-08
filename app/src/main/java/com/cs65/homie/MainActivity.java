@@ -12,8 +12,10 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.cs65.homie.ui.ProfileSettingsActivity;
+import com.cs65.homie.models.Message;
 import com.cs65.homie.models.Profile;
 import com.cs65.homie.ui.chats.ChatFragment;
+import com.cs65.homie.ui.chats.ChatsViewModel;
 import com.cs65.homie.ui.login.ui.login.LoginActivity;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
@@ -22,13 +24,14 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
-import org.jetbrains.annotations.NotNull;
 
+import org.jetbrains.annotations.NotNull;
 import java.util.Locale;
 
 
@@ -44,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int RC_LOGIN = 0;
     private static final int EDIT_PROFILE = 0;
 
-    private FirebaseAuth mAuth;
+    private FirebaseHelper mHelper;
     private Intent loginIntent;
     // the menu, login and logout action button
     private MenuItem mLogout, mLogin;
@@ -111,7 +114,7 @@ public class MainActivity extends AppCompatActivity {
         this.hostView = findViewById(R.id.nav_host_fragment);
         this.navView = findViewById(R.id.nav_view);
 
-        mAuth = FirebaseAuth.getInstance();
+        mHelper = FirebaseHelper.getInstance();
         loginIntent = new Intent(this, LoginActivity.class);
 
         // Passing each menu ID as a set of Ids because each

@@ -19,6 +19,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.cs65.homie.FirebaseHelper;
 import com.cs65.homie.MainActivity;
 import com.cs65.homie.R;
 import com.cs65.homie.Utilities;
@@ -45,6 +46,8 @@ import java.util.List;
 @SuppressWarnings("Convert2Diamond")
 public class ChatFragment extends Fragment implements View.OnClickListener
 {
+
+    private FirebaseHelper mHelper;
 
     public static final String ARG_KEY_USER_ID  = "CHAT_FRAG_ARG_KEY_USER_ID";
     public static final String BUNDLE_KEY_KEYBOARD_UP
@@ -92,6 +95,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener
     {
 
         super.onCreate(savedInstanceState);
+        mHelper = FirebaseHelper.getInstance();
 
         if (this.getArguments() != null)
         {
@@ -293,25 +297,18 @@ public class ChatFragment extends Fragment implements View.OnClickListener
             return;
         }
 
-        SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
-        String userId = sharedPref.getString("userId", null);
 
-        // Create the message object
-        Message message = new Message();
-        message.setTimestamp(Calendar.getInstance().getTime());
-        message.setText(messageText);
-        message.setReceiverId(this.userId);
-        // FIXME Using fake data for now
-        message.setSenderId(
-            userId
-        );
+        // go to definition for description
+        mHelper.sendMessage(this.userId, messageText, (msg) -> {
+            List<Message> messages = this.vm.getMessages(this.userId).getValue();
+            if (messages == null)
+            {
+                messages = new ArrayList<Message>();
+            }
+            messages.add(msg);
 
-        List<Message> messages = this.vm.getMessages(this.userId).getValue();
-        if (messages == null)
-        {
-            messages = new ArrayList<Message>();
-        }
-        messages.add(message);
+            this.vm.getMessages(this.userId).setValue(messages);
+        });
 
         // Put the keyboard back
         InputMethodManager inputManager
@@ -330,18 +327,6 @@ public class ChatFragment extends Fragment implements View.OnClickListener
         Utilities.showErrorToast(
             R.string.chat_message_sent_toast, this.getActivity()
         );
-
-        this.vm.getMessages(this.userId).setValue(messages);
-
-        this.sendMessageToFirebase(message);
-
-    }
-
-    private void sendMessageToFirebase(Message message)
-    {
-        // TODO Implement
-        // It also should be noted that the message is already in the
-        // ViewModel. Don't duplicate the message somehow.
     }
 
 }

@@ -18,6 +18,7 @@ import android.widget.Toast;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import com.cs65.homie.models.Message;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.io.IOException;
@@ -311,4 +312,23 @@ public class Utilities
 
     }
 
+    public interface onMessageSentCallbackInterface {
+        void run(Message msg);
+    }
+    // the callback is supposed to handle two cases:
+    // a. a message is added - the msg param would have a regular timestamp
+    // b. a message is removed - the msg param would have a -1 as timestamp
+    public interface onMessagesLoadedCallbackInterface {
+//        void run(List<Message> msgs);
+        void run(Message msg);
+    }
+    public interface onChatUpdatedCallbackInterface {
+        void run(Message msg);
+    }
+    public interface onLikeCallbackInterface {
+        void run();
+    }
+    public interface onUnlikeCallbackInterface {
+        void run();
+    }
 }

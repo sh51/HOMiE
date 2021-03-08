@@ -77,7 +77,7 @@ class ChatRecyclerAdapter extends RecyclerView.Adapter<ChatViewHolder>
             if (holder.getChatTimeTextViewLeft() != null)
             {
                 holder.formatDate(
-                    message.getTimestamp(), holder.getChatTimeTextViewLeft()
+                    message._getDatetime(), holder.getChatTimeTextViewLeft()
                 );
             }
             // A different spacer is used to right and left align the chat boxes
@@ -120,7 +120,7 @@ class ChatRecyclerAdapter extends RecyclerView.Adapter<ChatViewHolder>
             if (holder.getChatTimeTextViewRight() != null)
             {
                 holder.formatDate(
-                    message.getTimestamp(), holder.getChatTimeTextViewRight()
+                    message._getDatetime(), holder.getChatTimeTextViewRight()
                 );
             }
             if (holder.getSpacerLeft() != null)

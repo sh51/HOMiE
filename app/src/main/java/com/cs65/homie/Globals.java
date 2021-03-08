@@ -4,5 +4,5 @@ public abstract class Globals {
 
 	// Debugging tag
 	public static final String TAG = "HOMiE";
-  
+	// User id
 }
