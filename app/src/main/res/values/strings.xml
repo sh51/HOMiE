@@ -6,6 +6,7 @@
     <string name="title_chats">Chats</string>
     <string name="title_profile_view">Profile</string>
     <string name="title_match">Match with a Homie!</string>
+    <string name="title_edit_profile">Edit Profile</string>
 
     <!-- CHAT -->
     <string name="chat_back_button_description">Back Button</string>
@@ -35,7 +36,8 @@
     <string name="field_Name_text">Name </string>
     <string name="field_Email_text">Email</string>
     <string name="field_Password_text">Password</string>
-    <string name="field_HousingSearchOptions_text">Do you have Housing</string>
+    <string name="field_HousingSearchOptions_text">Do you have housing</string>
+    <string name="field_GenderPref_text">Do you have a preference for the gender of your roommate?</string>
     <string name="saved_preferences">SavedPreferences</string>
     <string name="button_Save_text">Save</string>
     <string name="button_Cancel_text">Cancel</string>
@@ -68,7 +70,7 @@
     <!-- EDIT PROFILE SETTINGS -->
 
     <!-- LOGIN -->
-    <string name="title_activity_login">LoginActivity</string>
+    <string name="title_activity_login">HOMiE Login</string>
     <string name="prompt_email">Email</string>
     <string name="prompt_password">Password</string>
     <string name="action_register_short">Register</string>

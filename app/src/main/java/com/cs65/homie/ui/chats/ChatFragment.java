@@ -2,6 +2,7 @@ package com.cs65.homie.ui.chats;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -22,6 +23,8 @@ import com.cs65.homie.R;
 import com.cs65.homie.Utilities;
 import com.cs65.homie.models.Message;
 import com.cs65.homie.models.Profile;
+import com.cs65.homie.ui.profile.view.ProfileViewActivity;
+import com.cs65.homie.ui.profile.view.ProfileViewFragment;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -46,22 +49,37 @@ public class ChatFragment extends Fragment implements View.OnClickListener
     public static final String BUNDLE_KEY_KEYBOARD_UP
         = "CHAT_FRAG_BUNDLE_KEY_KEYBOARD_IS_UP";
 
+    private static final int PROFILE_VIEW_ACTIVITY_RESPONSE_CODE = 22564;
+
     private ChatRecyclerAdapter adapter = null;
+    private boolean inProfile = false;
     private EditText inputView = null;
     //private boolean isKeyboardUp = false;
     private RecyclerView recyclerView = null;
     private String userId = null;
     private ChatsViewModel vm = null;
 
+
+    public void onActivityResult (
+        int requestCode, int resultCode, Intent data
+    )
+    {
+        if (requestCode == PROFILE_VIEW_ACTIVITY_RESPONSE_CODE)
+        {
+            this.inProfile = false;
+        }
+    }
+
     @SuppressLint("NonConstantResourceId")
     public void onClick(View view)
     {
+        // This probably shouldn't be a switch anymore
         switch (view.getId())
         {
 
             case R.id.chatAvatarImageView:
             case R.id.chatNameTextView:
-                // TODO Spawn profile view fragment
+                this.spawnProfileView();
                 break;
             default:
                 // pass
@@ -235,6 +253,26 @@ public class ChatFragment extends Fragment implements View.OnClickListener
         //outState.putBoolean(BUNDLE_KEY_KEYBOARD_UP, this.isKeyboardUp);
     }
 
+    public void spawnProfileView()
+    {
+
+        if (this.inProfile)
+        {
+            return;
+        }
+
+        this.inProfile = true;
+
+        Intent intent = new Intent(this.getContext(), ProfileViewActivity.class);
+        intent.putExtra(ProfileViewFragment.BUNDLE_KEY_USER_ID, this.userId);
+        // FIXME Using fake data
+        intent.putExtra(
+            ProfileViewFragment.BUNDLE_KEY_MY_ID,
+            ((MainActivity)this.requireActivity()).getFakeMyId()
+        );
+        this.startActivityForResult(intent, PROFILE_VIEW_ACTIVITY_RESPONSE_CODE);
+
+    }
 
     private void sendMessage(EditText inputView)
     {
@@ -287,6 +325,15 @@ public class ChatFragment extends Fragment implements View.OnClickListener
 
         this.vm.getMessages(this.userId).setValue(messages);
 
+        this.sendMessageToFirebase(message);
+
+    }
+
+    private void sendMessageToFirebase(Message message)
+    {
+        // TODO Implement
+        // It also should be noted that the message is already in the
+        // ViewModel. Don't duplicate the message somehow.
     }
 
 }

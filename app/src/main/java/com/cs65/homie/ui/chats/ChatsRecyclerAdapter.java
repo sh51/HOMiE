@@ -66,8 +66,12 @@ class ChatsRecyclerAdapter extends RecyclerView.Adapter<ChatsViewHolder>
 
         if (avatarView != null)
         {
-            // TODO Need to set up separate clicks for avatar (to profile)
-            //avatarView.setOnClickListener(this.frag);
+
+            // Clicking on the avatar should spawn that user's profile
+            avatarView.setOnClickListener(
+                (v) -> this.frag.spawnProfileView(profile.getId())
+            );
+
             if (
                 profile.getAvatarImage() == null
                 || profile.getAvatarImage().equals("")

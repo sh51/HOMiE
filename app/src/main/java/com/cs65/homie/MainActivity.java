@@ -9,12 +9,15 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
+import com.cs65.homie.ui.ProfileSettingsActivity;
 import com.cs65.homie.ui.chats.ChatFragment;
 import com.cs65.homie.ui.login.ui.login.LoginActivity;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -23,17 +26,31 @@ import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
+import org.jetbrains.annotations.NotNull;
+
+import java.util.Locale;
+
+
 public class MainActivity extends AppCompatActivity {
 
     // Needs to be "homies" with an 's' and not "homie" because the package
     // name "homie" has too many matches in regex logging mode
     public static final String TAG = "HOMIES";
+
+    private static final String BUNDLE_KEY_MATCH_TRANSITION_BOOL
+        = "MAIN_ACTIVITY_BUNDLE_KEY_MATCH_TRANSITION_BOOL";
+    private static final String MATCH_TEXT_FORMAT = "%s is a Homie!";
     private static final int RC_LOGIN = 0;
+    private static final int EDIT_PROFILE = 0;
 
     private FirebaseAuth mAuth;
     // the menu, login and logout action button
     private MenuItem mLogout, mLogin;
     private View hostView = null;
+    // Whether or not we are in a "You Have a Match!" transition
+    // State must be tracked through rotation
+    private boolean inMatchTransition = false;
+    private NavController navController = null;
     private BottomNavigationView navView = null;
 
     // Fake app user ID for testing/demoing before Firebase
@@ -82,6 +99,14 @@ public class MainActivity extends AppCompatActivity {
     {
 
         super.onCreate(savedInstanceState);
+
+        if (savedInstanceState != null)
+        {
+            this.inMatchTransition = savedInstanceState.getBoolean(
+                BUNDLE_KEY_MATCH_TRANSITION_BOOL, false
+            );
+        }
+
         setContentView(R.layout.activity_main);
 
         this.hostView = findViewById(R.id.nav_host_fragment);
@@ -96,13 +121,13 @@ public class MainActivity extends AppCompatActivity {
                 R.id.navigation_match,
                 R.id.navigation_profile
         ).build();
-        NavController navController = Navigation.findNavController(
+        this.navController = Navigation.findNavController(
             this, R.id.nav_host_fragment
         );
         NavigationUI.setupActionBarWithNavController(
-            this, navController, appBarConfiguration
+            this, this.navController, appBarConfiguration
         );
-        NavigationUI.setupWithNavController(navView, navController);
+        NavigationUI.setupWithNavController(this.navView, this.navController);
 
         // FIXME This spawns the login activity on every single screen rotation
         Intent intent = new Intent(this, LoginActivity.class);
@@ -125,31 +150,34 @@ public class MainActivity extends AppCompatActivity {
     @SuppressLint("NonConstantResourceId")
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.menu_item_logout:
-                FirebaseAuth.getInstance().signOut();
-                // switch to login button after logout
-                if (mLogin != null && mLogout != null) {
-                    mLogin.setVisible(true);
-                    mLogout.setVisible(false);
-                }
-                return false;
-            case R.id.menu_item_login:
-                Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
-                startActivityForResult(intent, RC_LOGIN);
-        }
+        Intent intent = new Intent(getApplicationContext(), ProfileSettingsActivity.class);
+        startActivityForResult(intent, EDIT_PROFILE);
+
+//        switch (item.getItemId()) {
+//            case R.id.menu_item_logout:
+//                FirebaseAuth.getInstance().signOut();
+//                // switch to login button after logout
+//                if (mLogin != null && mLogout != null) {
+//                    mLogin.setVisible(true);
+//                    mLogout.setVisible(false);
+//                }
+//                return false;
+//            case R.id.menu_item_login:
+//                Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
+//                startActivityForResult(intent, RC_LOGIN);
+//        }
         return false;
     }
     @Override
     public boolean onPrepareOptionsMenu(Menu menu)
     {
-        mLogout = menu.findItem(R.id.menu_item_logout);
-        mLogin = menu.findItem(R.id.menu_item_login);
-        if (mLogin != null && mLogout != null) {
-            boolean authenticated = mAuth.getCurrentUser() != null;
-            mLogin.setVisible(!authenticated);
-            mLogout.setVisible(authenticated);
-        }
+//        mLogout = menu.findItem(R.id.menu_item_logout);
+//        mLogin = menu.findItem(R.id.menu_item_login);
+//        if (mLogin != null && mLogout != null) {
+//            boolean authenticated = mAuth.getCurrentUser() != null;
+//            mLogin.setVisible(!authenticated);
+//            mLogout.setVisible(authenticated);
+//        }
         return true;
     }
 
@@ -166,6 +194,44 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
+
+    /**
+     * Transition from match to chat, showing a pop-up on match
+     *
+     * @param name Name of the matchee
+     */
+     public void matchTransition(String name)
+     {
+
+        if (this.inMatchTransition)
+        {
+            return;
+        }
+        this.inMatchTransition = true;
+
+        View popupView = this.getLayoutInflater().inflate(
+            R.layout.popup_match, null
+        );
+        TextView nameView = popupView.findViewById(R.id.matchPopupTextView);
+        if (nameView != null)
+        {
+            nameView.setText(String.format(
+                Locale.getDefault(),
+                MATCH_TEXT_FORMAT,
+                name
+            ));
+        }
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setView(popupView);
+        builder.setOnCancelListener((d) -> this.finishMatchTransition());
+        builder.show();
+
+        // The dialog dies on rotation.
+        // We accept that, and just move the user onto the chat view
+
+        // TODO The chat must be read with the new matched chat upon the transition
+
+     }
 
     /**
      * Show the navigation bar view if hidden
@@ -203,7 +269,6 @@ public class MainActivity extends AppCompatActivity {
         Bundle args = new Bundle();
         args.putString(ChatFragment.ARG_KEY_USER_ID, userId);
 
-        @SuppressWarnings("ConstantConditions")
         FragmentManager activeFragManager
             = this.getSupportFragmentManager().findFragmentById(
             R.id.nav_host_fragment
@@ -231,6 +296,41 @@ public class MainActivity extends AppCompatActivity {
         transaction.commit();
         activeFragManager.executePendingTransactions();
 
+    }
+
+    protected void onResume()
+    {
+        super.onResume();
+        // If we were in a match transition upon destruction, immediately
+        // navigate to the chats fragment
+        // The dialog was destroyed
+        if (this.inMatchTransition)
+        {
+            this.finishMatchTransition();
+        }
+    }
+
+    protected void onSaveInstanceState(@NotNull Bundle outBundle)
+    {
+        super.onSaveInstanceState(outBundle);
+        outBundle.putBoolean(
+            BUNDLE_KEY_MATCH_TRANSITION_BOOL, this.inMatchTransition
+        );
+    }
+
+    /**
+     * Complete a match transition upon destruction of the pop-up dialog
+     */
+    private void finishMatchTransition()
+    {
+        if (this.inMatchTransition)
+        {
+            this.inMatchTransition = false;
+            if (this.navController != null)
+            {
+                this.navController.navigate(R.id.navigation_chats);
+            }
+        }
     }
 
 }
