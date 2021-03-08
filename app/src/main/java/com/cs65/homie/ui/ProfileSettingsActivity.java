@@ -26,6 +26,7 @@ import com.cs65.homie.ui.login.ui.login.RegistrationActivity;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.soundcloud.android.crop.Crop;
@@ -209,6 +210,7 @@ public class ProfileSettingsActivity extends AppCompatActivity {
         newProfile.setEmail(this.email);
         newProfile.setPassword(this.password);
         newProfile.setBio(bio.getText().toString());
+        newProfile.setId(FirebaseAuth.getInstance().getCurrentUser().getUid());
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         db.collection("profiles")
