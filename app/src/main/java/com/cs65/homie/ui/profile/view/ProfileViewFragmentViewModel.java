@@ -45,6 +45,12 @@ public class ProfileViewFragmentViewModel extends ViewModel
         = new MutableLiveData<Boolean>(false);
     private final MutableLiveData<Boolean> place
         = new MutableLiveData<Boolean>(false);
+    private final MutableLiveData<Double> priceMin
+        = new MutableLiveData<Double>(0.0);
+    private final MutableLiveData<Double> priceMax
+        = new MutableLiveData<Double>(0.0);
+    private final MutableLiveData<Double> radius
+        = new MutableLiveData<Double>(0.0);
     private final MutableLiveData<Boolean> smoking
         = new MutableLiveData<Boolean>(false);
     private String userId = "";
@@ -72,7 +78,7 @@ public class ProfileViewFragmentViewModel extends ViewModel
     {
         return this.gender;
     }
-    public MutableLiveData<List<Uri>> getimages()
+    public MutableLiveData<List<Uri>> getImages()
     {
         return this.imageUris;
     }
@@ -149,6 +155,18 @@ public class ProfileViewFragmentViewModel extends ViewModel
     public MutableLiveData<String> getProfileName()
     {
         return this.name;
+    }
+    public MutableLiveData<Double> getPriceMin()
+    {
+        return this.priceMin;
+    }
+    public MutableLiveData<Double> getPriceMax()
+    {
+        return this.priceMax;
+    }
+    public MutableLiveData<Double> getRadius()
+    {
+        return this.radius;
     }
     public MutableLiveData<Boolean> getSmoking()
     {

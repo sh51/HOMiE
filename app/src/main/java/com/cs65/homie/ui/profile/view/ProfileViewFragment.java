@@ -22,6 +22,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.core.text.HtmlCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -60,6 +61,10 @@ public class ProfileViewFragment
         = "%s %.1f miles from you";
     public static final String PLACE_HAS_STR = "Has a place";
     public static final String PLACE_WANTS_STR = "Is looking for a place";
+    public static final String RADIUS_FORMAT_STR
+        = "Finding Homies within <b>%.1f</b> miles";
+    public static final double RADIUS_LIMIT = 2000;
+    public static final String PRICE_FORMAT_STR = "$%.2f";
 
     private Geocoder geocoder = null;
     private LocationManager locationManager = null;
@@ -367,25 +372,34 @@ public class ProfileViewFragment
         {
             if (this.isMe())
             {
-                // TODO Observers
+                this.vm.getPriceMin().observe(
+                    this.getViewLifecycleOwner(), this::updateViewMinPrice
+                );
+                this.updateViewMinPrice(this.vm.getPriceMin().getValue());
             }
         }
-        this.viewPriceMin = view.findViewById(
-            R.id.profileViewMinPriceValueTextView
+        this.viewPriceMax = view.findViewById(
+            R.id.profileViewMaxPriceValueTextView
         );
         if (this.viewPriceMax != null)
         {
             if (this.isMe())
             {
-                // TODO Observers
+                this.vm.getPriceMax().observe(
+                    this.getViewLifecycleOwner(), this::updateViewMaxPrice
+                );
+                this.updateViewMaxPrice(this.vm.getPriceMax().getValue());
             }
         }
         this.viewRadius = view.findViewById(R.id.profileViewRadiusTextView);
         if (this.viewRadius != null)
         {
-            // TODO Observers
             if (this.isMe())
             {
+                this.vm.getRadius().observe(
+                    this.getViewLifecycleOwner(), this::updateViewRadius
+                );
+                this.updateViewRadius(this.vm.getRadius().getValue());
                 this.viewRadius.setVisibility(View.VISIBLE);
             }
         }
@@ -410,7 +424,7 @@ public class ProfileViewFragment
             .findFragmentById(R.id.profileViewCarouselFragView);
         if (carouselFrag != null)
         {
-            this.vm.getimages().observe(
+            this.vm.getImages().observe(
                 this.getViewLifecycleOwner(), carouselFrag::setImages
             );
         }
@@ -652,6 +666,81 @@ public class ProfileViewFragment
         }
     }
 
+    public void updateViewMinPrice(double price)
+    {
+        if (this.viewPriceMin != null)
+        {
+
+            if (price <= 0)
+            {
+                this.viewPriceMin.setText(
+                    R.string.profile_view_min_price_value_placeholder
+                );
+            }
+            else
+            {
+                this.viewPriceMin.setText(String.format(
+                    Locale.getDefault(),
+                    PRICE_FORMAT_STR,
+                    price
+                ));
+            }
+
+        }
+    }
+
+    public void updateViewMaxPrice(double price)
+    {
+        if (this.viewPriceMax != null)
+        {
+
+            if (price <= 0)
+            {
+                this.viewPriceMax.setText(
+                    R.string.profile_view_max_price_value_placeholder
+                );
+            }
+            else
+            {
+                this.viewPriceMax.setText(String.format(
+                    Locale.getDefault(),
+                    PRICE_FORMAT_STR,
+                    price
+                ));
+            }
+
+        }
+    }
+
+    public void updateViewRadius(double radius)
+    {
+        if (this.viewRadius != null)
+        {
+
+            if (radius <= 0 || radius > RADIUS_LIMIT)
+            {
+                this.viewRadius.setText(
+                    R.string.profile_view_radius_placeholder
+                );
+            }
+            else
+            {
+                // The HTML hack is to bold the distance in a string that's
+                // probably too long for this purpose
+                this.viewRadius.setText(HtmlCompat.fromHtml(
+                    String.format(
+                        Locale.getDefault(),
+                        RADIUS_FORMAT_STR,
+                        radius
+
+                    ),
+                    HtmlCompat.FROM_HTML_MODE_LEGACY
+                ));
+            }
+
+        }
+    }
+
     public void updateViewSmoking(boolean smoking)
     {
         if (this.viewSmoking != null)
@@ -715,7 +804,11 @@ public class ProfileViewFragment
         images.add(Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://com.cs65.homie/" + R.drawable.dart1));
         images.add(Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://com.cs65.homie/" + R.drawable.dart2));
         images.add(Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://com.cs65.homie/" + R.drawable.dart3));
-        this.vm.getimages().setValue(images);
+        this.vm.getImages().setValue(images);
+
+        this.vm.getPriceMin().setValue(42.42);
+        this.vm.getPriceMax().setValue(4242.42);
+        this.vm.getRadius().setValue(42.42);
 
     }
 

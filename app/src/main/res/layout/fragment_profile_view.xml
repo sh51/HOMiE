@@ -157,7 +157,7 @@
                         android:orientation="vertical">
 
                         <TextView
-                            android:id="@+id/profileViewMaxPriceTitleTextView"
+                            android:id="@+id/profileViewMinPriceTitleTextView"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="@string/profile_view_min_price_title"
@@ -166,11 +166,13 @@
                             android:textStyle="bold" />
 
                         <TextView
-                            android:id="@+id/profileViewMaxPriceValueTextView"
+                            android:id="@+id/profileViewMinPriceValueTextView"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="@string/profile_view_min_price_value_placeholder"
                             android:textSize="16sp"
+                            android:singleLine="true"
+                            android:ellipsize="middle"
                             android:textAlignment="textEnd" />
                     </LinearLayout>
 
@@ -182,7 +184,7 @@
                         android:orientation="vertical">
 
                         <TextView
-                            android:id="@+id/profileViewMinPriceTitleTextView"
+                            android:id="@+id/profileViewMaxPriceTitleTextView"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:textSize="16sp"
@@ -190,10 +192,12 @@
                             android:textStyle="bold" />
 
                         <TextView
-                            android:id="@+id/profileViewMinPriceValueTextView"
+                            android:id="@+id/profileViewMaxPriceValueTextView"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:textSize="16sp"
+                            android:singleLine="true"
+                            android:ellipsize="middle"
                             android:text="@string/profile_view_max_price_value_placeholder" />
 
                     </LinearLayout>
@@ -206,6 +210,7 @@
                     android:layout_height="wrap_content"
                     android:text="@string/profile_view_radius_placeholder"
                     android:textSize="16sp"
+                    android:layout_marginBottom="17dp"
                     android:visibility="gone" />
 
             </LinearLayout>
