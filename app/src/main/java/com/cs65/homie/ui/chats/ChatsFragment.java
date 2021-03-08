@@ -292,11 +292,6 @@ public class ChatsFragment extends Fragment
                 this.vm.getUsersMessages().setValue(usersMessages);
             }));
         });
-
-        // subscribe to chat events
-        mHelper.addChatEventListener((msg) -> {
-
-        });
     }
 
 

@@ -297,18 +297,6 @@ public class FirebaseHelper {
         }
     }
 
-    // register to chat updates: for simplicity all updates under /chats would be received and filtered
-    // only pertinent chat messages would be presented
-    public void addChatEventListener(Utilities.onChatUpdatedCallbackInterface callback) {
-        String uid = getUid();
-        DatabaseReference ref = rdb.getReference("chats");
-
-
-    }
-    // remove ChatEventListener
-    public void removeChatEventListener() {
-//        if (chatListener != null) rdb.getReference("chats").removeEventListener(chatListener);
-    }
 
     // like a user
     public static void like(String uid, Utilities.onLikeCallbackInterface callback) {
