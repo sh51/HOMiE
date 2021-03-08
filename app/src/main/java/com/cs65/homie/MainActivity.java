@@ -59,6 +59,14 @@ public class MainActivity extends AppCompatActivity {
     private BottomNavigationView navView = null;
 //    private String userId = null;
 
+    // Fake app user ID for testing/demoing before Firebase
+    // Profile view needs it
+    // This eventually needs to be saved to the device somewhere for profile
+    // view to operate
+    public String getFakeMyId()
+    {
+        return "42";
+    }
     // Fake profile user ID for testing/demoing before Firebase
     // Profile view needs it
     public String getFakeUserId()
