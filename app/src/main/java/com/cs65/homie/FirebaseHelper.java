@@ -241,9 +241,10 @@ public class FirebaseHelper {
     // load messages of certain user
     public void loadMessages(String uid, Utilities.onMessagesLoadedCallbackInterface callback) {
         String currId = getUid();
+        ChildEventListener chatListener = chatListeners.get(uid);
         DatabaseReference ref = rdb.getReference("chats/" + getPairId(currId, uid));
 
-        ChildEventListener chatListener = new ChildEventListener() {
+        chatListener = new ChildEventListener() {
             @Override
             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                 Message msg = snapshot.getValue(Message.class);
@@ -281,12 +282,13 @@ public class FirebaseHelper {
 
         chatListeners.put(uid, chatListener);
         ref.orderByChild("timestamp").addChildEventListener(chatListener);
-        Log.d(Globals.TAG, "childEventListner added");
+//        Log.d(Globals.TAG, "childEventListner added");
     }
 
     // unload messages of certain user - this should happen when an unmatch event occurs
     public void unloadMessages(String uid, Utilities.onMessagesUnloadedCallbackInterface callback) {
         ChildEventListener chatListener = chatListeners.get(uid);
+        chatListeners.put(uid, null);
         if (chatListener != null) {
             String currId = getUid();
             DatabaseReference ref = rdb.getReference("chats/" + getPairId(currId, uid));
