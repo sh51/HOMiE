@@ -122,6 +122,8 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
+    // FIXME Needs to be restored once this can build
+    //
     //@SuppressLint("NonConstantResourceId")
     //@Override
     //public boolean onOptionsItemSelected(MenuItem item) {
