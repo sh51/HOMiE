@@ -250,6 +250,7 @@
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
+        app:backgroundTint="#eb8e2a"
         app:rippleColor="#FF0000"
         tools:srcCompat="@tools:sample/backgrounds/scenic" />
 
