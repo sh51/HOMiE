@@ -1,6 +1,7 @@
 package com.cs65.homie.ui.chats;
 
 import android.content.ContentResolver;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,6 +18,8 @@ import com.cs65.homie.MainActivity;
 import com.cs65.homie.R;
 import com.cs65.homie.models.Message;
 import com.cs65.homie.models.Profile;
+import com.cs65.homie.ui.profile.view.ProfileViewActivity;
+import com.cs65.homie.ui.profile.view.ProfileViewFragment;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -136,6 +139,20 @@ public class ChatsFragment extends Fragment
                 );
             }
         }
+
+    }
+
+    public void spawnProfile(String userId)
+    {
+
+        Intent intent = new Intent(this.getContext(), ProfileViewActivity.class);
+        intent.putExtra(ProfileViewFragment.BUNDLE_KEY_USER_ID, userId);
+        // FIXME Using fake data
+        intent.putExtra(
+            ProfileViewFragment.BUNDLE_KEY_MY_ID,
+            ((MainActivity)this.requireActivity()).getFakeMyId()
+        );
+        this.startActivity(intent);
 
     }
 

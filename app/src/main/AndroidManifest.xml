@@ -31,6 +31,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".ui.ImageFullScreenActivity" />
+        <activity android:name=".ui.profile.view.ProfileViewActivity"/>
         <activity android:name="com.soundcloud.android.crop.CropImageActivity" />
         <provider
             android:name="androidx.core.content.FileProvider"
