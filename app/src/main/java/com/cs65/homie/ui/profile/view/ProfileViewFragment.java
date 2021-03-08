@@ -644,7 +644,7 @@ public class ProfileViewFragment
 
         // Get firebase wrapper (in-built)
         // Fetch profiles and loads them
-        // TODO: We need some stratagey of marking unliked and matched profiles to avoid showing the same profile twice
+        // TODO: We need some strategy of marking unliked and matched profiles to avoid showing the same profile twice
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         db.collection("profiles")
                 .get()
