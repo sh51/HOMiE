@@ -17,9 +17,13 @@ import com.cs65.homie.models.Profile;
 import com.cs65.homie.ui.chats.ChatFragment;
 import com.cs65.homie.ui.chats.ChatsViewModel;
 import com.cs65.homie.ui.login.ui.login.LoginActivity;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.messaging.FirebaseMessaging;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
@@ -32,6 +36,11 @@ import androidx.navigation.ui.NavigationUI;
 
 
 import org.jetbrains.annotations.NotNull;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Locale;
 
 
@@ -155,11 +164,54 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
+    public void ReadTextFile() {
+        String string = "";
+        StringBuilder stringBuilder = new StringBuilder();
+        InputStream is = this.getResources().openRawResource(R.raw.env);
+        BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+        while (true) {
+            try {
+                if ((string = reader.readLine()) == null) break;
+            }
+            catch (IOException e) {
+                e.printStackTrace();
+            }
+            stringBuilder.append(string).append("\n");
+        }
+        try {
+            is.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        Log.d(Globals.TAG, "key: " + stringBuilder.toString());
+    }
+
     @SuppressLint("NonConstantResourceId")
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        Intent intent = new Intent(getApplicationContext(), ProfileSettingsActivity.class);
-        startActivityForResult(intent, EDIT_PROFILE);
+//        Intent intent = new Intent(getApplicationContext(), ProfileSettingsActivity.class);
+//        startActivityForResult(intent, EDIT_PROFILE);
+        FirebaseMessaging.getInstance().getToken()
+                .addOnCompleteListener(new OnCompleteListener<String>() {
+                    @Override
+                    public void onComplete(@NonNull Task<String> task) {
+                        if (!task.isSuccessful()) {
+                            Log.w(TAG, "Fetching FCM registration token failed", task.getException());
+                            return;
+                        }
+
+                        // Get new FCM registration token
+                        String token = task.getResult();
+
+                        // Log and toast
+                        Log.d(Globals.TAG, "token: " + token);
+
+                        ReadTextFile();
+
+                    }
+                });
+
 
 //        switch (item.getItemId()) {
 //            case R.id.menu_item_logout:
