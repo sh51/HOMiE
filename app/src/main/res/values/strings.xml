@@ -29,6 +29,11 @@
     <string name="profile_view_match_reject_description">Reject this homie</string>
     <string name="profile_view_match_accept">➕</string>
     <string name="profile_view_match_reject">✖</string>
+    <string name="profile_view_max_price_title"><u>Max Price</u></string>
+    <string name="profile_view_min_price_title"><u>Min Price</u></string>
+    <string name="profile_view_max_price_value_placeholder">$$$$</string>
+    <string name="profile_view_min_price_value_placeholder">$0</string>
+    <string name="profile_view_radius_placeholder">Radius in which to search for Homies: <b>∞</b> Miles</string>
     <!-- STATIC PROFILE VIEW -->
 
     <!-- EDIT PROFILE SETTINGS -->

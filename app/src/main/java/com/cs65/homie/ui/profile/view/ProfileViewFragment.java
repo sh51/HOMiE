@@ -72,6 +72,9 @@ public class ProfileViewFragment
     private TextView viewLoc = null;
     private TextView viewName = null;
     private TextView viewPets = null;
+    private TextView viewPriceMin = null;
+    private TextView viewPriceMax = null;
+    private TextView viewRadius = null;
     private TextView viewSmoking = null;
     protected ProfileViewFragmentViewModel vm = null;
 
@@ -193,7 +196,8 @@ public class ProfileViewFragment
             else if (this.getActivity() != null)
             {
                 // FIXME Using fake data
-                this.vm.setUserId(((MainActivity)this.getActivity()).getFakeUserId());
+                // And note this is setting the user to the app owner
+                this.vm.setUserId(((MainActivity)this.getActivity()).getFakeMyId());
             }
         }
         // FIXME Default user ID (empty string) is magic
@@ -356,6 +360,35 @@ public class ProfileViewFragment
             //noinspection ConstantConditions
             this.updateViewPets(this.vm.getPets().getValue());
         }
+        this.viewPriceMin = view.findViewById(
+            R.id.profileViewMinPriceValueTextView
+        );
+        if (this.viewPriceMin != null)
+        {
+            if (this.isMe())
+            {
+                // TODO Observers
+            }
+        }
+        this.viewPriceMin = view.findViewById(
+            R.id.profileViewMinPriceValueTextView
+        );
+        if (this.viewPriceMax != null)
+        {
+            if (this.isMe())
+            {
+                // TODO Observers
+            }
+        }
+        this.viewRadius = view.findViewById(R.id.profileViewRadiusTextView);
+        if (this.viewRadius != null)
+        {
+            // TODO Observers
+            if (this.isMe())
+            {
+                this.viewRadius.setVisibility(View.VISIBLE);
+            }
+        }
         this.viewSmoking = view.findViewById(R.id.profileViewSmokingTextView);
         if (this.viewSmoking != null)
         {
@@ -380,6 +413,17 @@ public class ProfileViewFragment
             this.vm.getimages().observe(
                 this.getViewLifecycleOwner(), carouselFrag::setImages
             );
+        }
+
+        if (this.isMe())
+        {
+            View priceLayoutView = view.findViewById(
+                R.id.profileViewPriceLayout
+            );
+            if (priceLayoutView != null)
+            {
+                priceLayoutView.setVisibility(View.VISIBLE);
+            }
         }
 
         // Fetch Firebase data asynchronously (eventually, somehow)

@@ -102,10 +102,10 @@ public class ProfileMatchFragment
     public void onViewCreated(View view, Bundle savedInstanceState)
     {
 
-        super.onViewCreated(view, savedInstanceState);
-
         // FIXME Using fake data, need to set to the other user
         super.vm.setUserId(((MainActivity)this.requireActivity()).getFakeUserId());
+
+        super.onViewCreated(view, savedInstanceState);
 
         View scrollLayout = view.findViewById(R.id.profileViewScrollLayout);
         if (scrollLayout != null)

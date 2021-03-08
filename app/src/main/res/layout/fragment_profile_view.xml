@@ -25,7 +25,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:baselineAligned="false">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
@@ -117,6 +118,7 @@
                     android:layout_marginVertical="5dp"
                     android:textSize="16sp" />
 
+
                 <TextView
                     android:id="@+id/profileViewPetsTextView"
                     android:layout_width="match_parent"
@@ -138,6 +140,74 @@
                     android:lineSpacingExtra="2sp"
                     android:textAlignment="center"
                     android:textSize="16sp" />
+
+                <LinearLayout
+                    android:id="@+id/profileViewPriceLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:baselineAligned="false"
+                    android:orientation="horizontal"
+                    android:visibility="gone">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="8dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/profileViewMaxPriceTitleTextView"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/profile_view_min_price_title"
+                            android:textAlignment="textEnd"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/profileViewMaxPriceValueTextView"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/profile_view_min_price_value_placeholder"
+                            android:textSize="16sp"
+                            android:textAlignment="textEnd" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="8dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/profileViewMinPriceTitleTextView"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textSize="16sp"
+                            android:text="@string/profile_view_max_price_title"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/profileViewMinPriceValueTextView"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textSize="16sp"
+                            android:text="@string/profile_view_max_price_value_placeholder" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/profileViewRadiusTextView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/profile_view_radius_placeholder"
+                    android:textSize="16sp"
+                    android:visibility="gone" />
+
             </LinearLayout>
 
         </LinearLayout>
