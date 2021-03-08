@@ -22,6 +22,9 @@ import java.util.List;
 
 /**
  * Matching fragment, to handle matching functionality
+ *
+ * This fragment assumes that its parent is ALWAYS MainActivity,
+ * and that's not a temporary fake-data dependency
  */
 @SuppressWarnings("Convert2Diamond")
 public class ProfileMatchFragment
@@ -154,12 +157,27 @@ public class ProfileMatchFragment
 
     ///// ///// /////
 
+    private boolean isMatch()
+    {
+        // TODO A real implementation would somehow ping firebase (or a cache)
+        // and see if userId has matched myId.
+        return true;
+    }
+
+
     private void handleMatch()
     {
-        // TODO Need a real implementation
-        Utilities.showErrorToast(
-            R.string.profile_view_match_accept_description,
-            this.getActivity());
+
+        // TODO Need to send match to Firebase
+
+        if (this.isMatch())
+        {
+            ((MainActivity)this.requireActivity()).matchTransition(
+                this.vm.getProfileName().getValue()
+            );
+
+        }
+
     }
 
     private void handleReject()
