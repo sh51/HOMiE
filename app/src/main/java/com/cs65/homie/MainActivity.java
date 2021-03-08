@@ -10,6 +10,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.cs65.homie.ui.ProfileSettingsActivity;
 import com.cs65.homie.ui.chats.ChatFragment;
 import com.cs65.homie.ui.login.ui.login.LoginActivity;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -29,6 +30,7 @@ public class MainActivity extends AppCompatActivity {
     // name "homie" has too many matches in regex logging mode
     public static final String TAG = "HOMIES";
     private static final int RC_LOGIN = 0;
+    private static final int EDIT_PROFILE = 0;
 
     private FirebaseAuth mAuth;
     // the menu, login and logout action button
@@ -122,38 +124,39 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
-    // FIXME Needs to be restored once this can build
-    //
-    //@SuppressLint("NonConstantResourceId")
-    //@Override
-    //public boolean onOptionsItemSelected(MenuItem item) {
-    //    switch (item.getItemId()) {
-    //        case R.id.menu_item_logout:
-    //            FirebaseAuth.getInstance().signOut();
-    //            // switch to login button after logout
-    //            if (mLogin != null && mLogout != null) {
-    //                mLogin.setVisible(true);
-    //                mLogout.setVisible(false);
-    //            }
-    //            return false;
-    //        case R.id.menu_item_login:
-    //            Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
-    //            startActivityForResult(intent, RC_LOGIN);
-    //    }
-    //    return false;
-    //}
-    //@Override
-    //public boolean onPrepareOptionsMenu(Menu menu)
-    //{
-    //    mLogout = menu.findItem(R.id.menu_item_logout);
-    //    mLogin = menu.findItem(R.id.menu_item_login);
-    //    if (mLogin != null && mLogout != null) {
-    //        boolean authenticated = mAuth.getCurrentUser() != null;
-    //        mLogin.setVisible(!authenticated);
-    //        mLogout.setVisible(authenticated);
-    //    }
-    //    return true;
-    //}
+    @SuppressLint("NonConstantResourceId")
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        Intent intent = new Intent(getApplicationContext(), ProfileSettingsActivity.class);
+        startActivityForResult(intent, EDIT_PROFILE);
+
+//        switch (item.getItemId()) {
+//            case R.id.menu_item_logout:
+//                FirebaseAuth.getInstance().signOut();
+//                // switch to login button after logout
+//                if (mLogin != null && mLogout != null) {
+//                    mLogin.setVisible(true);
+//                    mLogout.setVisible(false);
+//                }
+//                return false;
+//            case R.id.menu_item_login:
+//                Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
+//                startActivityForResult(intent, RC_LOGIN);
+//        }
+        return false;
+    }
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu)
+    {
+//        mLogout = menu.findItem(R.id.menu_item_logout);
+//        mLogin = menu.findItem(R.id.menu_item_login);
+//        if (mLogin != null && mLogout != null) {
+//            boolean authenticated = mAuth.getCurrentUser() != null;
+//            mLogin.setVisible(!authenticated);
+//            mLogout.setVisible(authenticated);
+//        }
+        return true;
+    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
