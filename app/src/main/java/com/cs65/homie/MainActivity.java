@@ -122,36 +122,36 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
-    @SuppressLint("NonConstantResourceId")
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.menu_item_logout:
-                FirebaseAuth.getInstance().signOut();
-                // switch to login button after logout
-                if (mLogin != null && mLogout != null) {
-                    mLogin.setVisible(true);
-                    mLogout.setVisible(false);
-                }
-                return false;
-            case R.id.menu_item_login:
-                Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
-                startActivityForResult(intent, RC_LOGIN);
-        }
-        return false;
-    }
-    @Override
-    public boolean onPrepareOptionsMenu(Menu menu)
-    {
-        mLogout = menu.findItem(R.id.menu_item_logout);
-        mLogin = menu.findItem(R.id.menu_item_login);
-        if (mLogin != null && mLogout != null) {
-            boolean authenticated = mAuth.getCurrentUser() != null;
-            mLogin.setVisible(!authenticated);
-            mLogout.setVisible(authenticated);
-        }
-        return true;
-    }
+    //@SuppressLint("NonConstantResourceId")
+    //@Override
+    //public boolean onOptionsItemSelected(MenuItem item) {
+    //    switch (item.getItemId()) {
+    //        case R.id.menu_item_logout:
+    //            FirebaseAuth.getInstance().signOut();
+    //            // switch to login button after logout
+    //            if (mLogin != null && mLogout != null) {
+    //                mLogin.setVisible(true);
+    //                mLogout.setVisible(false);
+    //            }
+    //            return false;
+    //        case R.id.menu_item_login:
+    //            Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
+    //            startActivityForResult(intent, RC_LOGIN);
+    //    }
+    //    return false;
+    //}
+    //@Override
+    //public boolean onPrepareOptionsMenu(Menu menu)
+    //{
+    //    mLogout = menu.findItem(R.id.menu_item_logout);
+    //    mLogin = menu.findItem(R.id.menu_item_login);
+    //    if (mLogin != null && mLogout != null) {
+    //        boolean authenticated = mAuth.getCurrentUser() != null;
+    //        mLogin.setVisible(!authenticated);
+    //        mLogout.setVisible(authenticated);
+    //    }
+    //    return true;
+    //}
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {

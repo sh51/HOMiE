@@ -6,6 +6,7 @@
     <string name="title_chats">Chats</string>
     <string name="title_profile_view">Profile</string>
     <string name="title_match">Match with a Homie!</string>
+    <string name="title_edit_profile">Edit Your Profile</string>
 
     <!-- CHAT -->
     <string name="chat_back_button_description">Back Button</string>
