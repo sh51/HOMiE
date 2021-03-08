@@ -139,10 +139,27 @@ public class ProfileViewFragment
 
         // Setup My ID
         // FIXME Default user ID (empty string) is magic
-        if (this.vm.getMyId().equals("") && this.getActivity() != null)
+        if (this.vm.getMyId().equals(""))
         {
-            // FIXME Using fake data
-            this.vm.setMyId(((MainActivity)this.getActivity()).getFakeMyId());
+
+            if (savedInstanceState != null)
+            {
+                this.vm.setMyId(savedInstanceState.getString(
+                    BUNDLE_KEY_MY_ID, ""
+                ));
+            }
+            else if (this.getArguments() != null)
+            {
+                this.vm.setMyId(this.getArguments().getString(
+                    BUNDLE_KEY_MY_ID, ""
+                ));
+            }
+            else if (this.getActivity() != null)
+            {
+                // FIXME Using fake data
+                this.vm.setMyId(((MainActivity) this.getActivity()).getFakeMyId());
+            }
+
         }
         // FIXME Default user ID (empty string) is magic
         if (this.vm.getMyId().equals(""))
@@ -161,8 +178,23 @@ public class ProfileViewFragment
         // FIXME Default user ID (empty string) is magic
         if (this.vm.getUserId().equals("") && this.getActivity() != null)
         {
-            // FIXME Using fake data
-            this.vm.setUserId(((MainActivity)this.getActivity()).getFakeMyId());
+            if (savedInstanceState != null)
+            {
+                this.vm.setUserId(savedInstanceState.getString(
+                    BUNDLE_KEY_USER_ID, ""
+                ));
+            }
+            else if (this.getArguments() != null)
+            {
+                this.vm.setUserId(this.getArguments().getString(
+                    BUNDLE_KEY_USER_ID, ""
+                ));
+            }
+            else if (this.getActivity() != null)
+            {
+                // FIXME Using fake data
+                this.vm.setUserId(((MainActivity)this.getActivity()).getFakeUserId());
+            }
         }
         // FIXME Default user ID (empty string) is magic
         if (this.vm.getUserId().equals(""))
@@ -208,6 +240,7 @@ public class ProfileViewFragment
 
     public void onDestroy()
     {
+        this.locationManager.removeUpdates(this);
         this.workerThread.quitSafely();
         super.onDestroy();
     }
@@ -236,7 +269,6 @@ public class ProfileViewFragment
         // If the user uses a live location, update the location on resume
         // At the moment we don't bother listening to the location
         // Excessive
-        //noinspection ConstantConditions
         if (this.vm.getMyLocLive().getValue())
         {
             this.requestLocUpdate();
