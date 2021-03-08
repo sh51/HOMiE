@@ -1,5 +1,6 @@
 package com.cs65.homie.ui;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
@@ -17,12 +18,14 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
 
+import com.cs65.homie.MainActivity;
 import com.cs65.homie.R;
 import com.cs65.homie.Utilities;
 import com.cs65.homie.models.Profile;
 import com.cs65.homie.ui.login.ui.login.RegistrationActivity;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.soundcloud.android.crop.Crop;
@@ -30,6 +33,9 @@ import com.soundcloud.android.crop.Crop;
 import java.io.File;
 
 public class ProfileSettingsActivity extends AppCompatActivity {
+
+    // TODO: Make better pattern, just testing functionality
+    public static String userID = null;
 
     private ImageView photoView;
     private String tempImgFileName = "temp.png";
@@ -196,11 +202,13 @@ public class ProfileSettingsActivity extends AppCompatActivity {
         Log.d(TAG, "toasted");
 
         // Firebase
+        TextInputEditText bio = (TextInputEditText)findViewById(R.id.bio);
+
         Profile newProfile = new Profile();
         newProfile.setFirstName(this.name);
         newProfile.setEmail(this.email);
         newProfile.setPassword(this.password);
-
+        newProfile.setBio(bio.getText().toString());
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         db.collection("profiles")
@@ -209,8 +217,7 @@ public class ProfileSettingsActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess(DocumentReference documentReference) {
                         Log.d(TAG, "DocumentSnapshot added with ID: " + documentReference.getId());
-
-                        // TODO: Set current account ID
+                        MainActivity.userId = documentReference.getId();
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {

@@ -1,7 +1,9 @@
 package com.cs65.homie.ui.chats;
 
 import android.content.ContentResolver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -82,6 +84,9 @@ public class ChatsFragment extends Fragment
     public void onMessagesUpdate(List<Message> messages)
     {
 
+        SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
+        String userId = sharedPref.getString("userId", null);
+
         // if the messages list is not empty, get the other user
         // (might be sender or receiver) or the first message, and invalidate
         // that chat recycler view, to update the time and message preview
@@ -89,7 +94,7 @@ public class ChatsFragment extends Fragment
         {
             String receiverId = messages.get(0).getReceiverId();
             // FIXME Using fake data
-            if (receiverId.equals(((MainActivity) this.requireActivity()).getFakeMyId()))
+            if (receiverId.equals(userId))
             {
                 receiverId = messages.get(0).getSenderId();
             }
@@ -166,12 +171,17 @@ public class ChatsFragment extends Fragment
 
         this.inProfile = true;
 
+        // userID
+        SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
+        String userID = sharedPref.getString("userId", null);
+
+
         Intent intent = new Intent(this.getContext(), ProfileViewActivity.class);
         intent.putExtra(ProfileViewFragment.BUNDLE_KEY_USER_ID, userId);
-        // FIXME Using fake data
+        // FIXME: Handle null cases
         intent.putExtra(
             ProfileViewFragment.BUNDLE_KEY_MY_ID,
-            ((MainActivity)this.requireActivity()).getFakeMyId()
+                userID
         );
         this.startActivity(intent);
 

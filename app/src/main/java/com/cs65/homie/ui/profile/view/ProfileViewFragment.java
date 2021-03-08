@@ -36,7 +36,9 @@ import com.cs65.homie.ui.ImageFullScreenActivity;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
@@ -163,8 +165,8 @@ public class ProfileViewFragment
             }
             else if (this.getActivity() != null)
             {
-                // FIXME Using fake data
-                this.vm.setMyId(((MainActivity) this.getActivity()).getFakeMyId());
+                // TODO: There may be a race condition here
+                this.vm.setMyId(MainActivity.userId);
             }
 
         }
@@ -676,39 +678,80 @@ public class ProfileViewFragment
 
         // Get firebase wrapper (in-built)
         // Fetch profiles and loads them
-        // TODO: We need some strategy of marking unliked and matched profiles to avoid showing the same profile twice
+        // TODO: We need to fetch only the current user ID
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-        db.collection("profiles")
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            for (QueryDocumentSnapshot document : task.getResult()) {
 
-                                // Update UI
-                                bathroom.setValue((boolean)document.getData().get("privateBathroom"));
-                                bio.setValue((String)document.getData().get("bio"));
-                                pets.setValue((boolean)document.getData().get("petFriendly"));
-                                hasPlace.setValue((boolean)document.getData().get("hasApartment"));
-                                isSmoking.setValue((boolean)document.getData().get("smoking"));
-                                name.setValue((String)document.getData().get("firstName"));
+        if (isMe()) {
+            CollectionReference profilies = db.collection("profilies");
 
-                                int genderCode = Math.toIntExact((long)document.getData().get("gender"));
-                                if (genderCode == 1) {
-                                    gender.setValue("Female");
-                                } else {
-                                    gender.setValue("Male");
+            // Create a query against the collection.
+            Query query = profilies.whereEqualTo("id", this.vm.getUserId());
+            query.get()
+                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                            if (task.isSuccessful()) {
+                                for (QueryDocumentSnapshot document : task.getResult()) {
+                                    Log.d("firebase - homie", document.getId() + " => " + document.getData());
+
+                                    // Update UI
+                                    bathroom.setValue((boolean)document.getData().get("privateBathroom"));
+                                    bio.setValue((String)document.getData().get("bio"));
+                                    pets.setValue((boolean)document.getData().get("petFriendly"));
+                                    hasPlace.setValue((boolean)document.getData().get("hasApartment"));
+                                    isSmoking.setValue((boolean)document.getData().get("smoking"));
+                                    name.setValue((String)document.getData().get("firstName"));
+
+                                    int genderCode = Math.toIntExact((long)document.getData().get("gender"));
+                                    if (genderCode == 1) {
+                                        gender.setValue("Female");
+                                    } else {
+                                        gender.setValue("Male");
+                                    }
                                 }
-
-                                break;
-
+                            } else {
+                                Log.d("firebase - homie", "Error getting documents: ", task.getException());
                             }
-                        } else {
-                            Log.w("firebase - homies", "Error getting documents.", task.getException());
                         }
-                    }
-                });
+                    });
+
+
+//
+//            db.collection("profiles")
+//                    .get()
+//                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+//                        @Override
+//                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
+//                            if (task.isSuccessful()) {
+//                                for (QueryDocumentSnapshot document : task.getResult()) {
+//
+//                                    // Update UI
+//                                    bathroom.setValue((boolean)document.getData().get("privateBathroom"));
+//                                    bio.setValue((String)document.getData().get("bio"));
+//                                    pets.setValue((boolean)document.getData().get("petFriendly"));
+//                                    hasPlace.setValue((boolean)document.getData().get("hasApartment"));
+//                                    isSmoking.setValue((boolean)document.getData().get("smoking"));
+//                                    name.setValue((String)document.getData().get("firstName"));
+//
+//                                    int genderCode = Math.toIntExact((long)document.getData().get("gender"));
+//                                    if (genderCode == 1) {
+//                                        gender.setValue("Female");
+//                                    } else {
+//                                        gender.setValue("Male");
+//                                    }
+//
+//                                    break;
+//
+//                                }
+//                            } else {
+//                                Log.w("firebase - homies", "Error getting documents.", task.getException());
+//                            }
+//                        }
+//                    });
+
+        } else {
+            // TODO: Handle ID doesnt exist
+        }
 
     }
 
