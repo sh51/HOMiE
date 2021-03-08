@@ -69,7 +69,7 @@ class ChatsRecyclerAdapter extends RecyclerView.Adapter<ChatsViewHolder>
 
             // Clicking on the avatar should spawn that user's profile
             avatarView.setOnClickListener(
-                (v) -> this.frag.spawnProfile(profile.getId())
+                (v) -> this.frag.spawnProfileView(profile.getId())
             );
 
             if (

@@ -19,8 +19,6 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import java.util.ArrayList;
 import java.util.List;
 
-// TODO Clicking the avatar should put it into full screen (if set)
-
 
 /**
  * Matching fragment, to handle matching functionality
@@ -38,6 +36,11 @@ public class ProfileMatchFragment
 
     public void onClick(View view)
     {
+
+        // FIXME It's likely you can match more than once by spamming
+        // the button or swiping
+        // There's nothing stopping you from doing that at least
+
         // TODO After-matching action, ping to Firebase, "you have a match!"
         // etc happens here
         // For now, toasts

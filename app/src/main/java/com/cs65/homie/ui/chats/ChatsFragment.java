@@ -38,11 +38,25 @@ import java.util.TreeMap;
 public class ChatsFragment extends Fragment
 {
 
+    private static final int PROFILE_VIEW_ACTIVITY_RESPONSE_CODE = 22564;
+
     private ChatsRecyclerAdapter adapter = null;
+    private boolean inProfile = false;
     // Defensive coding
     @SuppressWarnings("FieldCanBeLocal")
     private RecyclerView recyclerView = null;
     private ChatsViewModel vm = null;
+
+
+    public void onActivityResult (
+        int requestCode, int resultCode, Intent data
+    )
+    {
+        if (requestCode == PROFILE_VIEW_ACTIVITY_RESPONSE_CODE)
+        {
+            this.inProfile = false;
+        }
+    }
 
     public void onCreate(Bundle savedInstanceState)
     {
@@ -142,8 +156,15 @@ public class ChatsFragment extends Fragment
 
     }
 
-    public void spawnProfile(String userId)
+    public void spawnProfileView(String userId)
     {
+
+        if (this.inProfile)
+        {
+            return;
+        }
+
+        this.inProfile = true;
 
         Intent intent = new Intent(this.getContext(), ProfileViewActivity.class);
         intent.putExtra(ProfileViewFragment.BUNDLE_KEY_USER_ID, userId);

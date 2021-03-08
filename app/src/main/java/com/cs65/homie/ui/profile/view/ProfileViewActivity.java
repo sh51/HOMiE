@@ -9,9 +9,11 @@ import androidx.fragment.app.FragmentTransaction;
 
 import com.cs65.homie.R;
 
-import java.util.List;
 
-
+/**
+ * Wrapper activity around the ProfileViewFragment, so there can be an
+ * activity that supports profile views
+ */
 public class ProfileViewActivity extends AppCompatActivity
 {
 
@@ -58,6 +60,7 @@ public class ProfileViewActivity extends AppCompatActivity
     }
 
     // We don't need to worry about multiple onCreate calls because the
-    // contained fragment saves the Ids into its ViewModel
+    // contained fragment saves the IDs into its ViewModel
+    // So we don't need to save the IDs
 
 }
