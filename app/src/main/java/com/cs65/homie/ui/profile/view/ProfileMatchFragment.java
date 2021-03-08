@@ -4,6 +4,7 @@ import android.content.ContentResolver;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -12,13 +13,21 @@ import android.widget.LinearLayout;
 
 import androidx.cardview.widget.CardView;
 
+import androidx.annotation.NonNull;
+import androidx.lifecycle.MutableLiveData;
+
 import com.cs65.homie.MainActivity;
 import com.cs65.homie.R;
 import com.cs65.homie.Utilities;
 import com.cs65.homie.ui.gestures.OnSwipeGestureListener;
 import com.cs65.homie.ui.gestures.SwipeGesture;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -224,37 +233,63 @@ public class ProfileMatchFragment
      */
     private void loadFakeData()
     {
-
-        this.vm.getBathroom().setValue(true);
-        this.vm.getBio().setValue(
-            "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do "
-                + "eiusmod tempor incididunt ut labore et dolore magna aliqua. "
-                + "Ut enim ad minim veniam, quis nostrud exercitation ullamco "
-                + "laboris nisi ut aliquip ex ea commodo consequat. Duis aute "
-                + "irure dolor in reprehenderit in voluptate velit esse cillum "
-                + "dolore eu fugiat nulla pariatur. Excepteur sint occaecat "
-                + "cupidatat non proident, sunt in culpa qui officia deserunt "
-                + "mollit anim id est laborum."
-        );
-        this.vm.getGender().setValue("Female");
+        // TODO: Where will we get this? We aren't currently storing it
         this.vm.getLoc().setValue(new LatLng(43.624794, -72.323171));
         this.vm.getMyLoc().setValue(new LatLng(43.704166, -72.288762));
         this.vm.getMyLocLive().setValue(true);
         this.vm.getMyLocStr().setValue("Sanborn");
-        this.vm.getPets().setValue(true);
-        this.vm.getPlace().setValue(true);
-        this.vm.getProfileName().setValue("Jane");
-        this.vm.getSmoking().setValue(true);
         this.vm.getAvatarUri().setValue(
             Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://com.cs65.homie/" + R.drawable.ai)
         );
-
         List<Uri> images = new ArrayList<Uri>();
         images.add(Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://com.cs65.homie/" + R.drawable.dart0));
         images.add(Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://com.cs65.homie/" + R.drawable.dart1));
         images.add(Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://com.cs65.homie/" + R.drawable.dart2));
         images.add(Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://com.cs65.homie/" + R.drawable.dart3));
         this.vm.getImages().setValue(images);
+
+
+        // Firebase section --------------------
+        MutableLiveData<String> bio = this.vm.getBio();
+        MutableLiveData<Boolean> bathroom = this.vm.getBathroom();
+        MutableLiveData<String> gender = this.vm.getGender();
+        MutableLiveData<Boolean> pets = this.vm.getPets();
+        MutableLiveData<Boolean> hasPlace = this.vm.getPlace();
+        MutableLiveData<Boolean> isSmoking = this.vm.getSmoking();
+        MutableLiveData<String> name = this.vm.getProfileName();
+
+        // Get firebase wrapper (in-built)
+        // Fetch profiles and loads them
+        // TODO: We need some stratagey of marking unliked and matched profiles to avoid showing the same profile twice and avoid showing our own profile
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db.collection("profiles")
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+
+                                // Update UI
+                                bathroom.setValue((boolean)document.getData().get("privateBathroom"));
+                                bio.setValue((String)document.getData().get("bio"));
+                                pets.setValue((boolean)document.getData().get("petFriendly"));
+                                hasPlace.setValue((boolean)document.getData().get("hasApartment"));
+                                isSmoking.setValue((boolean)document.getData().get("smoking"));
+                                name.setValue((String)document.getData().get("firstName"));
+
+                                int genderCode = Math.toIntExact((long)document.getData().get("gender"));
+                                if (genderCode == 1) {
+                                    gender.setValue("Female");
+                                } else {
+                                    gender.setValue("Male");
+                                }
+                            }
+                        } else {
+                            Log.w("firebase - homies", "Error getting documents.", task.getException());
+                        }
+                    }
+                });
 
     }
 

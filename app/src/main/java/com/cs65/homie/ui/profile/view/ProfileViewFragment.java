@@ -22,17 +22,28 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.core.text.HtmlCompat;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.cs65.homie.MainActivity;
 import com.cs65.homie.R;
 import com.cs65.homie.ThreadPerTaskExecutor;
 import com.cs65.homie.Utilities;
+import com.cs65.homie.ui.ProfileSettingsActivity;
 import com.cs65.homie.ui.carousel.ImageCarouselFragment;
 import com.cs65.homie.ui.ImageFullScreenActivity;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.FieldPath;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -131,110 +142,115 @@ public class ProfileViewFragment
     {
 
         super.onCreate(savedInstanceState);
-
-        Log.d(
-            MainActivity.TAG,
-            this.getClass().getCanonicalName()
-                + " location permissions: " +
-                Utilities.checkPermissionLocation(this.getActivity())
-        );
-
         // Get the view model instance
         // ViewModel can never be null
         this.vm = new ViewModelProvider(this).get(
-            ProfileViewFragmentViewModel.class
+                ProfileViewFragmentViewModel.class
         );
 
-        // Setup My ID
-        // FIXME Default user ID (empty string) is magic
-        if (this.vm.getMyId().equals(""))
-        {
 
-            if (savedInstanceState != null)
-            {
-                this.vm.setMyId(savedInstanceState.getString(
-                    BUNDLE_KEY_MY_ID, ""
-                ));
-            }
-            else if (this.getArguments() != null)
-            {
-                this.vm.setMyId(this.getArguments().getString(
-                    BUNDLE_KEY_MY_ID, ""
-                ));
-            }
-            else if (this.getActivity() != null)
-            {
-                // FIXME Using fake data
-                this.vm.setMyId(((MainActivity) this.getActivity()).getFakeMyId());
-            }
-
-        }
-        // FIXME Default user ID (empty string) is magic
-        if (this.vm.getMyId().equals(""))
-        {
-            // TODO Handle
+        // If no current USERid, go to profile page
+        if (MainActivity.userId == null) {
+            Intent myIntent = new Intent(ProfileViewFragment.this.getActivity(), ProfileSettingsActivity.class);
+            startActivity(myIntent);
+        } else {
             Log.d(
-                MainActivity.TAG, String.format(
-                    "%s.onCreate(), MyId is %s",
-                    this.getClass().getCanonicalName(),
-                    this.vm.getMyId()
-                ));
-            return;
-        }
+                    MainActivity.TAG,
+                    this.getClass().getCanonicalName()
+                            + " location permissions: " +
+                            Utilities.checkPermissionLocation(this.getActivity())
+            );
 
-        // Setup User ID
-        // FIXME Default user ID (empty string) is magic
-        if (this.vm.getUserId().equals("") && this.getActivity() != null)
-        {
-            if (savedInstanceState != null)
+            // Setup My ID
+            // FIXME Default user ID (empty string) is magic
+            if (this.vm.getMyId().equals(""))
             {
-                this.vm.setUserId(savedInstanceState.getString(
-                    BUNDLE_KEY_USER_ID, ""
-                ));
-            }
-            else if (this.getArguments() != null)
-            {
-                this.vm.setUserId(this.getArguments().getString(
-                    BUNDLE_KEY_USER_ID, ""
-                ));
-            }
-            else if (this.getActivity() != null)
-            {
-                // FIXME Using fake data
-                // And note this is setting the user to the app owner
-                this.vm.setUserId(((MainActivity)this.getActivity()).getFakeMyId());
-            }
-        }
-        // FIXME Default user ID (empty string) is magic
-        if (this.vm.getUserId().equals(""))
-        {
-            // TODO Handle
-            Log.d(MainActivity.TAG, String.format(
-                "%s.onCreate(), UserID is %s",
-                this.getClass().getCanonicalName(),
-                this.vm.getUserId()
-            ));
-            return;
-        }
 
-        // Setup the location services if we need it.
-        this.geocoder = new Geocoder(this.getContext(), Locale.getDefault());
-        this.locationManager
-            = (LocationManager) this.requireActivity().getSystemService(
-            Context.LOCATION_SERVICE
-        );
-        Criteria locCriteria = new Criteria();
-        locCriteria.setAccuracy(Criteria.ACCURACY_COARSE);
-        this.locationProvider = this.locationManager.getBestProvider(
-            locCriteria, true
-        );
-        Log.d(
-            MainActivity.TAG,
-            this.getClass().getCanonicalName()
-                + " location provider: "
-                + this.locationProvider
-        );
+                if (savedInstanceState != null)
+                {
+                    this.vm.setMyId(savedInstanceState.getString(
+                            BUNDLE_KEY_MY_ID, ""
+                    ));
+                }
+                else if (this.getArguments() != null)
+                {
+                    this.vm.setMyId(this.getArguments().getString(
+                            BUNDLE_KEY_MY_ID, ""
+                    ));
+                }
+                else if (this.getActivity() != null)
+                {
+                    // TODO: There may be a race condition here
+                    this.vm.setMyId(MainActivity.userId);
+                }
 
+            }
+            // FIXME Default user ID (empty string) is magic
+            if (this.vm.getMyId().equals(""))
+            {
+                // TODO Handle
+                Log.d(
+                        MainActivity.TAG, String.format(
+                                "%s.onCreate(), MyId is %s",
+                                this.getClass().getCanonicalName(),
+                                this.vm.getMyId()
+                        ));
+                return;
+            }
+
+            // Setup User ID
+            // FIXME Default user ID (empty string) is magic
+            if (this.vm.getUserId().equals("") && this.getActivity() != null)
+            {
+                if (savedInstanceState != null)
+                {
+                    this.vm.setUserId(savedInstanceState.getString(
+                            BUNDLE_KEY_USER_ID, ""
+                    ));
+                }
+                else if (this.getArguments() != null)
+                {
+                    this.vm.setUserId(this.getArguments().getString(
+                            BUNDLE_KEY_USER_ID, ""
+                    ));
+                }
+                else if (this.getActivity() != null)
+                {
+                    // FIXME Using fake data
+                    this.vm.setUserId(((MainActivity)this.getActivity()).getFakeUserId());
+                }
+            }
+            // FIXME Default user ID (empty string) is magic
+            if (this.vm.getUserId().equals(""))
+            {
+                // TODO Handle
+                Log.d(MainActivity.TAG, String.format(
+                        "%s.onCreate(), UserID is %s",
+                        this.getClass().getCanonicalName(),
+                        this.vm.getUserId()
+                ));
+                return;
+            }
+
+            // Setup the location services if we need it.
+            this.geocoder = new Geocoder(this.getContext(), Locale.getDefault());
+            this.locationManager
+                    = (LocationManager) this.requireActivity().getSystemService(
+                    Context.LOCATION_SERVICE
+            );
+            Criteria locCriteria = new Criteria();
+            locCriteria.setAccuracy(Criteria.ACCURACY_COARSE);
+            this.locationProvider = this.locationManager.getBestProvider(
+                    locCriteria, true
+            );
+            Log.d(
+                    MainActivity.TAG,
+                    this.getClass().getCanonicalName()
+                            + " location provider: "
+                            + this.locationProvider
+            );
+
+        }
     }
 
     public View onCreateView(
@@ -249,8 +265,12 @@ public class ProfileViewFragment
 
     public void onDestroy()
     {
-        this.locationManager.removeUpdates(this);
-        this.workerThread.quitSafely();
+        if (locationManager != null) {
+            this.locationManager.removeUpdates(this);
+        }
+        if (workerThread != null) {
+            this.workerThread.quitSafely();
+        }
         super.onDestroy();
     }
 
@@ -768,7 +788,7 @@ public class ProfileViewFragment
      */
     private boolean isMe()
     {
-        return this.vm.getMyId().equals(this.vm.getUserId());
+        return this.vm.getMyId().equals(MainActivity.userId);
     }
 
     /**
@@ -777,26 +797,10 @@ public class ProfileViewFragment
     private void loadFakeData()
     {
 
-        this.vm.getBathroom().setValue(false);
-        this.vm.getBio().setValue(
-            "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do "
-            + "eiusmod tempor incididunt ut labore et dolore magna aliqua. "
-            + "Ut enim ad minim veniam, quis nostrud exercitation ullamco "
-            + "laboris nisi ut aliquip ex ea commodo consequat. Duis aute "
-            + "irure dolor in reprehenderit in voluptate velit esse cillum "
-            + "dolore eu fugiat nulla pariatur. Excepteur sint occaecat "
-            + "cupidatat non proident, sunt in culpa qui officia deserunt "
-            + "mollit anim id est laborum."
-        );
-        this.vm.getGender().setValue("Male");
         this.vm.getLoc().setValue(new LatLng(43.624794, -72.323171));
         this.vm.getMyLoc().setValue(new LatLng(43.704166, -72.288762));
         this.vm.getMyLocLive().setValue(true);
         this.vm.getMyLocStr().setValue("Sanborn");
-        this.vm.getPets().setValue(false);
-        this.vm.getPlace().setValue(false);
-        this.vm.getProfileName().setValue("John");
-        this.vm.getSmoking().setValue(false);
         this.vm.getAvatarUri().setValue(null);
 
         List<Uri> images = new ArrayList<Uri>();
@@ -809,6 +813,53 @@ public class ProfileViewFragment
         this.vm.getPriceMin().setValue(42.42);
         this.vm.getPriceMax().setValue(4242.42);
         this.vm.getRadius().setValue(42.42);
+
+
+        // Firebase section --------------------
+        MutableLiveData<String> bio = this.vm.getBio();
+        MutableLiveData<Boolean> bathroom = this.vm.getBathroom();
+        MutableLiveData<String> gender = this.vm.getGender();
+        MutableLiveData<Boolean> pets = this.vm.getPets();
+        MutableLiveData<Boolean> hasPlace = this.vm.getPlace();
+        MutableLiveData<Boolean> isSmoking = this.vm.getSmoking();
+        MutableLiveData<String> name = this.vm.getProfileName();
+
+        // Get firebase wrapper (in-built)
+        // Fetch profiles and loads them
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        if (isMe()) {
+            db.collection("profiles").whereEqualTo(FieldPath.documentId(), this.vm.getMyId()).get()
+                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                            if (task.isSuccessful()) {
+                                for (QueryDocumentSnapshot document : task.getResult()) {
+                                    Log.d("firebase - homie", document.getId() + " => " + document.getData());
+
+                                    // Update UI
+                                    updateViewBathroomByBathroom((boolean)document.getData().get("privateBathroom"));
+                                    updateViewBio((String)document.getData().get("bio"));
+                                    updateViewPets((boolean)document.getData().get("petFriendly"));
+                                    updateViewBathroomByPlace((boolean)document.getData().get("hasApartment"));
+                                    updateViewSmoking((boolean)document.getData().get("smoking"));
+                                    updateViewName((String)document.getData().get("firstName"));
+
+                                    int genderCode = Math.toIntExact((long)document.getData().get("gender"));
+                                    if (genderCode == 1) {
+                                        updateViewGender("Female");
+                                    } else {
+                                        updateViewGender("Male");
+                                    }
+                                }
+                            } else {
+                                Log.d("firebase - homie", "Error getting documents: ", task.getException());
+                            }
+                        }
+                    });
+
+        } else {
+            // TODO: Handle ID doesnt exist
+        }
 
     }
 

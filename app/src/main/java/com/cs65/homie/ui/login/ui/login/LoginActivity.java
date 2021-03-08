@@ -22,6 +22,7 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.cs65.homie.Globals;
+import com.cs65.homie.MainActivity;
 import com.cs65.homie.R;
 
 import com.firebase.ui.auth.AuthUI;
@@ -34,6 +35,10 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.FirebaseAuthInvalidUserException;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 
 public class LoginActivity extends AppCompatActivity {
@@ -46,6 +51,8 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+
         setContentView(R.layout.activity_login);
         loginViewModel = new ViewModelProvider(this, new LoginViewModelFactory())
                 .get(LoginViewModel.class);
@@ -174,6 +181,27 @@ public class LoginActivity extends AppCompatActivity {
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(Globals.TAG, "signInWithEmail:success");
                             FirebaseUser user = mAuth.getCurrentUser();
+
+                            FirebaseFirestore db = FirebaseFirestore.getInstance();
+                            Query capitalCities = db.collection("profiles").whereEqualTo("id", user.getUid());
+                            capitalCities
+                                    .get()
+                                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                            if (task.isSuccessful()) {
+                                                for (QueryDocumentSnapshot document : task.getResult()) {
+                                                    MainActivity.userId = document.getId();
+                                                    break;
+                                                }
+                                            } else {
+                                                Log.d("firebase --> homies", "Error getting documents: ", task.getException());
+                                            }
+                                        }
+                                    });
+
+
+
                             finish();
                         } else {
                             // If sign in fails, display a message to the user.

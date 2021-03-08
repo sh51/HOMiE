@@ -3,6 +3,7 @@ package com.cs65.homie.ui.chats;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -263,12 +264,16 @@ public class ChatFragment extends Fragment implements View.OnClickListener
 
         this.inProfile = true;
 
+        SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
+        String userId = sharedPref.getString("userId", null);
+
+
         Intent intent = new Intent(this.getContext(), ProfileViewActivity.class);
         intent.putExtra(ProfileViewFragment.BUNDLE_KEY_USER_ID, this.userId);
-        // FIXME Using fake data
+        // TODO: Handle null case
         intent.putExtra(
             ProfileViewFragment.BUNDLE_KEY_MY_ID,
-            ((MainActivity)this.requireActivity()).getFakeMyId()
+            userId
         );
         this.startActivityForResult(intent, PROFILE_VIEW_ACTIVITY_RESPONSE_CODE);
 
@@ -288,6 +293,9 @@ public class ChatFragment extends Fragment implements View.OnClickListener
             return;
         }
 
+        SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
+        String userId = sharedPref.getString("userId", null);
+
         // Create the message object
         Message message = new Message();
         message.setTimestamp(Calendar.getInstance().getTime());
@@ -295,7 +303,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener
         message.setReceiverId(this.userId);
         // FIXME Using fake data for now
         message.setSenderId(
-            ((MainActivity)this.requireActivity()).getFakeMyId()
+            userId
         );
 
         List<Message> messages = this.vm.getMessages(this.userId).getValue();
