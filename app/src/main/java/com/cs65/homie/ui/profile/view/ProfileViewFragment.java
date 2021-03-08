@@ -31,6 +31,7 @@ import com.cs65.homie.MainActivity;
 import com.cs65.homie.R;
 import com.cs65.homie.ThreadPerTaskExecutor;
 import com.cs65.homie.Utilities;
+import com.cs65.homie.ui.ProfileSettingsActivity;
 import com.cs65.homie.ui.carousel.ImageCarouselFragment;
 import com.cs65.homie.ui.ImageFullScreenActivity;
 import com.google.android.gms.maps.model.LatLng;
@@ -133,109 +134,115 @@ public class ProfileViewFragment
     {
 
         super.onCreate(savedInstanceState);
-
-        Log.d(
-            MainActivity.TAG,
-            this.getClass().getCanonicalName()
-                + " location permissions: " +
-                Utilities.checkPermissionLocation(this.getActivity())
-        );
-
         // Get the view model instance
         // ViewModel can never be null
         this.vm = new ViewModelProvider(this).get(
-            ProfileViewFragmentViewModel.class
+                ProfileViewFragmentViewModel.class
         );
 
-        // Setup My ID
-        // FIXME Default user ID (empty string) is magic
-        if (this.vm.getMyId().equals(""))
-        {
 
-            if (savedInstanceState != null)
-            {
-                this.vm.setMyId(savedInstanceState.getString(
-                    BUNDLE_KEY_MY_ID, ""
-                ));
-            }
-            else if (this.getArguments() != null)
-            {
-                this.vm.setMyId(this.getArguments().getString(
-                    BUNDLE_KEY_MY_ID, ""
-                ));
-            }
-            else if (this.getActivity() != null)
-            {
-                // TODO: There may be a race condition here
-                this.vm.setMyId(MainActivity.userId);
-            }
-
-        }
-        // FIXME Default user ID (empty string) is magic
-        if (this.vm.getMyId().equals(""))
-        {
-            // TODO Handle
+        // If no current USERid, go to profile page
+        if (MainActivity.userId == null) {
+            Intent myIntent = new Intent(ProfileViewFragment.this.getActivity(), ProfileSettingsActivity.class);
+            startActivity(myIntent);
+        } else {
             Log.d(
-                MainActivity.TAG, String.format(
-                    "%s.onCreate(), MyId is %s",
-                    this.getClass().getCanonicalName(),
-                    this.vm.getMyId()
-                ));
-            return;
-        }
+                    MainActivity.TAG,
+                    this.getClass().getCanonicalName()
+                            + " location permissions: " +
+                            Utilities.checkPermissionLocation(this.getActivity())
+            );
 
-        // Setup User ID
-        // FIXME Default user ID (empty string) is magic
-        if (this.vm.getUserId().equals("") && this.getActivity() != null)
-        {
-            if (savedInstanceState != null)
+            // Setup My ID
+            // FIXME Default user ID (empty string) is magic
+            if (this.vm.getMyId().equals(""))
             {
-                this.vm.setUserId(savedInstanceState.getString(
-                    BUNDLE_KEY_USER_ID, ""
-                ));
-            }
-            else if (this.getArguments() != null)
-            {
-                this.vm.setUserId(this.getArguments().getString(
-                    BUNDLE_KEY_USER_ID, ""
-                ));
-            }
-            else if (this.getActivity() != null)
-            {
-                // FIXME Using fake data
-                this.vm.setUserId(((MainActivity)this.getActivity()).getFakeUserId());
-            }
-        }
-        // FIXME Default user ID (empty string) is magic
-        if (this.vm.getUserId().equals(""))
-        {
-            // TODO Handle
-            Log.d(MainActivity.TAG, String.format(
-                "%s.onCreate(), UserID is %s",
-                this.getClass().getCanonicalName(),
-                this.vm.getUserId()
-            ));
-            return;
-        }
 
-        // Setup the location services if we need it.
-        this.geocoder = new Geocoder(this.getContext(), Locale.getDefault());
-        this.locationManager
-            = (LocationManager) this.requireActivity().getSystemService(
-            Context.LOCATION_SERVICE
-        );
-        Criteria locCriteria = new Criteria();
-        locCriteria.setAccuracy(Criteria.ACCURACY_COARSE);
-        this.locationProvider = this.locationManager.getBestProvider(
-            locCriteria, true
-        );
-        Log.d(
-            MainActivity.TAG,
-            this.getClass().getCanonicalName()
-                + " location provider: "
-                + this.locationProvider
-        );
+                if (savedInstanceState != null)
+                {
+                    this.vm.setMyId(savedInstanceState.getString(
+                            BUNDLE_KEY_MY_ID, ""
+                    ));
+                }
+                else if (this.getArguments() != null)
+                {
+                    this.vm.setMyId(this.getArguments().getString(
+                            BUNDLE_KEY_MY_ID, ""
+                    ));
+                }
+                else if (this.getActivity() != null)
+                {
+                    // TODO: There may be a race condition here
+                    this.vm.setMyId(MainActivity.userId);
+                }
 
+            }
+            // FIXME Default user ID (empty string) is magic
+            if (this.vm.getMyId().equals(""))
+            {
+                // TODO Handle
+                Log.d(
+                        MainActivity.TAG, String.format(
+                                "%s.onCreate(), MyId is %s",
+                                this.getClass().getCanonicalName(),
+                                this.vm.getMyId()
+                        ));
+                return;
+            }
+
+            // Setup User ID
+            // FIXME Default user ID (empty string) is magic
+            if (this.vm.getUserId().equals("") && this.getActivity() != null)
+            {
+                if (savedInstanceState != null)
+                {
+                    this.vm.setUserId(savedInstanceState.getString(
+                            BUNDLE_KEY_USER_ID, ""
+                    ));
+                }
+                else if (this.getArguments() != null)
+                {
+                    this.vm.setUserId(this.getArguments().getString(
+                            BUNDLE_KEY_USER_ID, ""
+                    ));
+                }
+                else if (this.getActivity() != null)
+                {
+                    // FIXME Using fake data
+                    this.vm.setUserId(((MainActivity)this.getActivity()).getFakeUserId());
+                }
+            }
+            // FIXME Default user ID (empty string) is magic
+            if (this.vm.getUserId().equals(""))
+            {
+                // TODO Handle
+                Log.d(MainActivity.TAG, String.format(
+                        "%s.onCreate(), UserID is %s",
+                        this.getClass().getCanonicalName(),
+                        this.vm.getUserId()
+                ));
+                return;
+            }
+
+            // Setup the location services if we need it.
+            this.geocoder = new Geocoder(this.getContext(), Locale.getDefault());
+            this.locationManager
+                    = (LocationManager) this.requireActivity().getSystemService(
+                    Context.LOCATION_SERVICE
+            );
+            Criteria locCriteria = new Criteria();
+            locCriteria.setAccuracy(Criteria.ACCURACY_COARSE);
+            this.locationProvider = this.locationManager.getBestProvider(
+                    locCriteria, true
+            );
+            Log.d(
+                    MainActivity.TAG,
+                    this.getClass().getCanonicalName()
+                            + " location provider: "
+                            + this.locationProvider
+            );
+
+        }
     }
 
     public View onCreateView(
@@ -250,8 +257,12 @@ public class ProfileViewFragment
 
     public void onDestroy()
     {
-        this.locationManager.removeUpdates(this);
-        this.workerThread.quitSafely();
+        if (locationManager != null) {
+            this.locationManager.removeUpdates(this);
+        }
+        if (workerThread != null) {
+            this.workerThread.quitSafely();
+        }
         super.onDestroy();
     }
 
