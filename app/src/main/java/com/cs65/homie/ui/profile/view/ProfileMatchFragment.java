@@ -1,6 +1,7 @@
 package com.cs65.homie.ui.profile.view;
 
 import android.content.ContentResolver;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -8,6 +9,9 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
+
+import androidx.cardview.widget.CardView;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.MutableLiveData;
@@ -42,6 +46,10 @@ public class ProfileMatchFragment
     View.OnClickListener,
     View.OnTouchListener
 {
+
+    private static final int CARD_BACKGROUND_COLOR = 0xFFDDDDDD;
+    private static final double CARD_ELEVATION = 5.0;
+    private static final double CARD_MARGIN = 20.0;
 
     private FloatingActionButton buttonMatch = null;
     private FloatingActionButton buttonReject = null;
@@ -111,10 +119,10 @@ public class ProfileMatchFragment
     public void onViewCreated(View view, Bundle savedInstanceState)
     {
 
-        super.onViewCreated(view, savedInstanceState);
-
         // FIXME Using fake data, need to set to the other user
         super.vm.setUserId(((MainActivity)this.requireActivity()).getFakeUserId());
+
+        super.onViewCreated(view, savedInstanceState);
 
         View scrollLayout = view.findViewById(R.id.profileViewScrollLayout);
         if (scrollLayout != null)
@@ -124,14 +132,36 @@ public class ProfileMatchFragment
             );
         }
 
-        View topLayout = view.findViewById(R.id.profileViewLayout);
+        CardView cardView = view.findViewById(R.id.profileViewCardView);
+        if (cardView != null)
+        {
+
+            // Sets up the card view for the matching view
+            // By default the card view hides itself for the profile view
+
+            LinearLayout.LayoutParams layoutParams
+                = (LinearLayout.LayoutParams)cardView.getLayoutParams();
+            int margin = (int)Math.round(Utilities.pixelDensity(
+                this.requireContext(), CARD_MARGIN)
+            );
+            layoutParams.setMargins(margin, margin, margin, margin);
+            cardView.setLayoutParams(layoutParams);
+            cardView.setCardBackgroundColor(CARD_BACKGROUND_COLOR);
+            int elevation = (int)Math.round(
+                Utilities.pixelDensity(this.requireContext(), CARD_ELEVATION)
+            );
+            cardView.setCardElevation(elevation);
+
+        }
+
+        View topLayout = view.findViewById(R.id.profileViewContainerLayout);
         if (topLayout != null)
         {
             // The match buttons require more padding
             // FIXME At least comment the magic numbers
             topLayout.setPadding(
                 0, 0, 0,
-                (int)Math.round(Utilities.pixelDensity(this.requireContext(), 80.0))
+                (int)Math.round(Utilities.pixelDensity(this.requireContext(), 60.0))
             );
         }
 
@@ -216,7 +246,7 @@ public class ProfileMatchFragment
         images.add(Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://com.cs65.homie/" + R.drawable.dart1));
         images.add(Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://com.cs65.homie/" + R.drawable.dart2));
         images.add(Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://com.cs65.homie/" + R.drawable.dart3));
-        this.vm.getimages().setValue(images);
+        this.vm.getImages().setValue(images);
 
 
         // Firebase section --------------------
