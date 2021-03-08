@@ -240,6 +240,7 @@ public class ProfileViewFragment
 
     public void onDestroy()
     {
+        this.locationManager.removeUpdates(this);
         this.workerThread.quitSafely();
         super.onDestroy();
     }
