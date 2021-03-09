@@ -168,7 +168,10 @@ public class FirebaseHelper {
     }
 
     // Update profile
-    public static void updateProfile() {
+    public void updateProfile(String userId, Map<String, Object> data) {
+        db.collection("profiles")
+                .document(userId)
+                .update(data);
 
     }
 

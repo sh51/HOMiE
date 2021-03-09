@@ -31,12 +31,15 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -86,33 +89,6 @@ public class ProfileMatchFragment
         }
     }
 
-    private void loadMatches() {
-        // TODO: Improve matches
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        db.collection("profiles")
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-                                Profile newMatch = new Profile();
-                                newMatch.setBio((String)document.getData().get("bio"));
-                                newMatch.setPrivateBathroom((boolean)document.getData().get("privateBathroom"));
-                                newMatch.setisPetFriendly((boolean)document.getData().get("petFriendly"));
-                                newMatch.setHasApartment((boolean)document.getData().get("hasApartment"));
-                                newMatch.setSmoking((boolean)document.getData().get("smoking"));
-                                newMatch.setFirstName((String)document.getData().get("firstName"));
-                                newMatch.setGender(Math.toIntExact((long)document.getData().get("gender")));
-
-                                matches.add(newMatch);
-                            }
-                        } else {
-                            Log.w("firebase - homies", "Error getting documents.", task.getException());
-                        }
-                    }
-                });
-    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -251,17 +227,20 @@ public class ProfileMatchFragment
     }
 
 
-    private void handleMatch()
-    {
+    private void handleMatch() {
+        if (this.isMatch()) {
+            final Map<String, Object> likeMap = new HashMap<>();
+            List<Profile> profiles = mHelper.getProfiles();
+            int size = profiles.size();
+            Profile matchedProfile = profiles.get(currentIndex % size);
 
-        // TODO Need to send match to Firebase
+            likeMap.put("likes", FieldValue.arrayUnion(matchedProfile.getId()));
 
-        if (this.isMatch())
-        {
+            mHelper.updateProfile(mHelper.getUid(), likeMap);
+
             ((MainActivity)this.requireActivity()).matchTransition(
                 this.vm.getProfileName().getValue()
             );
-
         }
 
     }
@@ -278,53 +257,6 @@ public class ProfileMatchFragment
         loadProfile();
     }
 
-    /**
-     * Load fake data in lieu of Firebase, for testing
-     */
-    private void loadFakeData()
-    {
-        // TODO: Where will we get this? We aren't currently storing it
-        this.vm.getBathroom().setValue(true);
-        this.vm.getBio().setValue(
-            "i Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do "
-                + "eiusmod tempor incididunt ut labore et dolore magna aliqua. "
-                + "Ut enim ad minim veniam, quis nostrud exercitation ullamco "
-                + "laboris nisi ut aliquip ex ea commodo consequat. Duis aute "
-                + "irure dolor in reprehenderit in voluptate velit esse cillum "
-                + "dolore eu fugiat nulla pariatur. Excepteur sint occaecat "
-                + "cupidatat non proident, sunt in culpa qui officia deserunt "
-                + "mollit anim id est laborum."
-        );
-        this.vm.getGender().setValue("Female");
-        this.vm.getLoc().setValue(new LatLng(43.624794, -72.323171));
-        this.vm.getMyLoc().setValue(new LatLng(43.704166, -72.288762));
-        this.vm.getMyLocLive().setValue(true);
-        this.vm.getMyLocStr().setValue("Sanborn");
-        //this.vm.getAvatarUri().setValue(
-        //    Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://com.cs65.homie/" + R.drawable.ai)
-        //);
-        List<Uri> images = new ArrayList<Uri>();
-        images.add(Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://com.cs65.homie/" + R.drawable.dart0));
-        images.add(Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://com.cs65.homie/" + R.drawable.dart1));
-        images.add(Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://com.cs65.homie/" + R.drawable.dart2));
-        images.add(Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://com.cs65.homie/" + R.drawable.dart3));
-        this.vm.getImages().setValue(images);
-
-
-        // Firebase section --------------------
-        MutableLiveData<String> bio = this.vm.getBio();
-        MutableLiveData<Boolean> bathroom = this.vm.getBathroom();
-        MutableLiveData<String> gender = this.vm.getGender();
-        MutableLiveData<Boolean> pets = this.vm.getPets();
-        MutableLiveData<Boolean> hasPlace = this.vm.getPlace();
-        MutableLiveData<Boolean> isSmoking = this.vm.getSmoking();
-        MutableLiveData<String> name = this.vm.getProfileName();
-
-        // Get firebase wrapper (in-built)
-        // Fetch profiles and loads them
-        // TODO: We need some stratagey of marking unliked and matched profiles to avoid showing the same profile twice and avoid showing our own profile
-        loadProfile("pR7PsciIRpdL24u54ZNoP85efh83");
-    }
     private void loadProfile(String uid) {
         updateUI(mHelper.getProfile(uid));
     }
