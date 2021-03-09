@@ -53,7 +53,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener
     public static final String BUNDLE_KEY_KEYBOARD_UP
         = "CHAT_FRAG_BUNDLE_KEY_KEYBOARD_IS_UP";
 
-    private static final int PROFILE_VIEW_ACTIVITY_RESPONSE_CODE = 22564;
+    private static final int PROFILE_VIEW_ACTIVITY_RESPONSE_CODE = 22565;
 
     private ChatRecyclerAdapter adapter = null;
     private boolean inProfile = false;
@@ -269,17 +269,16 @@ public class ChatFragment extends Fragment implements View.OnClickListener
         this.inProfile = true;
 
         SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
-        String userId = sharedPref.getString("userId", null);
+        String myId = sharedPref.getString("userId", "");
 
-
-        Intent intent = new Intent(this.getContext(), ProfileViewActivity.class);
-        intent.putExtra(ProfileViewFragment.BUNDLE_KEY_USER_ID, this.userId);
-        // TODO: Handle null case
-        intent.putExtra(
-            ProfileViewFragment.BUNDLE_KEY_MY_ID,
-            userId
+        Intent intent = new Intent(
+            this.requireContext(), ProfileViewActivity.class
         );
-        this.startActivityForResult(intent, PROFILE_VIEW_ACTIVITY_RESPONSE_CODE);
+        intent.putExtra(ProfileViewFragment.BUNDLE_KEY_USER_ID, this.userId);
+        intent.putExtra(ProfileViewFragment.BUNDLE_KEY_MY_ID, myId);
+        this.startActivityForResult(
+            intent, PROFILE_VIEW_ACTIVITY_RESPONSE_CODE
+        );
 
     }
 

@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.MutableLiveData;
@@ -19,7 +20,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.cs65.homie.FirebaseHelper;
 import com.cs65.homie.Globals;
-import com.cs65.homie.MainActivity;
 import com.cs65.homie.R;
 import com.cs65.homie.models.Message;
 import com.cs65.homie.models.Profile;
@@ -27,10 +27,7 @@ import com.cs65.homie.ui.profile.view.ProfileViewActivity;
 import com.cs65.homie.ui.profile.view.ProfileViewFragment;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -46,12 +43,14 @@ import java.util.TreeMap;
 public class ChatsFragment extends Fragment
 {
     private static final int PROFILE_VIEW_ACTIVITY_RESPONSE_CODE = 22564;
+
     private FirebaseHelper mHelper;
     private ChatsRecyclerAdapter adapter = null;
     private boolean inProfile = false;
     // Defensive coding
     @SuppressWarnings("FieldCanBeLocal")
-    private RecyclerView recyclerView = null;
+    private RecyclerView viewRecycler = null;
+    private TextView viewTextWarning = null;
     private ChatsViewModel vm = null;
 
 
@@ -76,8 +75,8 @@ public class ChatsFragment extends Fragment
         );
 
         mHelper = FirebaseHelper.getInstance();
-        //        this.loadFakeData();
         this.loadChats(mHelper.getMatchedProfiles());
+        //this.loadFakeData();
 
     }
 
@@ -93,7 +92,7 @@ public class ChatsFragment extends Fragment
     {
 
         SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
-        String userId = sharedPref.getString("userId", null);
+        String myId = sharedPref.getString("userId", "");
 
         // if the messages list is not empty, get the other user
         // (might be sender or receiver) or the first message, and invalidate
@@ -101,8 +100,7 @@ public class ChatsFragment extends Fragment
         if (!messages.isEmpty())
         {
             String receiverId = messages.get(0).getReceiverId();
-            // FIXME Using fake data
-            if (receiverId.equals(userId))
+            if (receiverId.equals(myId))
             {
                 receiverId = messages.get(0).getSenderId();
             }
@@ -118,18 +116,27 @@ public class ChatsFragment extends Fragment
     public void onViewCreated(View view, Bundle savedInstanceState)
     {
 
-        this.recyclerView = view.findViewById(R.id.chatsRecyclerView);
-        if (this.recyclerView != null)
+        this.viewTextWarning = view.findViewById(R.id.chatsEmptyTextView);
+        if (
+            this.viewTextWarning != null
+            && !this.vm.getUsers().getValue().isEmpty()
+        )
+        {
+            this.viewTextWarning.setVisibility(View.GONE);
+        }
+
+        this.viewRecycler = view.findViewById(R.id.chatsRecyclerView);
+        if (this.viewRecycler != null)
         {
 
             LinearLayoutManager layoutManager
                 = new LinearLayoutManager(this.getContext());
-            this.recyclerView.addItemDecoration(new DividerItemDecoration(
+            this.viewRecycler.addItemDecoration(new DividerItemDecoration(
                 this.requireContext(), layoutManager.getOrientation()
             ));
-            this.recyclerView.setLayoutManager(layoutManager);
+            this.viewRecycler.setLayoutManager(layoutManager);
             this.adapter = new ChatsRecyclerAdapter(this, this.vm);
-            this.recyclerView.setAdapter(this.adapter);
+            this.viewRecycler.setAdapter(this.adapter);
             this.vm.getUsersMessages().observe(
                 this.getViewLifecycleOwner(), this::invalidateRecycler
             );
@@ -153,6 +160,11 @@ public class ChatsFragment extends Fragment
         Map<String, MutableLiveData<List<Message>>> usersMessages
     )
     {
+
+        if (this.viewTextWarning != null && !usersMessages.isEmpty())
+        {
+            this.viewTextWarning.setVisibility(View.GONE);
+        }
 
         if (this.adapter != null)
         {
@@ -179,19 +191,15 @@ public class ChatsFragment extends Fragment
 
         this.inProfile = true;
 
-        // userID
         SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
-        String userID = sharedPref.getString("userId", null);
-
+        String myId = sharedPref.getString("userId", "");
 
         Intent intent = new Intent(this.getContext(), ProfileViewActivity.class);
         intent.putExtra(ProfileViewFragment.BUNDLE_KEY_USER_ID, userId);
-        // FIXME: Handle null cases
-        intent.putExtra(
-            ProfileViewFragment.BUNDLE_KEY_MY_ID,
-                userID
+        intent.putExtra(ProfileViewFragment.BUNDLE_KEY_MY_ID, myId);
+        this.startActivityForResult(
+            intent, PROFILE_VIEW_ACTIVITY_RESPONSE_CODE
         );
-        this.startActivity(intent);
 
     }
 
@@ -251,6 +259,7 @@ public class ChatsFragment extends Fragment
     }
 
     private void loadChats(List<Profile> profiles) {
+
         if (profiles == null) profiles = new ArrayList<>();
 
         TreeMap<String, Profile> users = this.vm.getUsers().getValue();
@@ -261,8 +270,6 @@ public class ChatsFragment extends Fragment
             users.put(profile.getId(), profile);
             usersMessages.put(profile.getId(), new MutableLiveData<List<Message>>());
         });
-
-
 
         this.vm.getUsersMessages().setValue(usersMessages);
         this.vm.getUsers().setValue(users);
@@ -293,7 +300,5 @@ public class ChatsFragment extends Fragment
             }));
         });
     }
-
-
 
 }

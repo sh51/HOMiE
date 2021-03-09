@@ -6,12 +6,9 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.View;
-import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -25,8 +22,6 @@ import com.cs65.homie.Globals;
 import com.cs65.homie.MainActivity;
 import com.cs65.homie.R;
 
-import com.firebase.ui.auth.AuthUI;
-import com.firebase.ui.auth.IdpResponse;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
@@ -130,19 +125,6 @@ public class LoginActivity extends AppCompatActivity {
         };
         usernameEditText.addTextChangedListener(afterTextChangedListener);
         passwordEditText.addTextChangedListener(afterTextChangedListener);
-        passwordEditText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-
-            @Override
-            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                if (actionId == EditorInfo.IME_ACTION_DONE) {
-//                    loginViewModel.login(usernameEditText.getText().toString(),
-//                            passwordEditText.getText().toString());
-
-                    if (login_signin_Button.isEnabled()) onLogin(usernameEditText.getText().toString(), passwordEditText.getText().toString());
-                }
-                return false;
-            }
-        });
 
         login_signin_Button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -152,9 +134,10 @@ public class LoginActivity extends AppCompatActivity {
 //                        passwordEditText.getText().toString());
                 onLogin(usernameEditText.getText().toString(), passwordEditText.getText().toString());
 
-                // No longer spawning profile view activity
-                // Land on nav after logging in
-                finish();
+                // Do not finish the activity (and as a result the app) here
+                // It looks like the app is crashing on login failure
+                // The app is hidden without any notice on why
+
             }
         });
 

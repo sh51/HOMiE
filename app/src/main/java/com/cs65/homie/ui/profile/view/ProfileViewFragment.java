@@ -25,6 +25,7 @@ import android.widget.TextView;
 import androidx.core.text.HtmlCompat;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentContainerView;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -36,9 +37,11 @@ import com.cs65.homie.Utilities;
 import com.cs65.homie.ui.ProfileSettingsActivity;
 import com.cs65.homie.ui.carousel.ImageCarouselFragment;
 import com.cs65.homie.ui.ImageFullScreenActivity;
+import com.cs65.homie.ui.login.ui.login.LoginActivity;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FieldPath;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -51,6 +54,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.function.Consumer;
 
+// FIXME Does the view handle no image carousel correctly?
 
 /**
  * Static profile view activity
@@ -80,6 +84,7 @@ public class ProfileViewFragment
     public static final double RADIUS_LIMIT = 2000;
     public static final String PRICE_FORMAT_STR = "$%.2f";
 
+    private ImageCarouselFragment fragImageCarousel = null;
     private Geocoder geocoder = null;
     private LocationManager locationManager = null;
     private String locationProvider = null;
@@ -87,6 +92,7 @@ public class ProfileViewFragment
     private ImageView viewAvatar = null;
     private TextView viewBathroom = null;
     private TextView viewBio = null;
+    private FragmentContainerView viewCarousel = null;
     private TextView viewGender = null;
     private TextView viewLoc = null;
     private TextView viewName = null;
@@ -145,6 +151,7 @@ public class ProfileViewFragment
     {
 
         super.onCreate(savedInstanceState);
+
         // Get the view model instance
         // ViewModel can never be null
         this.vm = new ViewModelProvider(this).get(
@@ -159,8 +166,26 @@ public class ProfileViewFragment
 
         // If no current USERid, go to profile page
         if (MainActivity.userId == null) {
-            Intent myIntent = new Intent(ProfileViewFragment.this.getActivity(), ProfileSettingsActivity.class);
-            startActivity(myIntent);
+            if (FirebaseAuth.getInstance().getCurrentUser().getUid() != null) {
+                FirebaseFirestore db = FirebaseFirestore.getInstance();
+                db.collection("profiles").whereEqualTo("id", FirebaseAuth.getInstance().getCurrentUser().getUid()).get()
+                        .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                            @Override
+                            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                if (task.isSuccessful()) {
+                                    for (QueryDocumentSnapshot document : task.getResult()) {
+                                        Log.d("firebase - homie", document.getId() + " => " + document.getData());
+                                        MainActivity.userId = document.getId();
+                                    }
+                                } else {
+                                    Log.d("firebase - homie", "Error getting documents: ", task.getException());
+                                }
+                            }
+                        });
+            } else {
+                Intent myIntent = new Intent(ProfileViewFragment.this.getActivity(), ProfileSettingsActivity.class);
+                startActivity(myIntent);
+            }
         } else {
             Log.d(
                     MainActivity.TAG,
@@ -186,11 +211,8 @@ public class ProfileViewFragment
                             BUNDLE_KEY_MY_ID, ""
                     ));
                 }
-                else if (this.getActivity() != null)
-                {
-                    // TODO: There may be a race condition here
-                    this.vm.setMyId(MainActivity.userId);
-                }
+                // FIXME There IS a race condition here
+                this.vm.setMyId(MainActivity.userId);
 
             }
             // FIXME Default user ID (empty string) is magic
@@ -222,11 +244,8 @@ public class ProfileViewFragment
                             BUNDLE_KEY_USER_ID, ""
                     ));
                 }
-                else if (this.getActivity() != null)
-                {
-                    // FIXME Using fake data
-                    this.vm.setUserId(((MainActivity)this.getActivity()).getFakeUserId());
-                }
+                // FIXME There IS a race condition here
+                this.vm.setMyId(MainActivity.userId);
             }
             // FIXME Default user ID (empty string) is magic
             if (this.vm.getUserId().equals(""))
@@ -447,14 +466,25 @@ public class ProfileViewFragment
         );
 
         // Load the image carousel
-        ImageCarouselFragment carouselFrag
+        this.viewCarousel = view.findViewById(R.id.profileViewCarouselFragView);
+        this.fragImageCarousel
             = (ImageCarouselFragment)this.getChildFragmentManager()
             .findFragmentById(R.id.profileViewCarouselFragView);
-        if (carouselFrag != null)
+        if (this.fragImageCarousel != null && this.viewCarousel != null)
         {
+
             this.vm.getImages().observe(
-                this.getViewLifecycleOwner(), carouselFrag::setImages
+                this.getViewLifecycleOwner(), this::setImages
             );
+            if (this.vm.getImages().getValue().isEmpty())
+            {
+                this.viewCarousel.setVisibility(View.GONE);
+            }
+            else
+            {
+                this.fragImageCarousel.setImages(vm.getImages().getValue());
+            }
+
         }
 
         if (this.isMe())
@@ -470,6 +500,31 @@ public class ProfileViewFragment
 
         // Fetch Firebase data asynchronously (eventually, somehow)
         this.pingFirebase();
+
+    }
+
+    public void setImages(List<Uri> images)
+    {
+
+        if (images == null)
+        {
+            return;
+        }
+
+        if (this.viewCarousel != null)
+        {
+            if (images.isEmpty())
+            {
+                this.viewCarousel.setVisibility(View.GONE);
+            } else
+            {
+                this.viewCarousel.setVisibility(View.VISIBLE);
+            }
+        }
+        if (this.fragImageCarousel != null)
+        {
+            this.fragImageCarousel.setImages(images);
+        }
 
     }
 

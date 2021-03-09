@@ -9,6 +9,7 @@
     <string name="title_edit_profile">Edit Profile</string>
 
     <!-- CHAT -->
+    <string name="chats_empty_warning"><b>Oh No!</b>\n\nYou don\'t have any Homies to chat with!\nGo Match with someone\n<b>→</b></string>
     <string name="chat_back_button_description">Back Button</string>
     <string name="chat_input_hint">Compose Message</string>
     <string name="chat_send_button_description">Send Message Button</string>
@@ -63,7 +64,7 @@
     <string name="switch_PetFriendly">Pet-friendly</string>
     <string name="switch_PrivateBathroom">Private Bathroom</string>
     <string name="image_content_desc">Select Profile Photo from Camera or Gallery</string>
-    <string name="toast_saved">Success! \n Profile changes saved.</string>
+    <string name="toast_saved">Success!\nProfile changes saved.</string>
     <string name="key_filename">prefKey_filename</string>
     <string name="key_name">prefKey_name</string>
     <string name="key_email">prefKey_email</string>
