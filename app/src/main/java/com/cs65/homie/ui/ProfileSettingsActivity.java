@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
@@ -174,11 +175,13 @@ public class ProfileSettingsActivity extends AppCompatActivity {
         }
     }
     public void onSaveClicked(View view) {
+        this.hideKeyboard(view);
         this.saveProfile();
         finish();
     }
 
     public void onCancelClicked(View view) {
+        this.hideKeyboard(view);
         finish();
     }
 
@@ -196,6 +199,15 @@ public class ProfileSettingsActivity extends AppCompatActivity {
             this.genderPref = getString(R.string.radio_Male_text);
         else if (view.getId() == R.id.radioButton_nopref)
             this.genderPref = getString(R.string.radio_NoPref_text);
+    }
+
+    private void hideKeyboard(View view)
+    {
+        InputMethodManager inputManager
+            = (InputMethodManager)this.getSystemService(
+                Context.INPUT_METHOD_SERVICE
+            );
+        inputManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
 
     /**
