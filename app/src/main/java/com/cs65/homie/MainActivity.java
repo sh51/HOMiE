@@ -2,10 +2,7 @@ package com.cs65.homie;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.HandlerThread;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -15,23 +12,14 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.cs65.homie.ui.ProfileSettingsActivity;
-import com.cs65.homie.models.Message;
-import com.cs65.homie.models.Profile;
 import com.cs65.homie.ui.chats.ChatFragment;
-import com.cs65.homie.ui.chats.ChatsViewModel;
 import com.cs65.homie.ui.login.ui.login.LoginActivity;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.messaging.FirebaseMessaging;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -39,27 +27,23 @@ import androidx.navigation.ui.NavigationUI;
 
 
 import org.jetbrains.annotations.NotNull;
-import org.json.JSONObject;
-
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 
 
 public class MainActivity extends AppCompatActivity {
 
+    // TODO: We need a better pattern
+    public static String userId = null;
+
     // Needs to be "homies" with an 's' and not "homie" because the package
     // name "homie" has too many matches in regex logging mode
     public static final String TAG = "HOMIES";
 
+    private static final String BUNDLE_KEY_IN_CHAT_BOOL
+        = "MAIN_ACTIVITY_BUNDLE_KEY_IN_CHAT_BOOL";
     private static final String BUNDLE_KEY_MATCH_TRANSITION_BOOL
-            = "MAIN_ACTIVITY_BUNDLE_KEY_MATCH_TRANSITION_BOOL";
+        = "MAIN_ACTIVITY_BUNDLE_KEY_MATCH_TRANSITION_BOOL";
+    // FIXME Need a default when the string is somehow empty
     private static final String MATCH_TEXT_FORMAT = "%s is a Homie!";
     private static final int RC_LOGIN = 0;
     private static final int EDIT_PROFILE = 0;
@@ -69,6 +53,9 @@ public class MainActivity extends AppCompatActivity {
     // the menu, login and logout action button
     private MenuItem mLogout, mLogin;
     private View hostView = null;
+    // Whether or not the chat fragment is active
+    // State must be tracked so that nav can nav back to chat.
+    private boolean inChat = false;
     // Whether or not we are in a "You Have a Match!" transition
     // State must be tracked through rotation
     private boolean inMatchTransition = false;
@@ -90,10 +77,6 @@ public class MainActivity extends AppCompatActivity {
         return "41";
     }
 
-
-    // TODO: We need a better pattern
-    public static String userId = null;
-
     /**
      * Hide the navigation bar view, and extend the fragment container's
      * margins so that the container fills the entire containing view
@@ -102,9 +85,9 @@ public class MainActivity extends AppCompatActivity {
     public void hideNavView() {
 
         if (
-                this.hostView != null
-                        && this.navView != null
-                        && this.navView.getVisibility() == View.VISIBLE
+            this.hostView != null
+                && this.navView != null
+                && this.navView.getVisibility() == View.VISIBLE
         ) {
 
             this.navView.setVisibility(View.GONE);
@@ -118,14 +101,43 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    public void onChatPopped()
+    {
+
+        if (this.inChat)
+        {
+
+            this.inChat = false;
+
+            if (this.navController != null)
+            {
+                this.navController.navigate(R.id.navigation_chats);
+            }
+
+            @SuppressWarnings("ConstantConditions")
+            FragmentManager activeFragManager
+                = this.getSupportFragmentManager().findFragmentById(
+                R.id.nav_host_fragment
+            ).getChildFragmentManager();
+            activeFragManager.removeOnBackStackChangedListener(
+                this::onChatPopped
+            );
+
+        }
+
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
 
         if (savedInstanceState != null) {
+            this.inChat = savedInstanceState.getBoolean(
+                BUNDLE_KEY_IN_CHAT_BOOL, false
+            );
             this.inMatchTransition = savedInstanceState.getBoolean(
-                    BUNDLE_KEY_MATCH_TRANSITION_BOOL, false
+                BUNDLE_KEY_MATCH_TRANSITION_BOOL, false
             );
         }
 
@@ -154,10 +166,17 @@ public class MainActivity extends AppCompatActivity {
         );
         NavigationUI.setupWithNavController(this.navView, this.navController);
 
-
-        // TODO The landing activity should probably be profile?
-        // It shouldn't be messages at least?
-        // A question
+        // If we get here, it means that the MainActivity was killed
+        // (likely rotation), and so the active fragment manager is also dead.
+        // We need to re-register
+        if (this.inChat)
+        {
+            FragmentManager activeFragManager
+                = this.getSupportFragmentManager().findFragmentById(
+                    R.id.nav_host_fragment
+                ).getChildFragmentManager();
+            activeFragManager.addOnBackStackChangedListener(this::onChatPopped);
+        }
 
     }
 
@@ -168,8 +187,6 @@ public class MainActivity extends AppCompatActivity {
         inflater.inflate(R.menu.main, menu);
         return true;
     }
-
-
 
     @SuppressLint("NonConstantResourceId")
     @Override
@@ -261,15 +278,15 @@ public class MainActivity extends AppCompatActivity {
     public void showNavView() {
 
         if (
-                this.hostView != null
-                        && this.navView != null
-                        && this.navView.getVisibility() == View.GONE
+            this.hostView != null
+                && this.navView != null
+                && this.navView.getVisibility() == View.GONE
         ) {
 
             this.navView.setVisibility(View.VISIBLE);
 
             ViewGroup.MarginLayoutParams params
-                    = (ViewGroup.MarginLayoutParams) this.hostView.getLayoutParams();
+                = (ViewGroup.MarginLayoutParams) this.hostView.getLayoutParams();
             params.setMargins(0, 0, 0, this.navView.getHeight());
             this.hostView.setLayoutParams(params);
 
@@ -289,14 +306,14 @@ public class MainActivity extends AppCompatActivity {
         args.putString(ChatFragment.ARG_KEY_USER_ID, userId);
 
         FragmentManager activeFragManager
-                = this.getSupportFragmentManager().findFragmentById(
+            = this.getSupportFragmentManager().findFragmentById(
                 R.id.nav_host_fragment
-        ).getChildFragmentManager();
+            ).getChildFragmentManager();
 
         FragmentTransaction transaction = activeFragManager.beginTransaction();
         transaction.setCustomAnimations(
-                R.anim.frag_enter, R.anim.frag_exit,
-                R.anim.frag_enter_pop, R.anim.frag_exit_pop
+            R.anim.frag_enter, R.anim.frag_exit,
+            R.anim.frag_enter_pop, R.anim.frag_exit_pop
         );
 
         // Since there are more than one fragment in the navigator, we must
@@ -311,13 +328,16 @@ public class MainActivity extends AppCompatActivity {
         // The next two calls makes the back button bring up the chats fragment
         transaction.setReorderingAllowed(true);
         transaction.addToBackStack(null);
-
         transaction.commit();
         activeFragManager.executePendingTransactions();
+
+        this.inChat = true;
+        activeFragManager.addOnBackStackChangedListener(this::onChatPopped);
 
     }
 
     protected void onResume() {
+
         super.onResume();
         // If we were in a match transition upon destruction, immediately
         // navigate to the chats fragment
@@ -330,7 +350,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onSaveInstanceState(@NotNull Bundle outBundle) {
         super.onSaveInstanceState(outBundle);
         outBundle.putBoolean(
-                BUNDLE_KEY_MATCH_TRANSITION_BOOL, this.inMatchTransition
+            BUNDLE_KEY_IN_CHAT_BOOL, this.inChat
+        );
+        outBundle.putBoolean(
+            BUNDLE_KEY_MATCH_TRANSITION_BOOL, this.inMatchTransition
         );
     }
 
