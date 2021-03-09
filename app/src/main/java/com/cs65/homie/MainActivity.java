@@ -100,6 +100,10 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    /**
+     * Handle the event when the chat conversation fragment is popped off
+     * of the fragment stack
+     */
     public void onChatPopped()
     {
 
@@ -252,13 +256,22 @@ public class MainActivity extends AppCompatActivity {
                 R.layout.popup_match, null
         );
         TextView nameView = popupView.findViewById(R.id.matchPopupTextView);
-        if (nameView != null) {
-            nameView.setText(String.format(
+        if (nameView != null)
+        {
+            if (name == null || name.equals(""))
+            {
+                nameView.setText(R.string.profile_view_match_celebration);
+            }
+            else
+            {
+                nameView.setText(String.format(
                     Locale.getDefault(),
                     MATCH_TEXT_FORMAT,
                     name
-            ));
+                ));
+            }
         }
+
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setView(popupView);
         builder.setOnCancelListener((d) -> this.finishMatchTransition());

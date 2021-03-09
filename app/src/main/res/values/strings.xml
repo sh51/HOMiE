@@ -16,6 +16,14 @@
     <string name="chat_message_sent_toast">Message Sent!</string>
     <!-- CHAT -->
 
+    <!-- MATCH VIEW -->
+    <string name="profile_view_match_accept_description">Accept this Homie!</string>
+    <string name="profile_view_match_reject_description">Reject this Homie</string>
+    <string name="profile_view_match_accept">➕</string>
+    <string name="profile_view_match_reject">✖</string>
+    <string name="profile_view_match_celebration">You matched with a Homie!</string>
+    <!-- MATCH VIEW -->
+
     <!-- STATIC PROFILE VIEW -->
     <string name="profile_view_avatar_content_description">User Avatar</string>
     <string name="profile_view_bathroom_yes_place_yes">Has a private bathroom?  ✓</string>
@@ -26,10 +34,6 @@
     <string name="profile_view_pets_no">Pet Friendly?  ✖</string>
     <string name="profile_view_smoking_yes">Smoking?  🚬</string>
     <string name="profile_view_smoking_no">Smoking?  🚭</string>
-    <string name="profile_view_match_accept_description">Accept this homie!</string>
-    <string name="profile_view_match_reject_description">Reject this homie</string>
-    <string name="profile_view_match_accept">➕</string>
-    <string name="profile_view_match_reject">✖</string>
     <string name="profile_view_min_price_title"><u>Min Price</u></string>
     <string name="profile_view_max_price_title"><u>Max Price</u></string>
     <string name="profile_view_min_price_value_placeholder">$0</string>
