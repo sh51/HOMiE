@@ -60,18 +60,6 @@ public class Utilities
     private static final Map<String, Bitmap> nameBitmaps
         = new HashMap<String, Bitmap>();
 
-    public static boolean checkPermissionLocation(final Activity activity)
-    {
-        return checkPermissions(
-            activity,
-            new String[]{
-                Manifest.permission.ACCESS_COARSE_LOCATION,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            },
-            1
-        );
-    }
-
     /**
      * Generic function to check for permission(s)
      *

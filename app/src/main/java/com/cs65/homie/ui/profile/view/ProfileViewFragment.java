@@ -150,12 +150,6 @@ public class ProfileViewFragment extends Fragment
                 startActivity(myIntent);
             }
         } else {
-            Log.d(
-                    MainActivity.TAG,
-                    this.getClass().getCanonicalName()
-                            + " location permissions: " +
-                            Utilities.checkPermissionLocation(this.getActivity())
-            );
 
             // Setup My ID
             // FIXME Default user ID (empty string) is magic
