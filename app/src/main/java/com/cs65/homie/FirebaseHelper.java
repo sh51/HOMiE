@@ -121,53 +121,50 @@ public class FirebaseHelper {
 
 
     // Create profile
-    public void createProfile(String uid, Profile profile) {
-        if (uid == null) {
-            Log.d(Globals.TAG, "CreateProfile: null user.");
+    public void createProfile(Profile profile) {
+        if (profile.getId() == null) {
+            Log.d(Globals.TAG, "Error creating profile: uid empty.");
             return;
         }
-
-        Log.d(Globals.TAG, "Profile hasApartment - " + profile.isHasApartment());
-
-        Map<String, Object> p = new HashMap<>();
-        p.put("uid", uid);
-        // Strings
-        p.put("bio", profile.getBio());
-        p.put("address", profile.getAddress());
-        p.put("email", profile.getEmail());
-        p.put("password", profile.getPassword());
-        p.put("firstName", profile.getFirstName());
-        p.put("avatarImage", profile.getAvatarImage());
-        // numbers
-        p.put("hasApartment", profile.isHasApartment());
-        p.put("isPetFriendly", profile.isPetFriendly());
-        p.put("isSmoking", profile.isSmoking());
-        p.put("privateBathroom", profile.isPrivateBathroom());
-        p.put("gender", profile.getGender());
-        p.put("minPrice", profile.getMinPrice());
-        p.put("maxPrice", profile.getMaxPrice());
-        p.put("radius", profile.getRadius());
-        // geolocation
-        // TODO async geodecoding?
-        p.put("location", profile.getLocation());
-        // TODO array fields
-
-
-// Add a new document with a generated ID
-        db.collection("profiles")
-                .add(p)
-                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                    @Override
-                    public void onSuccess(DocumentReference documentReference) {
-                        Log.d(Globals.TAG, "DocumentSnapshot added with ID: " + documentReference.getId());
-                    }
-                })
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db.collection("profiles").document(profile.getId())
+                .set(profile)
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        Log.d(Globals.TAG, "Error adding document", e);
+                        Log.d(Globals.TAG, "Error setting document", e);
                     }
                 });
+
+//        if (uid == null) {
+//            Log.d(Globals.TAG, "CreateProfile: null user.");
+//            return;
+//        }
+//
+//        Log.d(Globals.TAG, "Profile hasApartment - " + profile.isHasApartment());
+//
+//        Map<String, Object> p = new HashMap<>();
+//        p.put("uid", uid);
+//        // Strings
+//        p.put("bio", profile.getBio());
+//        p.put("address", profile.getAddress());
+//        p.put("email", profile.getEmail());
+//        p.put("password", profile.getPassword());
+//        p.put("firstName", profile.getFirstName());
+//        p.put("avatarImage", profile.getAvatarImage());
+//        // numbers
+//        p.put("hasApartment", profile.isHasApartment());
+//        p.put("isPetFriendly", profile.isPetFriendly());
+//        p.put("isSmoking", profile.isSmoking());
+//        p.put("privateBathroom", profile.isPrivateBathroom());
+//        p.put("gender", profile.getGender());
+//        p.put("minPrice", profile.getMinPrice());
+//        p.put("maxPrice", profile.getMaxPrice());
+//        p.put("radius", profile.getRadius());
+//        // geolocation
+//        // TODO async geodecoding?
+//        p.put("location", profile.getLocation());
+//        // TODO array fields
     }
 
     // Update profile
@@ -187,22 +184,50 @@ public class FirebaseHelper {
             return;
         }
 
-        Query capitalCities = db.collection("profiles").whereEqualTo("id", uid);
-        capitalCities
-                .get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        for (QueryDocumentSnapshot document : task.getResult()) {
-                            MainActivity.userId = document.getId();
-                            Log.d(Globals.TAG, document.toObject(Profile.class).toString());
-                            break;
-                        }
-                    } else {
-                        Log.d(Globals.TAG, "Error getting documents: ", task.getException());
+        Query q = db.collection("profiles").whereEqualTo("id", uid);
+        q.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                for (QueryDocumentSnapshot document : task.getResult()) {
+                    try {
+                        Profile p = document.toObject(Profile.class);
+                        profiles.put(uid, p);
+                        callback.run(p);
+                    } catch (Exception e) {
+                        Log.d(Globals.TAG, "fetchProfile: cast to profile failed.\n+" + e.toString());
                     }
-                });
+                    break;
+                }
+            } else {
+                Log.d(Globals.TAG, "Error getting documents: ", task.getException());
+            }
+        });
     }
 
+    public void fetchProfiles(Utilities.onProfilesFetchedCallbackInterface callback) {
+        Query q = db.collection("profiles");
+        q.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                for (QueryDocumentSnapshot document : task.getResult()) {
+                    try {
+                        Profile p = document.toObject(Profile.class);
+                        String uid = p.getId();
+                        if (uid != null) profiles.put(uid, p);
+//                        if (document.toObject(Profile.class).getId() != null) Log.d(Globals.TAG, document.toObject(Profile.class).toString());
+                    } catch (Exception e) {
+                        Log.d(Globals.TAG, "fetchProfiles: cast to profile failed.\n" + e);
+                    }
+                }
+                callback.run(getProfiles());
+            } else {
+                Log.d(Globals.TAG, "Error getting documents: ", task.getException());
+            }
+        });
+    }
+
+    // Get certain profile
+    public Profile getProfile(String uid) {
+        return profiles.get(uid);
+    }
     // Get all the profiles
     public List<Profile> getProfiles() {
         return new ArrayList<Profile>(profiles.values());
@@ -273,7 +298,8 @@ public class FirebaseHelper {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         // TODO replace the userId with username
-                        if (dataSnapshot.getValue() != null) sendPushNotification(dataSnapshot.getValue(String.class), msg.getSenderId(), msg.getText());
+                        if (dataSnapshot.getValue() != null)
+                            sendPushNotification(dataSnapshot.getValue(String.class), msg.getSenderId(), msg.getText());
                     }
 
                     @Override
@@ -437,7 +463,6 @@ public class FirebaseHelper {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-
 
 
             thread.quit();

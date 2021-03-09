@@ -174,11 +174,8 @@ public class MainActivity extends AppCompatActivity {
     @SuppressLint("NonConstantResourceId")
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        mHelper.fetchProfile(mHelper.getUid(), (profile) -> {
-
-        });
-//        Intent intent = new Intent(getApplicationContext(), ProfileSettingsActivity.class);
-//        startActivityForResult(intent, EDIT_PROFILE);
+        Intent intent = new Intent(getApplicationContext(), ProfileSettingsActivity.class);
+        startActivityForResult(intent, EDIT_PROFILE);
 
 
 //        switch (item.getItemId()) {

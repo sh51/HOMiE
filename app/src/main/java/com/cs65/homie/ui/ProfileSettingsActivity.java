@@ -22,6 +22,8 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
+
+import com.cs65.homie.FirebaseHelper;
 import com.cs65.homie.Globals;
 import com.cs65.homie.ui.login.ui.login.LoginActivity;
 import com.cs65.homie.ui.login.ui.login.RegistrationActivity;
@@ -48,6 +50,7 @@ public class ProfileSettingsActivity extends AppCompatActivity {
     // TODO: Make better pattern, just testing functionality
     public static String userID = null;
 
+    private FirebaseHelper mHelper;
     private ImageView photoView;
     private String tempImgFileName = "temp.png";
     private EditText editedName, editedEmail, changedPassword;
@@ -75,6 +78,7 @@ public class ProfileSettingsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_profile_settings);
 
 
+        mHelper = FirebaseHelper.getInstance();
         SharedPreferences savedProfile = getSharedPreferences(getString(R.string.saved_preferences), MODE_PRIVATE);
 
 
@@ -289,33 +293,18 @@ public class ProfileSettingsActivity extends AppCompatActivity {
         Toast.makeText(this, R.string.toast_saved, Toast.LENGTH_SHORT).show();
         Log.d(TAG, "toasted");
 
-        // Firebase
-        TextInputEditText bio = (TextInputEditText)findViewById(R.id.bio);
 
+        TextInputEditText bio = (TextInputEditText)findViewById(R.id.bio);
+        // Firebase
         Profile newProfile = new Profile();
+        newProfile.setId(mHelper.getUid());
         newProfile.setFirstName(this.name);
         newProfile.setEmail(this.email);
         newProfile.setPassword(this.password);
         newProfile.setBio(bio.getText().toString());
         newProfile.setId(FirebaseAuth.getInstance().getCurrentUser().getUid());
+        mHelper.createProfile(newProfile);
 
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        db.collection("profiles")
-                .add(newProfile)
-                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                    @Override
-                    public void onSuccess(DocumentReference documentReference) {
-                        Log.d(TAG, "DocumentSnapshot added with ID: " + documentReference.getId());
-                        MainActivity.userId = documentReference.getId();
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.w(TAG, "Error adding document", e);
 
-                        // TODO: Registration failed, handle
-                    }
-                });
     }
 }
