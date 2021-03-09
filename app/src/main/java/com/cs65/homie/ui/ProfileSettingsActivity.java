@@ -16,6 +16,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -57,6 +58,7 @@ public class ProfileSettingsActivity extends AppCompatActivity {
     private Uri photoUri, houseUri;
     private String photoPath, name, email, password,
             genderPref, housingSearch, housePhotoPath,
+            address, radius, minBudget, maxBudget,
             petFriendly, noneSmoking, privateBathroom;
 
     private static final int RC_LOGIN = 0;
@@ -84,7 +86,11 @@ public class ProfileSettingsActivity extends AppCompatActivity {
         this.radioNoPref = (RadioButton) findViewById(R.id.radioButton_nopref);
         this.photoView = (ImageView) findViewById(R.id.photoView);
         this.housingSearchOptions = (Spinner) findViewById(R.id.spinnerNeedHousing);
+
+
         Button changeHousing = (Button) findViewById(R.id.button_ChangeHousingPhoto);
+        TextView changeHousingImgPrompt = (TextView) findViewById(R.id.textView_HousingImageView);
+        ImageView housingImgView = (ImageView) findViewById(R.id.imageViewHousing);
 
         Utilities.checkPermission(this);
 
@@ -96,6 +102,8 @@ public class ProfileSettingsActivity extends AppCompatActivity {
         this.houseUri = FileProvider.getUriForFile(
                 this, "com.cs65.homie.ui", tempHomeImgFile);
         changeHousing.setVisibility(View.GONE);
+        changeHousingImgPrompt.setVisibility(View.GONE);
+        housingImgView.setVisibility(View.GONE);
 
         ArrayAdapter<CharSequence> housingAdapter = ArrayAdapter.createFromResource(
                 this, R.array.spinner_HousingSearchOptions, android.R.layout.simple_spinner_item);
@@ -106,9 +114,13 @@ public class ProfileSettingsActivity extends AppCompatActivity {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 if (parent.getItemAtPosition(position).equals("Have Housing. Just looking for a Roommate.")) {
                     changeHousing.setVisibility(View.VISIBLE);
+                    changeHousingImgPrompt.setVisibility(View.VISIBLE);
+                    housingImgView.setVisibility(View.VISIBLE);
                 }
                 else {
                     changeHousing.setVisibility(View.GONE);
+                    changeHousingImgPrompt.setVisibility(View.GONE);
+                    housingImgView.setVisibility(View.GONE);
                 }
             }
 
@@ -127,6 +139,11 @@ public class ProfileSettingsActivity extends AppCompatActivity {
             this.privateBathroom = savedProfile.getString(getString(R.string.key_privateBathroom), null);
             this.genderPref = savedProfile.getString(getString(R.string.key_genderpref), null);
             this.housingSearch = savedProfile.getString(getString(R.string.key_lookingForHousing), null);
+            this.housePhotoPath = savedInstanceState.getString(getString(R.string.key_housingImg), null);
+            this.address = savedProfile.getString(getString(R.string.key_address), null);
+            this.radius = savedProfile.getString(getString(R.string.key_radius), null);
+            this.minBudget = savedProfile.getString(getString(R.string.key_minBudget), null);
+            this.maxBudget = savedProfile.getString(getString(R.string.key_maxBudget), null);
         }
         else {
             this.photoPath = savedProfile.getString(getString(R.string.key_filename), null);
@@ -139,6 +156,11 @@ public class ProfileSettingsActivity extends AppCompatActivity {
             this.privateBathroom = savedProfile.getString(getString(R.string.key_privateBathroom), null);
             this.genderPref = savedProfile.getString(getString(R.string.key_genderpref), null);
             this.housingSearch = savedProfile.getString(getString(R.string.key_lookingForHousing), null);
+            this.housePhotoPath = savedProfile.getString(getString(R.string.key_housingImg), null);
+            this.address = savedProfile.getString(getString(R.string.key_address), null);
+            this.radius = savedProfile.getString(getString(R.string.key_radius), null);
+            this.minBudget = savedProfile.getString(getString(R.string.key_minBudget), null);
+            this.maxBudget = savedProfile.getString(getString(R.string.key_maxBudget), null);
 
         }
 
