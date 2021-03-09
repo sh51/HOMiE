@@ -1,6 +1,9 @@
 package com.cs65.homie;
 
 import android.content.ContentResolver;
+import android.content.Context;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -10,8 +13,10 @@ import androidx.lifecycle.ViewModel;
 
 import com.cs65.homie.models.Message;
 import com.cs65.homie.models.Profile;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
@@ -22,7 +27,16 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.messaging.FirebaseMessaging;
 
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -39,6 +53,7 @@ public class FirebaseHelper {
     private HashMap<String, ChildEventListener> chatListeners;
     private HashMap<String, Profile> profiles;
     private List<Profile> matchedProfiles;
+    private String server_key;
 
     private FirebaseFirestore db;
     // realtime database object
@@ -52,6 +67,7 @@ public class FirebaseHelper {
 
         return inst;
     }
+
     public FirebaseHelper() {
         db = FirebaseFirestore.getInstance();
         rdb = FirebaseDatabase.getInstance();
@@ -59,6 +75,9 @@ public class FirebaseHelper {
         profiles = new HashMap<>();
         chatListeners = new HashMap<>();
         matchedProfiles = new ArrayList<>();
+
+        savePushToken();
+
 
         // TODO fetch profiles from FireStore
         Profile profile = new Profile();
@@ -168,6 +187,7 @@ public class FirebaseHelper {
     public List<Profile> getSuggestedProfiles() {
         return new ArrayList<Profile>(profiles.values());
     }
+
     // Get matched profiles for chat initialization - return the matched profiles, need to be called after a MatchedProfile update
     public List<Profile> getMatchedProfiles() {
         return matchedProfiles;
@@ -187,7 +207,7 @@ public class FirebaseHelper {
     }
 
 
-        // Chat related functions: !must be logged in
+    // Chat & notification related functions: !must be logged in
 
     // call sendMessage with receiverId, text and a callback for ui change
     public void sendMessage(String receiverId, String text, Utilities.onMessageSentCallbackInterface callback) {
@@ -219,8 +239,24 @@ public class FirebaseHelper {
         ref.push().setValue(msg, new DatabaseReference.CompletionListener() {
             @Override
             public void onComplete(@Nullable DatabaseError error, @NonNull DatabaseReference ref) {
-                callback.run(msg);
                 Log.d(Globals.TAG, "Message sent.");
+                // message sent, execute callback
+                callback.run(msg);
+                // send out push notif
+                DatabaseReference pts = rdb.getReference("pts/" + receiverId);
+                pts.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        // TODO replace the userId with username
+                        if (dataSnapshot.getValue() != null) sendPushNotification(dataSnapshot.getValue(String.class), msg.getSenderId(), msg.getText());
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                        // ...
+                    }
+                });
+
             }
         });
 
@@ -306,6 +342,100 @@ public class FirebaseHelper {
     // unlike a user
     public static void unlike(String uid, Utilities.onUnlikeCallbackInterface callback) {
 
+    }
+
+
+    // load the server key with context
+    public void loadServerKey(Context ctxt) {
+        String string = "";
+        StringBuilder stringBuilder = new StringBuilder();
+
+        try {
+            InputStream is = ctxt.getResources().openRawResource(R.raw.env);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+            while (true) {
+                if ((string = reader.readLine()) == null) break;
+                stringBuilder.append(string).append("\n");
+            }
+
+            is.close();
+            server_key = stringBuilder.toString();
+            Log.d(Globals.TAG, "Server key loaded.");
+        } catch (Exception e) {
+            Log.d(Globals.TAG, "Load server key failed.");
+        }
+
+    }
+
+    // send a push notification to a certain user
+    public void sendPushNotification(String token, String title, String text) {
+        if (server_key == null) return;
+        Log.d(Globals.TAG, "Sending push notification to " + token);
+
+        HandlerThread thread = new HandlerThread("pushNotification");
+        thread.start();
+        final Handler handler = new Handler(thread.getLooper());
+        handler.postDelayed(() -> {
+            try {
+                String request = Globals.FCM_API;
+                URL url = new URL(request);
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setDoOutput(true);
+                conn.setInstanceFollowRedirects(false);
+                conn.setRequestMethod("POST");
+                conn.setRequestProperty("Content-Type", "application/json");
+                conn.setRequestProperty("Authorization", "key=" + server_key);
+                conn.setUseCaches(false);
+                conn.connect();
+                JSONObject body = new JSONObject();
+                body.put("to", token);
+                JSONObject notification = new JSONObject();
+                notification.put("title", title);
+                notification.put("body", text);
+                body.put("notification", notification);
+
+                DataOutputStream wr = new DataOutputStream(conn.getOutputStream());
+                wr.write(body.toString().getBytes());
+                // Read the response
+                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"));
+
+                String line = null;
+                StringBuilder sb = new StringBuilder();
+
+                while ((line = bufferedReader.readLine()) != null) {
+                    sb.append(line);
+                }
+
+                bufferedReader.close();
+                Log.d(Globals.TAG, "Push notification sent.");
+//                Log.d(Globals.TAG, sb.toString());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+
+
+            thread.quit();
+        }, 0);
+    }
+
+    // save the push tokens to realtime database
+    private void savePushToken() {
+        FirebaseMessaging.getInstance().getToken()
+                .addOnCompleteListener(task -> {
+                    if (!task.isSuccessful()) {
+                        Log.w(Globals.TAG, "Fetching FCM registration token failed", task.getException());
+                        return;
+                    }
+                    // Get new FCM registration token
+                    String token = task.getResult();
+                    // save the token
+                    DatabaseReference ref = rdb.getReference("pts/" + getUid());
+                    ref.setValue(token, (err, prevRef) -> {
+                        Log.d(Globals.TAG, "Push notification saved.");
+                    });
+
+                });
     }
 
     // util function, map two userId to a chat id
