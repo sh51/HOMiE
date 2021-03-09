@@ -139,10 +139,10 @@ public class LoginActivity extends AppCompatActivity {
 //                        passwordEditText.getText().toString());
                 onLogin(usernameEditText.getText().toString(), passwordEditText.getText().toString());
 
-                // No longer spawning profile view activity
-                // Land on nav after logging in
-                // FIXME
-                finish();
+                // Do not finish the activity (and as a result the app) here
+                // It looks like the app is crashing on login failure
+                // The app is hidden without any notice on why
+
             }
         });
 
