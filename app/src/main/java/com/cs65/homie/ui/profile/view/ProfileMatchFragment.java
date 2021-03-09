@@ -57,6 +57,9 @@ public class ProfileMatchFragment
     private static final double CARD_ELEVATION = 5.0;
     private static final double CARD_MARGIN = 20.0;
 
+    // TODO add more logic to match suggestion
+    private int currentIndex;
+
     private FirebaseHelper mHelper;
     private FloatingActionButton buttonMatch = null;
     private FloatingActionButton buttonReject = null;
@@ -119,7 +122,7 @@ public class ProfileMatchFragment
     }
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        loadMatches();
+//        loadMatches();
         return super.onCreateView(inflater, container, savedInstanceState);
     }
 
@@ -233,7 +236,8 @@ public class ProfileMatchFragment
             buttonReject.setVisibility(View.VISIBLE);
         }
         // TODO Using fake data for now
-        this.loadFakeData();
+//        this.loadFakeData();
+        loadProfile();
 
     }
 
@@ -269,6 +273,9 @@ public class ProfileMatchFragment
             R.string.profile_view_match_reject_description,
             this.getActivity()
         );
+
+        currentIndex++;
+        loadProfile();
     }
 
     /**
@@ -319,8 +326,17 @@ public class ProfileMatchFragment
         loadProfile("pR7PsciIRpdL24u54ZNoP85efh83");
     }
     private void loadProfile(String uid) {
-        Profile p = mHelper.getProfile(uid);
-        // Update UI
+        updateUI(mHelper.getProfile(uid));
+    }
+
+    private void loadProfile() {
+        List<Profile> profiles = mHelper.getProfiles();
+        int size = profiles.size();
+        updateUI(profiles.get(currentIndex % size));
+    }
+
+    // Update UI given a profile
+    private void updateUI(Profile p) {
         name.setValue(p.getFirstName());
         bathroom.setValue(p.isPrivateBathroom());
         bio.setValue(p.getBio());
@@ -337,7 +353,5 @@ public class ProfileMatchFragment
         } else {
             updateViewGender("Male");
         }
-
     }
-
 }

@@ -16,6 +16,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.Spinner;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -57,6 +58,7 @@ public class ProfileSettingsActivity extends AppCompatActivity {
     private String tempImgHomeName = "temp.png";
     private RadioButton radioFemale, radioMale, radioNoPref;
     private Spinner housingSearchOptions;
+    private Switch isPetFriendly, isSmoking, isPrivateBathroom;
 
     private Uri photoUri, houseUri;
     private int gender;
@@ -93,6 +95,9 @@ public class ProfileSettingsActivity extends AppCompatActivity {
         this.photoView = (ImageView) findViewById(R.id.photoView);
         this.housingSearchOptions = (Spinner) findViewById(R.id.spinnerNeedHousing);
 
+        isPetFriendly = (Switch) findViewById(R.id.switchPetFriendly);
+        isSmoking = (Switch) findViewById(R.id.switchNoneSmoking);
+        isPrivateBathroom = (Switch) findViewById(R.id.switchPrivateBathroom);
 
         Button changeHousing = (Button) findViewById(R.id.button_ChangeHousingPhoto);
         TextView changeHousingImgPrompt = (TextView) findViewById(R.id.textView_HousingImageView);
@@ -310,12 +315,12 @@ public class ProfileSettingsActivity extends AppCompatActivity {
         newProfile.setBio(bio.getText().toString());
         newProfile.setGender(this.gender);
         newProfile.setHasApartment(hasApartment);
+        newProfile.setisPetFriendly(isPetFriendly.isChecked());
+        newProfile.setSmoking(!isSmoking.isChecked());
+        newProfile.setPrivateBathroom(isPrivateBathroom.isChecked());
         newProfile.setId(FirebaseAuth.getInstance().getCurrentUser().getUid());
 
         // TODO add these to saveProfile
-//        editedProfile.putString(getString(R.string.key_petFriendly), this.petFriendly);
-//        editedProfile.putString(getString(R.string.key_noneSmoking), this.noneSmoking);
-//        editedProfile.putString(getString(R.string.key_privateBathroom), this.privateBathroom);
 //        editedProfile.putString(getString(R.string.key_filename), this.photoPath);
 
         mHelper.createProfile(newProfile);
