@@ -130,19 +130,6 @@ public class LoginActivity extends AppCompatActivity {
         };
         usernameEditText.addTextChangedListener(afterTextChangedListener);
         passwordEditText.addTextChangedListener(afterTextChangedListener);
-        passwordEditText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-
-            @Override
-            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                if (actionId == EditorInfo.IME_ACTION_DONE) {
-//                    loginViewModel.login(usernameEditText.getText().toString(),
-//                            passwordEditText.getText().toString());
-
-                    if (login_signin_Button.isEnabled()) onLogin(usernameEditText.getText().toString(), passwordEditText.getText().toString());
-                }
-                return false;
-            }
-        });
 
         login_signin_Button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -154,6 +141,7 @@ public class LoginActivity extends AppCompatActivity {
 
                 // No longer spawning profile view activity
                 // Land on nav after logging in
+                // FIXME
                 finish();
             }
         });
