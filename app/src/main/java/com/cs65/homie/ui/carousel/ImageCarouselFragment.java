@@ -87,9 +87,7 @@ public class ImageCarouselFragment
     public void onViewCreated(View view, Bundle savedInstanceState)
     {
 
-        // FIXME The proportions of the movement, padding, etc,
-        // completely break down on landscape.
-        // Since it doesn't work in landscape, and is inflexible overall,
+        // Since this is poor in landscape, and is inflexible overall,
         // magic number remain for now
         this.viewPager = view.findViewById(R.id.imageCarouselViewPager);
         if (this.viewPager != null)
@@ -128,7 +126,10 @@ public class ImageCarouselFragment
     public void setImages(List<Uri> images)
     {
         this.images = images;
-        this.viewPager.invalidate();
+        if (this.viewPager != null)
+        {
+            this.viewPager.invalidate();
+        }
     }
 
 }

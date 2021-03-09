@@ -18,12 +18,15 @@ import androidx.lifecycle.MutableLiveData;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.ViewModel;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.cs65.homie.FirebaseHelper;
 import com.cs65.homie.Globals;
 import com.cs65.homie.MainActivity;
 import com.cs65.homie.R;
 import com.cs65.homie.Utilities;
+import com.cs65.homie.models.GenderEnum;
 import com.cs65.homie.models.Profile;
 import com.cs65.homie.ui.gestures.OnSwipeGestureListener;
 import com.cs65.homie.ui.gestures.SwipeGesture;
@@ -59,6 +62,7 @@ public class ProfileMatchFragment
     private static final int CARD_BACKGROUND_COLOR = 0xFFDDDDDD;
     private static final double CARD_ELEVATION = 5.0;
     private static final double CARD_MARGIN = 20.0;
+    private static final double MATCH_BUTTONS_PADDING = 60.0;
 
     // TODO add more logic to match suggestion
     private int currentIndex;
@@ -69,12 +73,9 @@ public class ProfileMatchFragment
 
     private List<Profile> matches = new ArrayList<>();
 
+
     public void onClick(View view)
     {
-
-        // FIXME It's likely you can match more than once by spamming
-        // the button or swiping
-        // There's nothing stopping you from doing that at least
 
         // TODO After-matching action, ping to Firebase, "you have a match!"
         // etc happens here
@@ -180,10 +181,10 @@ public class ProfileMatchFragment
         if (topLayout != null)
         {
             // The match buttons require more padding
-            // FIXME At least comment the magic numbers
             topLayout.setPadding(
-                0, 0, 0,
-                (int)Math.round(Utilities.pixelDensity(this.requireContext(), 60.0))
+                0, 0, 0, (int)Math.round(Utilities.pixelDensity(
+                    this.requireContext(), MATCH_BUTTONS_PADDING
+                ))
             );
         }
 
@@ -211,8 +212,7 @@ public class ProfileMatchFragment
             buttonReject.setOnClickListener(this);
             buttonReject.setVisibility(View.VISIBLE);
         }
-        // TODO Using fake data for now
-//        this.loadFakeData();
+
         loadProfile();
 
     }
@@ -278,12 +278,5 @@ public class ProfileMatchFragment
         vm.getPriceMin().setValue(p.getMinPrice());
         vm.getPriceMax().setValue(p.getMaxPrice());
         if (p.getAvatarImage() != null) vm.getAvatarUri().setValue(Uri.parse(p.getAvatarImage()));
-
-        int genderCode = p.getGender();
-        if (genderCode == 1) {
-            updateViewGender("Female");
-        } else {
-            updateViewGender("Male");
-        }
     }
 }

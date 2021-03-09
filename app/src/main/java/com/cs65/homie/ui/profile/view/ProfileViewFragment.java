@@ -1,17 +1,8 @@
 package com.cs65.homie.ui.profile.view;
 
-import android.annotation.SuppressLint;
 import android.content.ContentResolver;
-import android.content.Context;
 import android.content.Intent;
-import android.location.Address;
-import android.location.Criteria;
-import android.location.Geocoder;
-import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.HandlerThread;
 import android.os.Process;
@@ -23,50 +14,31 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.core.text.HtmlCompat;
-import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentContainerView;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.cs65.homie.FirebaseHelper;
-import com.cs65.homie.Globals;
 import com.cs65.homie.MainActivity;
 import com.cs65.homie.R;
-import com.cs65.homie.ThreadPerTaskExecutor;
 import com.cs65.homie.Utilities;
+import com.cs65.homie.models.GenderEnum;
 import com.cs65.homie.models.Profile;
-import com.cs65.homie.ui.ProfileSettingsActivity;
-import com.cs65.homie.ui.carousel.ImageCarouselFragment;
 import com.cs65.homie.ui.ImageFullScreenActivity;
-import com.cs65.homie.ui.login.ui.login.LoginActivity;
+import com.cs65.homie.ui.carousel.ImageCarouselFragment;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.FieldPath;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.Query;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.function.Consumer;
-
-// FIXME Does the view handle no image carousel correctly?
 
 /**
  * Static profile view activity
  */
 @SuppressWarnings("Convert2Diamond")
-public class ProfileViewFragment
-    extends Fragment
-    implements Consumer<Location>, LocationListener
+public class ProfileViewFragment extends Fragment
 {
-
     private FirebaseHelper mHelper;
 
     @SuppressWarnings("unused")
@@ -75,8 +47,6 @@ public class ProfileViewFragment
     @SuppressWarnings("unused")
     public static final String BUNDLE_KEY_USER_ID
         = "BUNDLE_KEY_PROFILE_VIEW_USER_ID";
-    public static final String CURRENT_LOC_FORMAT_STR
-        = "Your current location:%n%s";
     public static final String PLACE_FORMAT_STR
         = "%s %.1f miles from you";
     public static final String PLACE_HAS_STR = "Has a place";
@@ -87,9 +57,6 @@ public class ProfileViewFragment
     public static final String PRICE_FORMAT_STR = "$%.2f";
 
     private ImageCarouselFragment fragImageCarousel = null;
-    private Geocoder geocoder = null;
-    private LocationManager locationManager = null;
-    private String locationProvider = null;
     private final HandlerThread workerThread;
     private ImageView viewAvatar = null;
     private TextView viewBathroom = null;
@@ -125,20 +92,6 @@ public class ProfileViewFragment
 
     ///// ///// /////
 
-    public void accept(Location location)
-    {
-        if (location != null)
-        {
-            LatLng latLng = new LatLng(
-                location.getLatitude(), location.getLongitude()
-            );
-            if (latLng.latitude != 0 || latLng.longitude != 0)
-            {
-                this.vm.getMyLoc().postValue(latLng);
-            }
-        }
-    }
-
     public void onAvatarClick(View view)
     {
 
@@ -167,51 +120,26 @@ public class ProfileViewFragment
 
         // Get the view model instance
         // ViewModel can never be null
-        this.vm = new ViewModelProvider(this).get(
+        if (this.vm == null)
+        {
+            this.vm = new ViewModelProvider(this).get(
                 ProfileViewFragmentViewModel.class
-        );
+            );
+        }
 
         mHelper = FirebaseHelper.getInstance();
         bio = this.vm.getBio();
         bathroom = this.vm.getBathroom();
-        gender = this.vm.getGender();
+//        gender = this.vm.getGender();
         pets = this.vm.getPets();
         hasPlace = this.vm.getPlace();
         isSmoking = this.vm.getSmoking();
         name = this.vm.getProfileName();
 
 
+        // Setup My ID
+        this.vm.setMyId(mHelper.getUid());
 
-
-
-            Log.d(
-                    MainActivity.TAG,
-                    this.getClass().getCanonicalName()
-                            + " location permissions: " +
-                            Utilities.checkPermissionLocation(this.getActivity())
-            );
-
-            // Setup My ID
-            this.vm.setMyId(mHelper.getUid());
-
-
-            // Setup the location services if we need it.
-            this.geocoder = new Geocoder(this.getContext(), Locale.getDefault());
-            this.locationManager
-                    = (LocationManager) this.requireActivity().getSystemService(
-                    Context.LOCATION_SERVICE
-            );
-            Criteria locCriteria = new Criteria();
-            locCriteria.setAccuracy(Criteria.ACCURACY_COARSE);
-            this.locationProvider = this.locationManager.getBestProvider(
-                    locCriteria, true
-            );
-            Log.d(
-                    MainActivity.TAG,
-                    this.getClass().getCanonicalName()
-                            + " location provider: "
-                            + this.locationProvider
-            );
 
         }
 //    }
@@ -228,47 +156,11 @@ public class ProfileViewFragment
 
     public void onDestroy()
     {
-        if (locationManager != null) {
-            this.locationManager.removeUpdates(this);
-        }
         if (workerThread != null) {
             this.workerThread.quitSafely();
         }
         super.onDestroy();
     }
-
-    public void onLocationChanged(Location location)
-    {
-        if (location.getLatitude() != 0 || location.getLongitude() != 0)
-        {
-            this.vm.getMyLoc().postValue(
-                new LatLng(location.getLatitude(), location.getLongitude())
-            );
-        }
-    }
-
-    public void onUpdateLocLive(boolean locLive)
-    {
-        if (locLive)
-        {
-            this.requestLocUpdate();
-        }
-    }
-
-    public void onResume()
-    {
-        super.onResume();
-        // If the user uses a live location, update the location on resume
-        // At the moment we don't bother listening to the location
-        // Excessive
-        if (this.vm.getMyLocLive().getValue())
-        {
-            this.requestLocUpdate();
-        }
-    }
-
-    // Unimplemented. We do not care about location provider status events
-    public void onStatusChanged (String provider, int status, Bundle extras) {}
 
     public void onViewCreated(View view, Bundle savedInstanceState)
     {
@@ -311,13 +203,6 @@ public class ProfileViewFragment
             this.updateViewBio(this.vm.getBio().getValue());
         }
         this.viewGender = view.findViewById(R.id.profileViewGenderTextView);
-        if (this.viewGender != null)
-        {
-            this.vm.getGender().observe(
-                this.getViewLifecycleOwner(), this::updateViewGender
-            );
-            this.updateViewGender(this.vm.getGender().getValue());
-        }
         this.viewLoc = view.findViewById(R.id.profileViewLocationTextView);
         if (this.viewLoc != null)
         {
@@ -358,6 +243,7 @@ public class ProfileViewFragment
                 this.vm.getPriceMin().observe(
                     this.getViewLifecycleOwner(), this::updateViewMinPrice
                 );
+                //noinspection ConstantConditions
                 this.updateViewMinPrice(this.vm.getPriceMin().getValue());
             }
         }
@@ -371,6 +257,7 @@ public class ProfileViewFragment
                 this.vm.getPriceMax().observe(
                     this.getViewLifecycleOwner(), this::updateViewMaxPrice
                 );
+                //noinspection ConstantConditions
                 this.updateViewMaxPrice(this.vm.getPriceMax().getValue());
             }
         }
@@ -382,6 +269,7 @@ public class ProfileViewFragment
                 this.vm.getRadius().observe(
                     this.getViewLifecycleOwner(), this::updateViewRadius
                 );
+                //noinspection ConstantConditions
                 this.updateViewRadius(this.vm.getRadius().getValue());
                 this.viewRadius.setVisibility(View.VISIBLE);
             }
@@ -396,11 +284,6 @@ public class ProfileViewFragment
             this.updateViewSmoking(this.vm.getSmoking().getValue());
         }
 
-        // Set the non-view observer for the location live field
-        this.vm.getMyLocLive().observe(
-            this.getViewLifecycleOwner(), this::onUpdateLocLive
-        );
-
         // Load the image carousel
         this.viewCarousel = view.findViewById(R.id.profileViewCarouselFragView);
         this.fragImageCarousel
@@ -412,6 +295,7 @@ public class ProfileViewFragment
             this.vm.getImages().observe(
                 this.getViewLifecycleOwner(), this::setImages
             );
+            //noinspection ConstantConditions
             if (this.vm.getImages().getValue().isEmpty())
             {
                 this.viewCarousel.setVisibility(View.GONE);
@@ -538,11 +422,21 @@ public class ProfileViewFragment
         }
     }
 
-    public void updateViewGender(String gender)
+    public void updateViewGender(GenderEnum gender)
     {
         if (this.viewGender != null)
         {
-            this.viewGender.setText(gender);
+            switch (gender)
+            {
+                case FEMALE:
+                    this.viewGender.setText(R.string.profile_view_gender_male);
+                    break;
+                case MALE:
+                    this.viewGender.setText(R.string.profile_view_gender_female);
+                    break;
+                default:
+                    this.viewGender.setText(R.string.profile_view_gender_none);
+            }
         }
     }
 
@@ -551,52 +445,10 @@ public class ProfileViewFragment
      *
      * @param myLoc     The app user's location
      */
-    @SuppressWarnings("StatementWithEmptyBody")
     public void updateViewLocByMyLoc(LatLng myLoc)
     {
 
-        if (this.isMe())
-        {
-
-            //noinspection ConstantConditions
-            if (
-                this.viewLoc != null
-                && this.geocoder != null
-                && this.vm.getMyLocLive().getValue()
-            )
-            {
-
-                // Get address represented by the user's current location
-                Address address = Utilities.latLngToAddress(
-                    this.geocoder, myLoc
-                );
-                if (address != null)
-                {
-                    // Usually there's only one line, and it contains
-                    // the whole address
-                    String addrStr = address.getAddressLine(0);
-                    if (addrStr !=  null)
-                    {
-                        this.viewLoc.setText(String.format(
-                            Locale.getDefault(),
-                            CURRENT_LOC_FORMAT_STR,
-                            addrStr
-                        ));
-                    }
-                }
-
-            }
-            else
-            {
-                // This branch represents a static location address string
-                // that the user has set
-                // This is handled by updateMyLocStr and should not be updated
-                // by this method since this method is only invoked on the myLoc
-                // change.
-            }
-
-        }
-        else
+        if (!this.isMe())
         {
 
             // Show the distance from the app user to the profile's user
@@ -619,15 +471,16 @@ public class ProfileViewFragment
      * Update the location text view upon a change to the app user's location
      * string
      *
+     * This husk of a function exists for historical reason, but should not be
+     * removed due to observer dependencies
+     *
      * @param myLoc     The app user's location string
      */
     public void updateViewLocByMyString(String myLoc)
     {
-        //noinspection ConstantConditions
         if (
             this.viewLoc != null
             && this.isMe()
-            && !this.vm.getMyLocLive().getValue()
         )
         {
             this.viewLoc.setText(myLoc);
@@ -643,11 +496,11 @@ public class ProfileViewFragment
     public void updateViewLocByUserLoc(LatLng userLoc)
     {
 
-        LatLng zero = new LatLng(0, 0);
         if (this.isMe())
         {
             return;
         }
+        LatLng zero = new LatLng(0, 0);
         LatLng myLoc = this.vm.getMyLoc().getValue();
         assert myLoc != null;
         if (myLoc.equals(zero) || userLoc.equals(zero))
@@ -672,8 +525,6 @@ public class ProfileViewFragment
     {
         if (this.viewPets != null)
         {
-            // TODO The intention is that the final version will use icons
-            // rather than unicode, but this is good for now
             if (pets)
             {
                 this.viewPets.setText(R.string.profile_view_pets_yes);
@@ -764,8 +615,6 @@ public class ProfileViewFragment
     {
         if (this.viewSmoking != null)
         {
-            // TODO The intention is that the final version will use icons
-            // rather than unicode, but this is good for now
             if (smoking)
             {
                 this.viewSmoking.setText(R.string.profile_view_smoking_yes);
@@ -783,7 +632,7 @@ public class ProfileViewFragment
     /**
      * Whether or not this profile view is of the app user
      *
-     * @return  Whether or not this profile viwe is of the app user
+     * @return  Whether or not this profile view is of the app user
      */
     private boolean isMe()
     {
@@ -798,7 +647,6 @@ public class ProfileViewFragment
 
         this.vm.getLoc().setValue(new LatLng(43.624794, -72.323171));
         this.vm.getMyLoc().setValue(new LatLng(43.704166, -72.288762));
-        this.vm.getMyLocLive().setValue(true);
         this.vm.getMyLocStr().setValue("Sanborn");
         this.vm.getAvatarUri().setValue(null);
 
@@ -823,7 +671,7 @@ public class ProfileViewFragment
             loadProfile(this.vm.getMyId());
 
         } else {
-            // TODO: Handle ID doesnt exist
+            // TODO: Handle ID doesn't exist
         }
 
     }
@@ -840,14 +688,6 @@ public class ProfileViewFragment
         vm.getPriceMin().setValue(p.getMinPrice());
         vm.getPriceMax().setValue(p.getMaxPrice());
         if (p.getAvatarImage() != null) vm.getAvatarUri().setValue(Uri.parse(p.getAvatarImage()));
-
-        int genderCode = p.getGender();
-        if (genderCode == 1) {
-            updateViewGender("Female");
-        } else {
-            updateViewGender("Male");
-        }
-
     }
 
     private void pingFirebase()
@@ -855,53 +695,10 @@ public class ProfileViewFragment
         this.loadFakeData();
     }
 
-    @SuppressLint("MissingPermission")
-    private void requestLocUpdate()
-    {
-        if (this.locationManager != null && this.locationProvider != null)
-        {
-
-            // Before the async call, get the last location in the mean time
-            Location loc = this.locationManager.getLastKnownLocation(
-                this.locationProvider
-            );
-            if (
-                loc != null
-                && (loc.getLongitude() != 0 || loc.getLatitude() != 0)
-            )
-            {
-                this.vm.getMyLoc().postValue(new LatLng(
-                    loc.getLatitude(), loc.getLongitude()
-                ));
-            }
-
-            if (Build.VERSION.SDK_INT >= Utilities.GET_CURRENT_LOC_SDK)
-            {
-                this.locationManager.getCurrentLocation(
-                    this.locationProvider,
-                    null,
-                    new ThreadPerTaskExecutor(),
-                    this
-                );
-            }
-            else
-            {
-                //noinspection deprecation
-                this.locationManager.requestSingleUpdate(
-                    this.locationProvider,
-                    this,
-                    this.workerThread.getLooper()
-                );
-            }
-        }
-    }
-
     private void updateViewBathroom(boolean bathroom, boolean place)
     {
         if (this.viewBathroom != null)
         {
-            // TODO The intention is that the final version will use icons
-            // rather than unicode, but this is good for now
             if (bathroom)
             {
                 if (place)
@@ -946,9 +743,6 @@ public class ProfileViewFragment
         double distance = Utilities.distanceHaversine(
             myLoc, theirLoc, 0, 0
         );
-
-        // TODO Handle unit preference once that is established on the editable
-        // end
 
         String placeStr;
         if (place)

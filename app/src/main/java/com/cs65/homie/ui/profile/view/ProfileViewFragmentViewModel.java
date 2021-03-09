@@ -5,6 +5,7 @@ import android.net.Uri;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import com.cs65.homie.models.GenderEnum;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
@@ -30,12 +31,10 @@ public class ProfileViewFragmentViewModel extends ViewModel
         );
     private final MutableLiveData<LatLng> loc
         = new MutableLiveData<LatLng>(new LatLng(0, 0));
-    private final MutableLiveData<String> gender
-        = new MutableLiveData<String>("");
+    private final MutableLiveData<GenderEnum> gender
+        = new MutableLiveData<GenderEnum>(GenderEnum.NONE);
     private final MutableLiveData<LatLng> myLoc
         = new MutableLiveData<LatLng>(new LatLng(0, 0));
-    private final MutableLiveData<Boolean> myLocLive
-        = new MutableLiveData<Boolean>(false);
     private final MutableLiveData<String> myLocStr
         = new MutableLiveData<String>("");
     private String myId = "";
@@ -74,7 +73,7 @@ public class ProfileViewFragmentViewModel extends ViewModel
     {
         return this.bio;
     }
-    public MutableLiveData<String> getGender()
+    public MutableLiveData<GenderEnum> getGender()
     {
         return this.gender;
     }
@@ -107,17 +106,6 @@ public class ProfileViewFragmentViewModel extends ViewModel
     public MutableLiveData<LatLng> getMyLoc()
     {
         return this.myLoc;
-    }
-    /**
-     * Whether or not the app's user has elected to determine their location
-     * in real time using GPS
-     *
-     * @return  MutableLiveData wrapping whether or not the app's user has
-     *          elected to determine their location in real time using GPS
-     */
-    public MutableLiveData<Boolean> getMyLocLive()
-    {
-        return this.myLocLive;
     }
     /**
      * Get the location string of the app's user
