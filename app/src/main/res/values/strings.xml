@@ -9,6 +9,7 @@
     <string name="title_edit_profile">Edit Profile</string>
 
     <!-- CHAT -->
+    <string name="chats_empty_warning"><b>Oh No!</b>\n\nYou don\'t have any Homies to chat with!\nGo Match with someone\n<b>→</b></string>
     <string name="chat_back_button_description">Back Button</string>
     <string name="chat_input_hint">Compose Message</string>
     <string name="chat_send_button_description">Send Message Button</string>
