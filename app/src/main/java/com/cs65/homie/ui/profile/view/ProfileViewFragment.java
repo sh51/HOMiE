@@ -25,6 +25,7 @@ import android.widget.TextView;
 import androidx.core.text.HtmlCompat;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentContainerView;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -83,6 +84,7 @@ public class ProfileViewFragment
     public static final double RADIUS_LIMIT = 2000;
     public static final String PRICE_FORMAT_STR = "$%.2f";
 
+    private ImageCarouselFragment fragImageCarousel = null;
     private Geocoder geocoder = null;
     private LocationManager locationManager = null;
     private String locationProvider = null;
@@ -90,6 +92,7 @@ public class ProfileViewFragment
     private ImageView viewAvatar = null;
     private TextView viewBathroom = null;
     private TextView viewBio = null;
+    private FragmentContainerView viewCarousel = null;
     private TextView viewGender = null;
     private TextView viewLoc = null;
     private TextView viewName = null;
@@ -148,6 +151,7 @@ public class ProfileViewFragment
     {
 
         super.onCreate(savedInstanceState);
+
         // Get the view model instance
         // ViewModel can never be null
         this.vm = new ViewModelProvider(this).get(
@@ -207,11 +211,8 @@ public class ProfileViewFragment
                             BUNDLE_KEY_MY_ID, ""
                     ));
                 }
-                else if (this.getActivity() != null)
-                {
-                    // TODO: There may be a race condition here
-                    this.vm.setMyId(MainActivity.userId);
-                }
+                // FIXME There IS a race condition here
+                this.vm.setMyId(MainActivity.userId);
 
             }
             // FIXME Default user ID (empty string) is magic
@@ -243,11 +244,8 @@ public class ProfileViewFragment
                             BUNDLE_KEY_USER_ID, ""
                     ));
                 }
-                else if (this.getActivity() != null)
-                {
-                    // FIXME Using fake data
-                    this.vm.setUserId(((MainActivity)this.getActivity()).getFakeUserId());
-                }
+                // FIXME There IS a race condition here
+                this.vm.setMyId(MainActivity.userId);
             }
             // FIXME Default user ID (empty string) is magic
             if (this.vm.getUserId().equals(""))
@@ -468,14 +466,25 @@ public class ProfileViewFragment
         );
 
         // Load the image carousel
-        ImageCarouselFragment carouselFrag
+        this.viewCarousel = view.findViewById(R.id.profileViewCarouselFragView);
+        this.fragImageCarousel
             = (ImageCarouselFragment)this.getChildFragmentManager()
             .findFragmentById(R.id.profileViewCarouselFragView);
-        if (carouselFrag != null)
+        if (this.fragImageCarousel != null && this.viewCarousel != null)
         {
+
             this.vm.getImages().observe(
-                this.getViewLifecycleOwner(), carouselFrag::setImages
+                this.getViewLifecycleOwner(), this::setImages
             );
+            if (this.vm.getImages().getValue().isEmpty())
+            {
+                this.viewCarousel.setVisibility(View.GONE);
+            }
+            else
+            {
+                this.fragImageCarousel.setImages(vm.getImages().getValue());
+            }
+
         }
 
         if (this.isMe())
@@ -491,6 +500,31 @@ public class ProfileViewFragment
 
         // Fetch Firebase data asynchronously (eventually, somehow)
         this.pingFirebase();
+
+    }
+
+    public void setImages(List<Uri> images)
+    {
+
+        if (images == null)
+        {
+            return;
+        }
+
+        if (this.viewCarousel != null)
+        {
+            if (images.isEmpty())
+            {
+                this.viewCarousel.setVisibility(View.GONE);
+            } else
+            {
+                this.viewCarousel.setVisibility(View.VISIBLE);
+            }
+        }
+        if (this.fragImageCarousel != null)
+        {
+            this.fragImageCarousel.setImages(images);
+        }
 
     }
 
