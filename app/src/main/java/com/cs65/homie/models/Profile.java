@@ -27,6 +27,30 @@ public class Profile {
     private boolean isPetFriendly;
     private boolean isSmoking;
 
+    @Override
+    public String toString() {
+        return "Profile{" +
+                "id='" + id + '\'' +
+                ", password='" + password + '\'' +
+                ", email='" + email + '\'' +
+                ", firstName='" + firstName + '\'' +
+                ", avatarImage='" + avatarImage + '\'' +
+                ", bio='" + bio + '\'' +
+                ", gender=" + gender +
+                ", keywords=" + keywords +
+                ", images=" + images +
+                ", minPrice=" + minPrice +
+                ", maxPrice=" + maxPrice +
+                ", privateBathroom=" + privateBathroom +
+                ", likes=" + likes +
+                ", location=" + location +
+                ", address='" + address + '\'' +
+                ", radius=" + radius +
+                ", hasApartment=" + hasApartment +
+                ", isPetFriendly=" + isPetFriendly +
+                ", isSmoking=" + isSmoking +
+                '}';
+    }
 
     public Profile() {
 //        firstName = "Matt";

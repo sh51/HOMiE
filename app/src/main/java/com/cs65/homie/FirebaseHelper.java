@@ -27,6 +27,9 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.messaging.FirebaseMessaging;
 
 import org.json.JSONObject;
@@ -176,6 +179,28 @@ public class FirebaseHelper {
     // Delete profile
     public static void deleteProfile(String profileId) {
 
+    }
+
+    public void fetchProfile(String uid, Utilities.onProfileFetchedCallbackInterface callback) {
+        if (uid == null) {
+            Log.d(Globals.TAG, "FirebaseHelper: fetchProfile called with empty uid.");
+            return;
+        }
+
+        Query capitalCities = db.collection("profiles").whereEqualTo("id", uid);
+        capitalCities
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        for (QueryDocumentSnapshot document : task.getResult()) {
+                            MainActivity.userId = document.getId();
+                            Log.d(Globals.TAG, document.toObject(Profile.class).toString());
+                            break;
+                        }
+                    } else {
+                        Log.d(Globals.TAG, "Error getting documents: ", task.getException());
+                    }
+                });
     }
 
     // Get all the profiles

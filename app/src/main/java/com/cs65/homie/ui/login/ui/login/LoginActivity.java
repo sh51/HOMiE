@@ -171,24 +171,27 @@ public class LoginActivity extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(Globals.TAG, "signInWithEmail:success");
-                            FirebaseUser user = mAuth.getCurrentUser();
-                            FirebaseFirestore db = FirebaseFirestore.getInstance();
-                            Query capitalCities = db.collection("profiles").whereEqualTo("id", user.getUid());
-                            capitalCities
-                                    .get()
-                                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                                        @Override
-                                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                                            if (task.isSuccessful()) {
-                                                for (QueryDocumentSnapshot document : task.getResult()) {
-                                                    MainActivity.userId = document.getId();
-                                                    break;
-                                                }
-                                            } else {
-                                                Log.d("firebase --> homies", "Error getting documents: ", task.getException());
-                                            }
-                                        }
-                                    });
+
+                            // Commented out as the document is not saved
+//                            FirebaseUser user = mAuth.getCurrentUser();
+//                            FirebaseFirestore db = FirebaseFirestore.getInstance();
+//                            Query capitalCities = db.collection("profiles").whereEqualTo("id", user.getUid());
+//                            capitalCities
+//                                    .get()
+//                                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+//                                        @Override
+//                                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
+//                                            if (task.isSuccessful()) {
+//                                                for (QueryDocumentSnapshot document : task.getResult()) {
+//                                                    MainActivity.userId = document.getId();
+//                                                    Log.d(Globals.TAG, document.toString());
+//                                                    break;
+//                                                }
+//                                            } else {
+//                                                Log.d("firebase --> homies", "Error getting documents: ", task.getException());
+//                                            }
+//                                        }
+//                                    });
 
                             proceedIfLoggedIn();
 
