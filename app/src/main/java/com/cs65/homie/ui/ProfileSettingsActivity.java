@@ -59,6 +59,8 @@ public class ProfileSettingsActivity extends AppCompatActivity {
     private Spinner housingSearchOptions;
 
     private Uri photoUri, houseUri;
+    private int gender;
+    private boolean hasApartment;
     private String photoPath, name, email, password,
             genderPref, housingSearch, housePhotoPath,
             address, radius, minBudget, maxBudget,
@@ -120,11 +122,13 @@ public class ProfileSettingsActivity extends AppCompatActivity {
                     changeHousing.setVisibility(View.VISIBLE);
                     changeHousingImgPrompt.setVisibility(View.VISIBLE);
                     housingImgView.setVisibility(View.VISIBLE);
+                    hasApartment = true;
                 }
                 else {
                     changeHousing.setVisibility(View.GONE);
                     changeHousingImgPrompt.setVisibility(View.GONE);
                     housingImgView.setVisibility(View.GONE);
+                    hasApartment = false;
                 }
             }
 
@@ -235,6 +239,8 @@ public class ProfileSettingsActivity extends AppCompatActivity {
     }
 
     public void onGenderRadioToggled(View view) {
+        gender = radioFemale.isChecked() ? 1 : 0;
+
         if (view.getId() == R.id.radioButton_female)
             this.genderPref = getString(R.string.radio_Female_text);
         else if (view.getId() == R.id.radioButton_male)
@@ -302,7 +308,16 @@ public class ProfileSettingsActivity extends AppCompatActivity {
         newProfile.setEmail(this.email);
         newProfile.setPassword(this.password);
         newProfile.setBio(bio.getText().toString());
+        newProfile.setGender(this.gender);
+        newProfile.setHasApartment(hasApartment);
         newProfile.setId(FirebaseAuth.getInstance().getCurrentUser().getUid());
+
+        // TODO add these to saveProfile
+//        editedProfile.putString(getString(R.string.key_petFriendly), this.petFriendly);
+//        editedProfile.putString(getString(R.string.key_noneSmoking), this.noneSmoking);
+//        editedProfile.putString(getString(R.string.key_privateBathroom), this.privateBathroom);
+//        editedProfile.putString(getString(R.string.key_filename), this.photoPath);
+
         mHelper.createProfile(newProfile);
 
 
