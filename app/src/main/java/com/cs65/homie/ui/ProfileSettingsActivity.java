@@ -8,15 +8,25 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+<<<<<<< Updated upstream
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
+=======
+import com.cs65.homie.Globals;
+import com.cs65.homie.ui.login.ui.login.LoginActivity;
+import com.cs65.homie.ui.login.ui.login.RegistrationActivity;
+import com.google.firebase.auth.FirebaseAuth;
+import com.soundcloud.android.crop.Crop;
+>>>>>>> Stashed changes
 
 import com.cs65.homie.MainActivity;
 import com.cs65.homie.R;
@@ -49,6 +59,8 @@ public class ProfileSettingsActivity extends AppCompatActivity {
             genderPref, housingSearch,
             petFriendly, noneSmoking, privateBathroom;
 
+    private static final int RC_LOGIN = 0;
+
     public static final int CAMERA_REQUEST_CODE = 1;
 
     private static final String TAG = "ajb";
@@ -78,6 +90,27 @@ public class ProfileSettingsActivity extends AppCompatActivity {
         File tempImgFile = new File(getExternalFilesDir(null), tempImgFileName);
         this.photoUri = FileProvider.getUriForFile(
                 this, "com.cs65.homie.ui", tempImgFile);
+
+        ArrayAdapter<CharSequence> housingAdapter = ArrayAdapter.createFromResource(
+                this, R.array.spinner_HousingSearchOptions, android.R.layout.simple_spinner_item);
+        housingAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        housingSearchOptions.setAdapter(housingAdapter);
+        housingSearchOptions.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (parent.getItemAtPosition(position).equals(1) ) {
+                    Log.d(Globals.TAG, "has housing");
+                }
+                else {
+                    Log.d(Globals.TAG, "looking for housing");
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
 
         if (savedInstanceState != null) {
             this.photoPath = savedInstanceState.getString(getString(R.string.key_filename));
@@ -150,6 +183,13 @@ public class ProfileSettingsActivity extends AppCompatActivity {
 
     public void onCancelClicked(View view) {
         finish();
+    }
+
+    public void onLogoutClicked(View view) {
+        FirebaseAuth.getInstance().signOut();
+        Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
+        startActivityForResult(intent, RC_LOGIN);
+//        finish();
     }
 
     public void onGenderRadioToggled(View view) {
