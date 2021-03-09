@@ -54,7 +54,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.function.Consumer;
 
-// FIXME Does the view handle no image carousel correctly?
+// FIXME The avatar is not loading correctly, but not in match; only here
 
 /**
  * Static profile view activity
