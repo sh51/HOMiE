@@ -82,32 +82,32 @@ public class FirebaseHelper {
         savePushToken();
 
 
-        // TODO fetch profiles from FireStore
-        Profile profile = new Profile();
-        // test profile: logged in user
-        profile.setFirstName("Timothy");
-        profile.setAvatarImage(ContentResolver.SCHEME_ANDROID_RESOURCE + "://com.cs65.homie/" + R.drawable.background_rounded_corners_blue);
-        profile.setId(getUid());
-        profile.setLikes(new ArrayList<>(Arrays.asList("43", "44")));
-        // test profile: Dave
-        Profile profile1 = new Profile();
-        profile1.setFirstName("Dave");
-        profile1.setAvatarImage(ContentResolver.SCHEME_ANDROID_RESOURCE + "://com.cs65.homie/" + R.drawable.dart0);
-        profile1.setId("43");
-        profile1.setLikes(new ArrayList<>(Arrays.asList("oLpRxjVdRPadydoHnvBLLU8Mq3f2")));
+//        // TODO fetch profiles from FireStore
+//        Profile profile = new Profile();
+//        // test profile: logged in user
+//        profile.setFirstName("Timothy");
+//        profile.setAvatarImage(ContentResolver.SCHEME_ANDROID_RESOURCE + "://com.cs65.homie/" + R.drawable.background_rounded_corners_blue);
+//        profile.setId(getUid());
+//        profile.setLikes(new ArrayList<>(Arrays.asList("43", "44")));
+//        // test profile: Dave
+//        Profile profile1 = new Profile();
+//        profile1.setFirstName("Dave");
+//        profile1.setAvatarImage(ContentResolver.SCHEME_ANDROID_RESOURCE + "://com.cs65.homie/" + R.drawable.dart0);
+//        profile1.setId("43");
+//        profile1.setLikes(new ArrayList<>(Arrays.asList("oLpRxjVdRPadydoHnvBLLU8Mq3f2")));
+//
+//        // test profile: the Lord Bennington
+//        Profile profile2 = new Profile();
+//        profile2.setFirstName("The Lord Bennington of Bennington's in Bennington");
+//        profile2.setId("44");
+//        profile2.setLikes(new ArrayList<>(Arrays.asList("oLpRxjVdRPadydoHnvBLLU8Mq3f2")));
 
-        // test profile: the Lord Bennington
-        Profile profile2 = new Profile();
-        profile2.setFirstName("The Lord Bennington of Bennington's in Bennington");
-        profile2.setId("44");
-        profile2.setLikes(new ArrayList<>(Arrays.asList("oLpRxjVdRPadydoHnvBLLU8Mq3f2")));
-
-        profiles.put(profile.getId(), profile);
-        profiles.put(profile1.getId(), profile1);
-        profiles.put(profile2.getId(), profile2);
+//        profiles.put(profile.getId(), profile);
+//        profiles.put(profile1.getId(), profile1);
+//        profiles.put(profile2.getId(), profile2);
 
         // TODO also call updateMatchedProfiles when the profiles gets updated
-        updateMatchedProfiles();
+//        updateMatchedProfiles();
     }
 
     public String getUid() {
@@ -217,6 +217,7 @@ public class FirebaseHelper {
                         Log.d(Globals.TAG, "fetchProfiles: cast to profile failed.\n" + e);
                     }
                 }
+                updateMatchedProfiles();
                 callback.run(getProfiles());
             } else {
                 Log.d(Globals.TAG, "Error getting documents: ", task.getException());
@@ -459,7 +460,7 @@ public class FirebaseHelper {
 
                 bufferedReader.close();
                 Log.d(Globals.TAG, "Push notification sent.");
-//                Log.d(Globals.TAG, sb.toString());
+                Log.d(Globals.TAG, sb.toString());
             } catch (Exception e) {
                 e.printStackTrace();
             }
