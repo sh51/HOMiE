@@ -43,14 +43,9 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.2.0'
     implementation 'com.google.android.gms:play-services-maps:17.0.0'
     implementation 'androidx.annotation:annotation:1.1.0'
-<<<<<<< Updated upstream
-    implementation 'com.google.firebase:firebase-auth:19.2.0'
-    implementation 'com.google.firebase:firebase-firestore:22.1.0'
-=======
     implementation 'com.soundcloud.android:android-crop:1.0.1@aar'
     implementation 'com.google.firebase:firebase-auth:20.0.3'
     implementation 'com.google.firebase:firebase-firestore:22.1.1'
->>>>>>> Stashed changes
     implementation 'com.firebaseui:firebase-ui-auth:6.4.0'
     implementation 'com.soundcloud.android:android-crop:1.0.1@aar'
 

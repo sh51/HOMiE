@@ -16,17 +16,14 @@ import android.widget.RadioButton;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-<<<<<<< Updated upstream
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
-=======
 import com.cs65.homie.Globals;
 import com.cs65.homie.ui.login.ui.login.LoginActivity;
 import com.cs65.homie.ui.login.ui.login.RegistrationActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.soundcloud.android.crop.Crop;
->>>>>>> Stashed changes
 
 import com.cs65.homie.MainActivity;
 import com.cs65.homie.R;
