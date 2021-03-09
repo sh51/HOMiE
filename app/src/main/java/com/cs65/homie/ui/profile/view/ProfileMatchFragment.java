@@ -57,6 +57,7 @@ public class ProfileMatchFragment
     private static final int CARD_BACKGROUND_COLOR = 0xFFDDDDDD;
     private static final double CARD_ELEVATION = 5.0;
     private static final double CARD_MARGIN = 20.0;
+    private static final double MATCH_BUTTONS_PADDING = 60.0;
 
     private FloatingActionButton buttonMatch = null;
     private FloatingActionButton buttonReject = null;
@@ -71,15 +72,12 @@ public class ProfileMatchFragment
         );
         // FIXME Using fake data, need to set to the other user
         super.vm.setUserId(((MainActivity)this.requireActivity()).getFakeUserId());
+        // Must come last in this function
         super.onCreate(savedInstanceState);
     }
 
     public void onClick(View view)
     {
-
-        // FIXME It's likely you can match more than once by spamming
-        // the button or swiping
-        // There's nothing stopping you from doing that at least
 
         // TODO After-matching action, ping to Firebase, "you have a match!"
         // etc happens here
@@ -201,10 +199,10 @@ public class ProfileMatchFragment
         if (topLayout != null)
         {
             // The match buttons require more padding
-            // FIXME At least comment the magic numbers
             topLayout.setPadding(
-                0, 0, 0,
-                (int)Math.round(Utilities.pixelDensity(this.requireContext(), 60.0))
+                0, 0, 0, (int)Math.round(Utilities.pixelDensity(
+                    this.requireContext(), MATCH_BUTTONS_PADDING
+                ))
             );
         }
 
@@ -246,7 +244,6 @@ public class ProfileMatchFragment
         return true;
     }
 
-
     private void handleMatch()
     {
 
@@ -276,7 +273,7 @@ public class ProfileMatchFragment
      */
     private void loadFakeData()
     {
-        // TODO: Where will we get this? We aren't currently storing it
+
         this.vm.getBathroom().setValue(true);
         this.vm.getBio().setValue(
             "i Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do "

@@ -52,8 +52,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.function.Consumer;
 
-// FIXME Does the view handle no image carousel correctly?
-
 /**
  * Static profile view activity
  */
@@ -747,8 +745,6 @@ public class ProfileViewFragment
     {
         if (this.viewPets != null)
         {
-            // TODO The intention is that the final version will use icons
-            // rather than unicode, but this is good for now
             if (pets)
             {
                 this.viewPets.setText(R.string.profile_view_pets_yes);
@@ -839,8 +835,6 @@ public class ProfileViewFragment
     {
         if (this.viewSmoking != null)
         {
-            // TODO The intention is that the final version will use icons
-            // rather than unicode, but this is good for now
             if (smoking)
             {
                 this.viewSmoking.setText(R.string.profile_view_smoking_yes);
@@ -975,8 +969,6 @@ public class ProfileViewFragment
     {
         if (this.viewBathroom != null)
         {
-            // TODO The intention is that the final version will use icons
-            // rather than unicode, but this is good for now
             if (bathroom)
             {
                 if (place)
@@ -1021,9 +1013,6 @@ public class ProfileViewFragment
         double distance = Utilities.distanceHaversine(
             myLoc, theirLoc, 0, 0
         );
-
-        // TODO Handle unit preference once that is established on the editable
-        // end
 
         String placeStr;
         if (place)

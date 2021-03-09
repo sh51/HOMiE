@@ -53,7 +53,7 @@ public class ProfileViewActivity extends AppCompatActivity
 
         }
 
-        // TODO Once we have real data that's gettable, set the title of the
+        // If we have gettable, set the title of the
         // activity to the name of the user of the profile
         //this.setTitle();
 

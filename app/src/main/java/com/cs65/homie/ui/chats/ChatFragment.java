@@ -30,8 +30,6 @@ import com.cs65.homie.ui.profile.view.ProfileViewFragment;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 
 // FIXME On rotation to horizontal, the keyboard is hidden if it is shown
@@ -43,7 +41,6 @@ import java.util.List;
 /**
  * Fragment for a "chat" (conversation, person-to-person messages)
  */
-@SuppressWarnings("Convert2Diamond")
 public class ChatFragment extends Fragment implements View.OnClickListener
 {
 

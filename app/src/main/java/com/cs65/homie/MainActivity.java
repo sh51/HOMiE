@@ -43,7 +43,6 @@ public class MainActivity extends AppCompatActivity {
         = "MAIN_ACTIVITY_BUNDLE_KEY_IN_CHAT_BOOL";
     private static final String BUNDLE_KEY_MATCH_TRANSITION_BOOL
         = "MAIN_ACTIVITY_BUNDLE_KEY_MATCH_TRANSITION_BOOL";
-    // FIXME Need a default when the string is somehow empty
     private static final String MATCH_TEXT_FORMAT = "%s is a Homie!";
     private static final int RC_LOGIN = 0;
     private static final int EDIT_PROFILE = 0;
