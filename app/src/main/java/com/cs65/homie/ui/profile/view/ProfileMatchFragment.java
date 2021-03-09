@@ -16,6 +16,9 @@ import androidx.cardview.widget.CardView;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.MutableLiveData;
 
+import androidx.annotation.NonNull;
+import androidx.lifecycle.MutableLiveData;
+
 import com.cs65.homie.MainActivity;
 import com.cs65.homie.R;
 import com.cs65.homie.Utilities;
@@ -234,6 +237,18 @@ public class ProfileMatchFragment
     private void loadFakeData()
     {
         // TODO: Where will we get this? We aren't currently storing it
+        this.vm.getBathroom().setValue(true);
+        this.vm.getBio().setValue(
+            "i Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do "
+                + "eiusmod tempor incididunt ut labore et dolore magna aliqua. "
+                + "Ut enim ad minim veniam, quis nostrud exercitation ullamco "
+                + "laboris nisi ut aliquip ex ea commodo consequat. Duis aute "
+                + "irure dolor in reprehenderit in voluptate velit esse cillum "
+                + "dolore eu fugiat nulla pariatur. Excepteur sint occaecat "
+                + "cupidatat non proident, sunt in culpa qui officia deserunt "
+                + "mollit anim id est laborum."
+        );
+        this.vm.getGender().setValue("Female");
         this.vm.getLoc().setValue(new LatLng(43.624794, -72.323171));
         this.vm.getMyLoc().setValue(new LatLng(43.704166, -72.288762));
         this.vm.getMyLocLive().setValue(true);

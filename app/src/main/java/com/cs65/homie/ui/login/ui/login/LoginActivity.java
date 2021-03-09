@@ -43,10 +43,10 @@ import com.google.firebase.firestore.QuerySnapshot;
 
 public class LoginActivity extends AppCompatActivity {
 
-    private static final int RC_SIGN_IN = 0;
     private LoginViewModel loginViewModel;
-    private static final int REGISTRATION_REQUEST = 0;
+    private static final int RC_REGISTRATION = 0;
     private FirebaseAuth mAuth;
+    private Intent mainIntent;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -58,6 +58,14 @@ public class LoginActivity extends AppCompatActivity {
                 .get(LoginViewModel.class);
 
         mAuth = FirebaseAuth.getInstance();
+        mainIntent = new Intent(getApplicationContext(), MainActivity.class);
+
+//        if (mAuth.getCurrentUser() != null) Log.d(Globals.TAG, "login -> curent user is " + mAuth.getCurrentUser().getUid());
+//        else Log.d(Globals.TAG, "login -> not logged in");
+
+        // once mAuth is initialized, check login status and proceed if logged in
+        proceedIfLoggedIn();
+
         EditText usernameEditText = findViewById(R.id.username);
         EditText passwordEditText = findViewById(R.id.password);
         Button login_signin_Button = findViewById(R.id.login_signin);
@@ -154,10 +162,10 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(getApplicationContext(), RegistrationActivity.class);
-                startActivityForResult(intent, REGISTRATION_REQUEST);
+                startActivityForResult(intent, RC_REGISTRATION);
 //                loginViewModel.loginDataChanged(usernameEditText.getText().toString(),
 //                        passwordEditText.getText().toString());
-                finish();
+//                finish();
             }
         });
     }
@@ -181,7 +189,6 @@ public class LoginActivity extends AppCompatActivity {
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(Globals.TAG, "signInWithEmail:success");
                             FirebaseUser user = mAuth.getCurrentUser();
-
                             FirebaseFirestore db = FirebaseFirestore.getInstance();
                             Query capitalCities = db.collection("profiles").whereEqualTo("id", user.getUid());
                             capitalCities
@@ -200,9 +207,8 @@ public class LoginActivity extends AppCompatActivity {
                                         }
                                     });
 
+                            proceedIfLoggedIn();
 
-
-                            finish();
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.d(Globals.TAG, "signInWithEmail:failure", task.getException());
@@ -233,15 +239,22 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
+    private void proceedIfLoggedIn() {
+        if (mAuth.getCurrentUser() != null) {
+            startActivity(mainIntent);
+            finish();
+        }
+    }
+
     private void notifyUser(String msg) {
         Toast.makeText(LoginActivity.this, msg, Toast.LENGTH_SHORT).show();
     }
 
-//    // Result handling for Firebase Auth
-//    @Override
-//    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-//        super.onActivityResult(requestCode, resultCode, data);
-//
+    // Result handling for Firebase Auth
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
 //        if (requestCode == RC_SIGN_IN) {
 //            IdpResponse response = IdpResponse.fromResultIntent(data);
 //            Log.d(Globals.TAG, "onActivityResult");
@@ -259,5 +272,9 @@ public class LoginActivity extends AppCompatActivity {
 //                // ...
 //            }
 //        }
-//    }
+                if (requestCode == RC_REGISTRATION) {
+                    proceedIfLoggedIn();
+                }
+
+    }
 }

@@ -2,7 +2,10 @@ package com.cs65.homie;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -12,22 +15,40 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.cs65.homie.ui.ProfileSettingsActivity;
+import com.cs65.homie.models.Message;
+import com.cs65.homie.models.Profile;
 import com.cs65.homie.ui.chats.ChatFragment;
+import com.cs65.homie.ui.chats.ChatsViewModel;
 import com.cs65.homie.ui.login.ui.login.LoginActivity;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.messaging.FirebaseMessaging;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
-import org.jetbrains.annotations.NotNull;
 
+import org.jetbrains.annotations.NotNull;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 
 
@@ -38,12 +59,13 @@ public class MainActivity extends AppCompatActivity {
     public static final String TAG = "HOMIES";
 
     private static final String BUNDLE_KEY_MATCH_TRANSITION_BOOL
-        = "MAIN_ACTIVITY_BUNDLE_KEY_MATCH_TRANSITION_BOOL";
+            = "MAIN_ACTIVITY_BUNDLE_KEY_MATCH_TRANSITION_BOOL";
     private static final String MATCH_TEXT_FORMAT = "%s is a Homie!";
     private static final int RC_LOGIN = 0;
     private static final int EDIT_PROFILE = 0;
 
-    private FirebaseAuth mAuth;
+    private FirebaseHelper mHelper;
+    private Intent loginIntent;
     // the menu, login and logout action button
     private MenuItem mLogout, mLogin;
     private View hostView = null;
@@ -54,10 +76,17 @@ public class MainActivity extends AppCompatActivity {
     private BottomNavigationView navView = null;
 //    private String userId = null;
 
+    // Fake app user ID for testing/demoing before Firebase
+    // Profile view needs it
+    // This eventually needs to be saved to the device somewhere for profile
+    // view to operate
+    public String getFakeMyId() {
+        return "42";
+    }
+
     // Fake profile user ID for testing/demoing before Firebase
     // Profile view needs it
-    public String getFakeUserId()
-    {
+    public String getFakeUserId() {
         return "41";
     }
 
@@ -70,20 +99,18 @@ public class MainActivity extends AppCompatActivity {
      * margins so that the container fills the entire containing view
      * (because the navigation bar is hidden)
      */
-    public void hideNavView()
-    {
+    public void hideNavView() {
 
         if (
-            this.hostView != null
-            && this.navView != null
-            && this.navView.getVisibility() == View.VISIBLE
-        )
-        {
+                this.hostView != null
+                        && this.navView != null
+                        && this.navView.getVisibility() == View.VISIBLE
+        ) {
 
             this.navView.setVisibility(View.GONE);
 
             ViewGroup.MarginLayoutParams params
-                = (ViewGroup.MarginLayoutParams)this.hostView.getLayoutParams();
+                    = (ViewGroup.MarginLayoutParams) this.hostView.getLayoutParams();
             params.setMargins(0, 0, 0, 0);
             this.hostView.setLayoutParams(params);
 
@@ -92,15 +119,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState)
-    {
+    protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
 
-        if (savedInstanceState != null)
-        {
+        if (savedInstanceState != null) {
             this.inMatchTransition = savedInstanceState.getBoolean(
-                BUNDLE_KEY_MATCH_TRANSITION_BOOL, false
+                    BUNDLE_KEY_MATCH_TRANSITION_BOOL, false
             );
         }
 
@@ -109,7 +134,10 @@ public class MainActivity extends AppCompatActivity {
         this.hostView = findViewById(R.id.nav_host_fragment);
         this.navView = findViewById(R.id.nav_view);
 
-        mAuth = FirebaseAuth.getInstance();
+        mHelper = FirebaseHelper.getInstance();
+        mHelper.loadServerKey(this);
+
+        loginIntent = new Intent(this, LoginActivity.class);
 
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
@@ -119,16 +147,13 @@ public class MainActivity extends AppCompatActivity {
                 R.id.navigation_profile
         ).build();
         this.navController = Navigation.findNavController(
-            this, R.id.nav_host_fragment
+                this, R.id.nav_host_fragment
         );
         NavigationUI.setupActionBarWithNavController(
-            this, this.navController, appBarConfiguration
+                this, this.navController, appBarConfiguration
         );
         NavigationUI.setupWithNavController(this.navView, this.navController);
 
-        // FIXME This spawns the login activity on every single screen rotation
-        Intent intent = new Intent(this, LoginActivity.class);
-        startActivityForResult(intent, RC_LOGIN);
 
         // TODO The landing activity should probably be profile?
         // It shouldn't be messages at least?
@@ -144,11 +169,17 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
+
+
     @SuppressLint("NonConstantResourceId")
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        Intent intent = new Intent(getApplicationContext(), ProfileSettingsActivity.class);
-        startActivityForResult(intent, EDIT_PROFILE);
+//        Intent intent = new Intent(getApplicationContext(), ProfileSettingsActivity.class);
+//        startActivityForResult(intent, EDIT_PROFILE);
+        mHelper.sendMessage("oLpRxjVdRPadydoHnvBLLU8Mq3f2", "You up?", (msg) -> {
+
+        });
+
 
 //        switch (item.getItemId()) {
 //            case R.id.menu_item_logout:
@@ -165,9 +196,9 @@ public class MainActivity extends AppCompatActivity {
 //        }
         return false;
     }
+
     @Override
-    public boolean onPrepareOptionsMenu(Menu menu)
-    {
+    public boolean onPrepareOptionsMenu(Menu menu) {
 //        mLogout = menu.findItem(R.id.menu_item_logout);
 //        mLogin = menu.findItem(R.id.menu_item_login);
 //        if (mLogin != null && mLogout != null) {
@@ -197,25 +228,22 @@ public class MainActivity extends AppCompatActivity {
      *
      * @param name Name of the matchee
      */
-     public void matchTransition(String name)
-     {
+    public void matchTransition(String name) {
 
-        if (this.inMatchTransition)
-        {
+        if (this.inMatchTransition) {
             return;
         }
         this.inMatchTransition = true;
 
         View popupView = this.getLayoutInflater().inflate(
-            R.layout.popup_match, null
+                R.layout.popup_match, null
         );
         TextView nameView = popupView.findViewById(R.id.matchPopupTextView);
-        if (nameView != null)
-        {
+        if (nameView != null) {
             nameView.setText(String.format(
-                Locale.getDefault(),
-                MATCH_TEXT_FORMAT,
-                name
+                    Locale.getDefault(),
+                    MATCH_TEXT_FORMAT,
+                    name
             ));
         }
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -228,25 +256,23 @@ public class MainActivity extends AppCompatActivity {
 
         // TODO The chat must be read with the new matched chat upon the transition
 
-     }
+    }
 
     /**
      * Show the navigation bar view if hidden
      */
-    public void showNavView()
-    {
+    public void showNavView() {
 
         if (
-            this.hostView != null
-            && this.navView != null
-            && this.navView.getVisibility() == View.GONE
-        )
-        {
+                this.hostView != null
+                        && this.navView != null
+                        && this.navView.getVisibility() == View.GONE
+        ) {
 
             this.navView.setVisibility(View.VISIBLE);
 
             ViewGroup.MarginLayoutParams params
-                = (ViewGroup.MarginLayoutParams)this.hostView.getLayoutParams();
+                    = (ViewGroup.MarginLayoutParams) this.hostView.getLayoutParams();
             params.setMargins(0, 0, 0, this.navView.getHeight());
             this.hostView.setLayoutParams(params);
 
@@ -257,24 +283,23 @@ public class MainActivity extends AppCompatActivity {
     /**
      * Spawn a chat fragment between the app's user and the given user Id
      *
-     * @param userId    The other user in the chat
+     * @param userId The other user in the chat
      */
-    public void spawnChatFragment(String userId)
-    {
+    public void spawnChatFragment(String userId) {
 
         // Spawned fragment needs to know whose messages to query
         Bundle args = new Bundle();
         args.putString(ChatFragment.ARG_KEY_USER_ID, userId);
 
         FragmentManager activeFragManager
-            = this.getSupportFragmentManager().findFragmentById(
-            R.id.nav_host_fragment
+                = this.getSupportFragmentManager().findFragmentById(
+                R.id.nav_host_fragment
         ).getChildFragmentManager();
 
         FragmentTransaction transaction = activeFragManager.beginTransaction();
         transaction.setCustomAnimations(
-            R.anim.frag_enter, R.anim.frag_exit,
-            R.anim.frag_enter_pop, R.anim.frag_exit_pop
+                R.anim.frag_enter, R.anim.frag_exit,
+                R.anim.frag_enter_pop, R.anim.frag_exit_pop
         );
 
         // Since there are more than one fragment in the navigator, we must
@@ -295,36 +320,30 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    protected void onResume()
-    {
+    protected void onResume() {
         super.onResume();
         // If we were in a match transition upon destruction, immediately
         // navigate to the chats fragment
         // The dialog was destroyed
-        if (this.inMatchTransition)
-        {
+        if (this.inMatchTransition) {
             this.finishMatchTransition();
         }
     }
 
-    protected void onSaveInstanceState(@NotNull Bundle outBundle)
-    {
+    protected void onSaveInstanceState(@NotNull Bundle outBundle) {
         super.onSaveInstanceState(outBundle);
         outBundle.putBoolean(
-            BUNDLE_KEY_MATCH_TRANSITION_BOOL, this.inMatchTransition
+                BUNDLE_KEY_MATCH_TRANSITION_BOOL, this.inMatchTransition
         );
     }
 
     /**
      * Complete a match transition upon destruction of the pop-up dialog
      */
-    private void finishMatchTransition()
-    {
-        if (this.inMatchTransition)
-        {
+    private void finishMatchTransition() {
+        if (this.inMatchTransition) {
             this.inMatchTransition = false;
-            if (this.navController != null)
-            {
+            if (this.navController != null) {
                 this.navController.navigate(R.id.navigation_chats);
             }
         }

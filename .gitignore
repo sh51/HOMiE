@@ -1,6 +1,12 @@
 # MacOS
 **/.DS_Store
 
+# google service
+google-services.json
+
+# env file
+**/env
+
 # Built application files
 *.apk
 *.aar
