@@ -128,6 +128,54 @@ public class ProfileViewFragment
         }
     }
 
+    public void firebaseCallback(Task<QuerySnapshot> task)
+    {
+        if (task.isSuccessful()) {
+
+            for (QueryDocumentSnapshot document : task.getResult()) {
+
+                Log.d(
+                    MainActivity.TAG + " firebase",
+                    document.getId() + " => " + document.getData()
+                );
+
+                this.vm.getBathroom().postValue(
+                    (boolean)document.getData().get("privateBathroom")
+                );
+                this.vm.getBio().postValue(
+                    (String)document.getData().get("bio")
+                );
+                this.vm.getPets().postValue(
+                    (boolean)document.getData().get("petFriendly")
+                );
+                this.vm.getPlace().postValue(
+                    (boolean)document.getData().get("hasApartment")
+                );
+                this.vm.getSmoking().postValue(
+                    (boolean)document.getData().get("smoking")
+                );
+                this.vm.getProfileName().postValue(
+                    (String)document.getData().get("firstName")
+                );
+
+                int genderCode = Math.toIntExact(
+                    (long)document.getData().get("gender")
+                );
+                if (genderCode == 1) {
+                    this.vm.getGender().postValue("Female");
+                } else {
+                    this.vm.getGender().postValue("Male");
+                }
+            }
+
+        } else {
+            Log.d(
+                "firebase - homie", "Error getting documents: ",
+                task.getException()
+            );
+        }
+    }
+
     public void onAvatarClick(View view)
     {
 
@@ -152,12 +200,14 @@ public class ProfileViewFragment
 
         super.onCreate(savedInstanceState);
 
-        // Get the view model instance
-        // ViewModel can never be null
-        this.vm = new ViewModelProvider(this).get(
+        if (this.vm == null)
+        {
+            // Get the view model instance
+            // ViewModel can never be null
+            this.vm = new ViewModelProvider(this).get(
                 ProfileViewFragmentViewModel.class
-        );
-
+            );
+        }
 
 //        // quick fix
 //        mHelper = FirebaseHelper.getInstance();
@@ -188,10 +238,10 @@ public class ProfileViewFragment
             }
         } else {
             Log.d(
-                    MainActivity.TAG,
-                    this.getClass().getCanonicalName()
-                            + " location permissions: " +
-                            Utilities.checkPermissionLocation(this.getActivity())
+                MainActivity.TAG,
+                this.getClass().getCanonicalName()
+                + " location permissions: "
+                + Utilities.checkPermissionLocation(this.getActivity())
             );
 
             // Setup My ID
@@ -202,13 +252,13 @@ public class ProfileViewFragment
                 if (savedInstanceState != null)
                 {
                     this.vm.setMyId(savedInstanceState.getString(
-                            BUNDLE_KEY_MY_ID, ""
+                        BUNDLE_KEY_MY_ID, ""
                     ));
                 }
                 else if (this.getArguments() != null)
                 {
                     this.vm.setMyId(this.getArguments().getString(
-                            BUNDLE_KEY_MY_ID, ""
+                        BUNDLE_KEY_MY_ID, ""
                     ));
                 }
                 // FIXME There IS a race condition here
@@ -220,31 +270,34 @@ public class ProfileViewFragment
             {
                 // TODO Handle
                 Log.d(
-                        MainActivity.TAG, String.format(
-                                "%s.onCreate(), MyId is %s",
-                                this.getClass().getCanonicalName(),
-                                this.vm.getMyId()
-                        ));
+                    MainActivity.TAG, String.format(
+                        "%s.onCreate(), MyId is %s",
+                        this.getClass().getCanonicalName(),
+                        this.vm.getMyId()
+                    )
+                );
                 return;
             }
 
             // Setup User ID
             // FIXME Default user ID (empty string) is magic
-            if (this.vm.getUserId().equals("") && this.getActivity() != null)
+            if (this.vm.getUserId().equals(""))
             {
                 if (savedInstanceState != null)
                 {
                     this.vm.setUserId(savedInstanceState.getString(
-                            BUNDLE_KEY_USER_ID, ""
+                        BUNDLE_KEY_USER_ID, ""
                     ));
                 }
                 else if (this.getArguments() != null)
                 {
                     this.vm.setUserId(this.getArguments().getString(
-                            BUNDLE_KEY_USER_ID, ""
+                        BUNDLE_KEY_USER_ID, ""
                     ));
                 }
                 // FIXME There IS a race condition here
+                // FIXME This is using fake data effectively
+                // This should NOT be set to the app user's ID
                 this.vm.setMyId(MainActivity.userId);
             }
             // FIXME Default user ID (empty string) is magic
@@ -252,9 +305,9 @@ public class ProfileViewFragment
             {
                 // TODO Handle
                 Log.d(MainActivity.TAG, String.format(
-                        "%s.onCreate(), UserID is %s",
-                        this.getClass().getCanonicalName(),
-                        this.vm.getUserId()
+                    "%s.onCreate(), UserID is %s",
+                    this.getClass().getCanonicalName(),
+                    this.vm.getUserId()
                 ));
                 return;
             }
@@ -262,20 +315,23 @@ public class ProfileViewFragment
             // Setup the location services if we need it.
             this.geocoder = new Geocoder(this.getContext(), Locale.getDefault());
             this.locationManager
-                    = (LocationManager) this.requireActivity().getSystemService(
+                = (LocationManager) this.requireActivity().getSystemService(
                     Context.LOCATION_SERVICE
-            );
+                );
             Criteria locCriteria = new Criteria();
             locCriteria.setAccuracy(Criteria.ACCURACY_COARSE);
             this.locationProvider = this.locationManager.getBestProvider(
-                    locCriteria, true
+                locCriteria, true
             );
             Log.d(
-                    MainActivity.TAG,
-                    this.getClass().getCanonicalName()
-                            + " location provider: "
-                            + this.locationProvider
+                MainActivity.TAG,
+                this.getClass().getCanonicalName()
+                + " location provider: "
+                + this.locationProvider
             );
+
+            // Fetch Firebase data asynchronously (eventually, somehow)
+            this.pingFirebase();
 
         }
     }
@@ -329,6 +385,13 @@ public class ProfileViewFragment
         {
             this.requestLocUpdate();
         }
+    }
+
+    public void onSaveInstanceState(Bundle outState)
+    {
+        super.onSaveInstanceState(outState);
+        outState.putString(BUNDLE_KEY_MY_ID, this.vm.getMyId());
+        outState.putString(BUNDLE_KEY_USER_ID, this.vm.getUserId());
     }
 
     // Unimplemented. We do not care about location provider status events
@@ -498,8 +561,7 @@ public class ProfileViewFragment
             }
         }
 
-        // Fetch Firebase data asynchronously (eventually, somehow)
-        this.pingFirebase();
+
 
     }
 
@@ -847,11 +909,15 @@ public class ProfileViewFragment
     /**
      * Whether or not this profile view is of the app user
      *
-     * @return  Whether or not this profile viwe is of the app user
+     * @return  Whether or not this profile view is of the app user
      */
     private boolean isMe()
     {
-        return this.vm.getMyId().equals(MainActivity.userId);
+        if (this.vm.getMyId().equals(""))
+        {
+            return false;
+        }
+        return this.vm.getMyId().equals(this.vm.getUserId());
     }
 
     /**
@@ -877,59 +943,33 @@ public class ProfileViewFragment
         this.vm.getPriceMax().setValue(4242.42);
         this.vm.getRadius().setValue(42.42);
 
+    }
 
-        // Firebase section --------------------
-        MutableLiveData<String> bio = this.vm.getBio();
-        MutableLiveData<Boolean> bathroom = this.vm.getBathroom();
-        MutableLiveData<String> gender = this.vm.getGender();
-        MutableLiveData<Boolean> pets = this.vm.getPets();
-        MutableLiveData<Boolean> hasPlace = this.vm.getPlace();
-        MutableLiveData<Boolean> isSmoking = this.vm.getSmoking();
-        MutableLiveData<String> name = this.vm.getProfileName();
+    private void pingFirebase()
+    {
 
         // Get firebase wrapper (in-built)
         // Fetch profiles and loads them
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-        if (isMe()) {
-            db.collection("profiles").whereEqualTo(FieldPath.documentId(), this.vm.getMyId()).get()
-                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                        @Override
-                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                            if (task.isSuccessful()) {
-                                for (QueryDocumentSnapshot document : task.getResult()) {
-                                    Log.d("firebase - homie", document.getId() + " => " + document.getData());
-
-                                    // Update UI
-                                    updateViewBathroomByBathroom((boolean)document.getData().get("privateBathroom"));
-                                    updateViewBio((String)document.getData().get("bio"));
-                                    updateViewPets((boolean)document.getData().get("petFriendly"));
-                                    updateViewBathroomByPlace((boolean)document.getData().get("hasApartment"));
-                                    updateViewSmoking((boolean)document.getData().get("smoking"));
-                                    updateViewName((String)document.getData().get("firstName"));
-
-                                    int genderCode = Math.toIntExact((long)document.getData().get("gender"));
-                                    if (genderCode == 1) {
-                                        updateViewGender("Female");
-                                    } else {
-                                        updateViewGender("Male");
-                                    }
-                                }
-                            } else {
-                                Log.d("firebase - homie", "Error getting documents: ", task.getException());
-                            }
-                        }
-                    });
-
-        } else {
-            // TODO: Handle ID doesnt exist
+        try
+        {
+            db.collection("profiles").whereEqualTo(
+                FieldPath.documentId(), this.vm.getUserId()
+            ).get().addOnCompleteListener(this::firebaseCallback);
+        }
+        // User ID doesn't exist
+        catch (IllegalArgumentException ignored) {
+            Log.d(
+                MainActivity.TAG,
+                this.getClass().getCanonicalName()
+                + ".pingFirebase(), user does not exist in Firebase: "
+                + this.vm.getUserId()
+            );
         }
 
-    }
+        //this.loadFakeData();
 
-    private void pingFirebase()
-    {
-        this.loadFakeData();
     }
 
     @SuppressLint("MissingPermission")
