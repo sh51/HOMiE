@@ -104,7 +104,7 @@ class ChatsViewHolder extends RecyclerView.ViewHolder
                 Locale.getDefault(),
                 "%dh",
                 // Get duration in terms of hours, rounded down
-                (int)(duration / Utilities.MILISECONDS_IN_MINUTE * 60)
+                (int)(duration / (Utilities.MILISECONDS_IN_MINUTE * 60))
             );
         }
         else if (duration < Utilities.MILISECONDS_IN_DAY * 6)
