@@ -76,7 +76,7 @@ public class ChatsFragment extends Fragment
 
         mHelper = FirebaseHelper.getInstance();
         this.loadChats(mHelper.getMatchedProfiles());
-        //this.loadFakeData();
+        this.loadFakeData();
 
     }
 
