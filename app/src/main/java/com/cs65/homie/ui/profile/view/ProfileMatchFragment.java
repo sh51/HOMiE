@@ -22,6 +22,7 @@ import androidx.lifecycle.MutableLiveData;
 import com.cs65.homie.MainActivity;
 import com.cs65.homie.R;
 import com.cs65.homie.Utilities;
+import com.cs65.homie.models.Profile;
 import com.cs65.homie.ui.gestures.OnSwipeGestureListener;
 import com.cs65.homie.ui.gestures.SwipeGesture;
 import com.google.android.gms.maps.model.LatLng;
@@ -57,6 +58,8 @@ public class ProfileMatchFragment
     private FloatingActionButton buttonMatch = null;
     private FloatingActionButton buttonReject = null;
 
+    private List<Profile> matches = new ArrayList<>();
+
     public void onClick(View view)
     {
 
@@ -77,10 +80,36 @@ public class ProfileMatchFragment
         }
     }
 
-    public View onCreateView(
-        LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState
-    )
-    {
+    private void loadMatches() {
+        // TODO: Improve matches
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db.collection("profiles")
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                Profile newMatch = new Profile();
+                                newMatch.setBio((String)document.getData().get("bio"));
+                                newMatch.setPrivateBathroom((boolean)document.getData().get("privateBathroom"));
+                                newMatch.setisPetFriendly((boolean)document.getData().get("petFriendly"));
+                                newMatch.setHasApartment((boolean)document.getData().get("hasApartment"));
+                                newMatch.setSmoking((boolean)document.getData().get("smoking"));
+                                newMatch.setFirstName((String)document.getData().get("firstName"));
+                                newMatch.setGender(Math.toIntExact((long)document.getData().get("gender")));
+
+                                matches.add(newMatch);
+                            }
+                        } else {
+                            Log.w("firebase - homies", "Error getting documents.", task.getException());
+                        }
+                    }
+                });
+    }
+
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        loadMatches();
         return super.onCreateView(inflater, container, savedInstanceState);
     }
 

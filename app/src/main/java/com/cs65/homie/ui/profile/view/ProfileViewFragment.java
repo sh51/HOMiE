@@ -36,9 +36,11 @@ import com.cs65.homie.Utilities;
 import com.cs65.homie.ui.ProfileSettingsActivity;
 import com.cs65.homie.ui.carousel.ImageCarouselFragment;
 import com.cs65.homie.ui.ImageFullScreenActivity;
+import com.cs65.homie.ui.login.ui.login.LoginActivity;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FieldPath;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -159,8 +161,26 @@ public class ProfileViewFragment
 
         // If no current USERid, go to profile page
         if (MainActivity.userId == null) {
-            Intent myIntent = new Intent(ProfileViewFragment.this.getActivity(), ProfileSettingsActivity.class);
-            startActivity(myIntent);
+            if (FirebaseAuth.getInstance().getCurrentUser().getUid() != null) {
+                FirebaseFirestore db = FirebaseFirestore.getInstance();
+                db.collection("profiles").whereEqualTo("id", FirebaseAuth.getInstance().getCurrentUser().getUid()).get()
+                        .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                            @Override
+                            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                if (task.isSuccessful()) {
+                                    for (QueryDocumentSnapshot document : task.getResult()) {
+                                        Log.d("firebase - homie", document.getId() + " => " + document.getData());
+                                        MainActivity.userId = document.getId();
+                                    }
+                                } else {
+                                    Log.d("firebase - homie", "Error getting documents: ", task.getException());
+                                }
+                            }
+                        });
+            } else {
+                Intent myIntent = new Intent(ProfileViewFragment.this.getActivity(), ProfileSettingsActivity.class);
+                startActivity(myIntent);
+            }
         } else {
             Log.d(
                     MainActivity.TAG,
