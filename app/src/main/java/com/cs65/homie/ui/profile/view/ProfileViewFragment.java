@@ -53,6 +53,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.function.Consumer;
 
+// FIXME Does the view handle no image carousel correctly?
 
 /**
  * Static profile view activity
