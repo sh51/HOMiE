@@ -1,5 +1,6 @@
 package com.cs65.homie.ui.login.data;
 
+import com.cs65.homie.MainActivity;
 import com.cs65.homie.ui.login.data.model.LoggedInUser;
 
 import java.io.IOException;
@@ -25,5 +26,6 @@ public class LoginDataSource {
 
     public void logout() {
         // TODO: revoke authentication
+
     }
 }
