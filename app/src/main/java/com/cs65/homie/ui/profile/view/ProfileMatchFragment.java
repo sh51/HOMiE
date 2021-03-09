@@ -237,7 +237,7 @@ public class ProfileMatchFragment
             buttonReject.setVisibility(View.VISIBLE);
         }
         // TODO Using fake data for now
-        //this.loadFakeData();
+        this.loadFakeData();
 
     }
 
@@ -292,6 +292,7 @@ public class ProfileMatchFragment
                 + "cupidatat non proident, sunt in culpa qui officia deserunt "
                 + "mollit anim id est laborum."
         );
+        this.vm.getProfileName().setValue("Allie");
         this.vm.getGender().setValue("Female");
         this.vm.getLoc().setValue(new LatLng(43.624794, -72.323171));
         this.vm.getMyLoc().setValue(new LatLng(43.704166, -72.288762));

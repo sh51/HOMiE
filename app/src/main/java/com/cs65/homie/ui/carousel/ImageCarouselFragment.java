@@ -128,7 +128,10 @@ public class ImageCarouselFragment
     public void setImages(List<Uri> images)
     {
         this.images = images;
-        this.viewPager.invalidate();
+        if (this.viewPager != null)
+        {
+            this.viewPager.invalidate();
+        }
     }
 
 }

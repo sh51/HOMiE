@@ -233,7 +233,7 @@ public class ProfileViewFragment
                             }
                         });
             } else {
-                Intent myIntent = new Intent(ProfileViewFragment.this.getActivity(), ProfileSettingsActivity.class);
+                Intent myIntent = new Intent(this.requireActivity(), ProfileSettingsActivity.class);
                 startActivity(myIntent);
             }
         } else {
@@ -241,7 +241,7 @@ public class ProfileViewFragment
                 MainActivity.TAG,
                 this.getClass().getCanonicalName()
                 + " location permissions: "
-                + Utilities.checkPermissionLocation(this.getActivity())
+                + Utilities.checkPermissionLocation(this.requireActivity())
             );
 
             // Setup My ID
@@ -298,7 +298,7 @@ public class ProfileViewFragment
                 // FIXME There IS a race condition here
                 // FIXME This is using fake data effectively
                 // This should NOT be set to the app user's ID
-                this.vm.setMyId(MainActivity.userId);
+                this.vm.setUserId(MainActivity.userId);
             }
             // FIXME Default user ID (empty string) is magic
             if (this.vm.getUserId().equals(""))
@@ -968,7 +968,7 @@ public class ProfileViewFragment
             );
         }
 
-        //this.loadFakeData();
+        this.loadFakeData();
 
     }
 
