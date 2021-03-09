@@ -2,14 +2,18 @@ package com.cs65.homie.models;
 
 import android.location.Location;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Profile {
     private String id;
-    private String firstName;
     private String password;
     private String email;
+    private String firstName;
+    private String avatarImage;
+
     private String bio;
+    private int gender;
     private List<String> keywords;
     private List<String> images;
     private double minPrice;
@@ -22,9 +26,30 @@ public class Profile {
     private boolean hasApartment;
     private boolean isPetFriendly;
     private boolean isSmoking;
-    private String avatarImage;
-    private int gender = 0;
 
+
+    public Profile() {
+//        firstName = "Matt";
+        bio = "Diehard tennis player, love hula hooping more than anything.";
+        gender = 1;
+        minPrice = 600;
+        maxPrice = 1000;
+        privateBathroom = true;
+        address = "Dartmouth College";
+        radius = 5; // imperial by default
+        hasApartment = false;
+        isPetFriendly = true;
+        isSmoking = true;
+
+        likes = new ArrayList<>();
+        keywords = new ArrayList<>();
+        images = new ArrayList<>();
+    }
+
+    public Profile(boolean withApartment) {
+        this();
+        hasApartment = withApartment;
+    }
     public String getFirstName() {
         return firstName;
     }

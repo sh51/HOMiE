@@ -100,7 +100,7 @@ class ChatsRecyclerAdapter extends RecyclerView.Adapter<ChatsViewHolder>
             {
                 chatPreviewView.setText(message.getText());
             }
-            holder.setTimeSinceLastMessage(message.getTimestamp());
+            holder.setTimeSinceLastMessage(message._getDatetime());
         }
         if (textLayoutView != null)
         {

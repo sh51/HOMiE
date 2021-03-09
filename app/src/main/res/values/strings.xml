@@ -89,6 +89,7 @@
     <string name="login_failed">"Login failed"</string>
     <string name="menu_item_logout">LOGOUT</string>
     <string name="menu_item_login">LOGIN</string>
+    <string name="menu_item_profile">Profile</string>
     <!-- LOGIN -->
 
 </resources>
