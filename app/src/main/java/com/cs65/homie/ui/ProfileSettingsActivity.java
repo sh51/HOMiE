@@ -16,17 +16,17 @@ import android.widget.RadioButton;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-<<<<<<< Updated upstream
+//<<<<<<< Updated upstream
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
-=======
+//=======
 import com.cs65.homie.Globals;
 import com.cs65.homie.ui.login.ui.login.LoginActivity;
-import com.cs65.homie.ui.login.ui.login.RegistrationActivity;
-import com.google.firebase.auth.FirebaseAuth;
-import com.soundcloud.android.crop.Crop;
->>>>>>> Stashed changes
+//import com.cs65.homie.ui.login.ui.login.RegistrationActivity;
+//import com.google.firebase.auth.FirebaseAuth;
+//import com.soundcloud.android.crop.Crop;
+//>>>>>>> Stashed changes
 
 import com.cs65.homie.MainActivity;
 import com.cs65.homie.R;
@@ -98,7 +98,8 @@ public class ProfileSettingsActivity extends AppCompatActivity {
         housingSearchOptions.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if (parent.getItemAtPosition(position).equals(1) ) {
+                if (parent.getItemAtPosition(position).equals("Have Housing. Just looking for a Roommate.")) {
+
                     Log.d(Globals.TAG, "has housing");
                 }
                 else {
@@ -154,6 +155,13 @@ public class ProfileSettingsActivity extends AppCompatActivity {
 
     public void onChangePhotoClicked(View view) {
         Log.d(TAG, "onChangedPhotoClicked");
+        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, this.photoUri);
+        startActivityForResult(intent, CAMERA_REQUEST_CODE);
+    }
+
+    public void onChangeHousingPhotoClicked(View view) {
+        Log.d(TAG, "onChangeHousingPhotoClicked");
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         intent.putExtra(MediaStore.EXTRA_OUTPUT, this.photoUri);
         startActivityForResult(intent, CAMERA_REQUEST_CODE);

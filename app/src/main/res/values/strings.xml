@@ -48,6 +48,7 @@
     <string name="button_Cancel_text">Cancel</string>
     <string name="avatar_description">Change Avatar</string>
     <string name="button_ChangePhoto_text">Change Avatar</string>
+    <string name="button_ChangeHousingPhoto_text">Spark your future roommate\'s interest by adding photos of your home.</string>
     <string name="edit_Name_hint">Your Name</string>
     <string name="edit_Email_hint">Your Email</string>
     <string name="edit_Password_hint">New Password</string>
