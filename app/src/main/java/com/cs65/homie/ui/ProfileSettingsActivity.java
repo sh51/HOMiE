@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RadioButton;
@@ -49,12 +50,13 @@ public class ProfileSettingsActivity extends AppCompatActivity {
     private ImageView photoView;
     private String tempImgFileName = "temp.png";
     private EditText editedName, editedEmail, changedPassword;
+    private String tempImgHomeName = "temp.png";
     private RadioButton radioFemale, radioMale, radioNoPref;
     private Spinner housingSearchOptions;
 
-    private Uri photoUri;
+    private Uri photoUri, houseUri;
     private String photoPath, name, email, password,
-            genderPref, housingSearch,
+            genderPref, housingSearch, housePhotoPath,
             petFriendly, noneSmoking, privateBathroom;
 
     private static final int RC_LOGIN = 0;
@@ -82,12 +84,18 @@ public class ProfileSettingsActivity extends AppCompatActivity {
         this.radioNoPref = (RadioButton) findViewById(R.id.radioButton_nopref);
         this.photoView = (ImageView) findViewById(R.id.photoView);
         this.housingSearchOptions = (Spinner) findViewById(R.id.spinnerNeedHousing);
+        Button changeHousing = (Button) findViewById(R.id.button_ChangeHousingPhoto);
 
         Utilities.checkPermission(this);
 
+
         File tempImgFile = new File(getExternalFilesDir(null), tempImgFileName);
+        File tempHomeImgFile = new File(getExternalFilesDir(null), tempImgHomeName);
         this.photoUri = FileProvider.getUriForFile(
                 this, "com.cs65.homie.ui", tempImgFile);
+        this.houseUri = FileProvider.getUriForFile(
+                this, "com.cs65.homie.ui", tempHomeImgFile);
+        changeHousing.setVisibility(View.GONE);
 
         ArrayAdapter<CharSequence> housingAdapter = ArrayAdapter.createFromResource(
                 this, R.array.spinner_HousingSearchOptions, android.R.layout.simple_spinner_item);
@@ -96,11 +104,11 @@ public class ProfileSettingsActivity extends AppCompatActivity {
         housingSearchOptions.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if (parent.getItemAtPosition(position).equals(1) ) {
-                    Log.d(Globals.TAG, "has housing");
+                if (parent.getItemAtPosition(position).equals("Have Housing. Just looking for a Roommate.")) {
+                    changeHousing.setVisibility(View.VISIBLE);
                 }
                 else {
-                    Log.d(Globals.TAG, "looking for housing");
+                    changeHousing.setVisibility(View.GONE);
                 }
             }
 
@@ -154,6 +162,14 @@ public class ProfileSettingsActivity extends AppCompatActivity {
         Log.d(TAG, "onChangedPhotoClicked");
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         intent.putExtra(MediaStore.EXTRA_OUTPUT, this.photoUri);
+        startActivityForResult(intent, CAMERA_REQUEST_CODE);
+    }
+
+    // TODO ADD FUNCTIONALITY FOR ADDING MULTIPLE IMAGES
+    public void onChangeHousingPhotoClicked(View view) {
+        Log.d(TAG, "onChangeHousingPhotoClicked");
+        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, this.houseUri);
         startActivityForResult(intent, CAMERA_REQUEST_CODE);
     }
 
