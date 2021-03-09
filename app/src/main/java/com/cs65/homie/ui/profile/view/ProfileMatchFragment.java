@@ -288,8 +288,7 @@ public class ProfileMatchFragment
         this.vm.getGender().setValue(GenderEnum.FEMALE);
         this.vm.getLoc().setValue(new LatLng(43.624794, -72.323171));
         this.vm.getMyLoc().setValue(new LatLng(43.704166, -72.288762));
-        this.vm.getMyLocLive().setValue(true);
-        this.vm.getMyLocStr().setValue("Sanborn");
+        this.vm.getMyLocStr().setValue("Loops");
         //this.vm.getAvatarUri().setValue(
         //    Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://com.cs65.homie/" + R.drawable.ai)
         //);

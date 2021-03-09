@@ -35,8 +35,6 @@ public class ProfileViewFragmentViewModel extends ViewModel
         = new MutableLiveData<GenderEnum>(GenderEnum.NONE);
     private final MutableLiveData<LatLng> myLoc
         = new MutableLiveData<LatLng>(new LatLng(0, 0));
-    private final MutableLiveData<Boolean> myLocLive
-        = new MutableLiveData<Boolean>(false);
     private final MutableLiveData<String> myLocStr
         = new MutableLiveData<String>("");
     private String myId = "";
@@ -108,17 +106,6 @@ public class ProfileViewFragmentViewModel extends ViewModel
     public MutableLiveData<LatLng> getMyLoc()
     {
         return this.myLoc;
-    }
-    /**
-     * Whether or not the app's user has elected to determine their location
-     * in real time using GPS
-     *
-     * @return  MutableLiveData wrapping whether or not the app's user has
-     *          elected to determine their location in real time using GPS
-     */
-    public MutableLiveData<Boolean> getMyLocLive()
-    {
-        return this.myLocLive;
     }
     /**
      * Get the location string of the app's user
