@@ -19,6 +19,8 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.MutableLiveData;
 
+import com.cs65.homie.FirebaseHelper;
+import com.cs65.homie.Globals;
 import com.cs65.homie.MainActivity;
 import com.cs65.homie.R;
 import com.cs65.homie.Utilities;
@@ -55,6 +57,7 @@ public class ProfileMatchFragment
     private static final double CARD_ELEVATION = 5.0;
     private static final double CARD_MARGIN = 20.0;
 
+    private FirebaseHelper mHelper;
     private FloatingActionButton buttonMatch = null;
     private FloatingActionButton buttonReject = null;
 
@@ -108,6 +111,13 @@ public class ProfileMatchFragment
                 });
     }
 
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        mHelper = FirebaseHelper.getInstance();
+    }
+
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         loadMatches();
         return super.onCreateView(inflater, container, savedInstanceState);
@@ -152,7 +162,8 @@ public class ProfileMatchFragment
     {
 
         // FIXME Using fake data, need to set to the other user
-        super.vm.setUserId(((MainActivity)this.requireActivity()).getFakeUserId());
+//        super.vm.setUserId(((MainActivity)this.requireActivity()).getFakeUserId());
+        super.vm.setUserId("pR7PsciIRpdL24u54ZNoP85efh83");
 
         super.onViewCreated(view, savedInstanceState);
 
@@ -305,35 +316,27 @@ public class ProfileMatchFragment
         // Get firebase wrapper (in-built)
         // Fetch profiles and loads them
         // TODO: We need some stratagey of marking unliked and matched profiles to avoid showing the same profile twice and avoid showing our own profile
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        db.collection("profiles")
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            for (QueryDocumentSnapshot document : task.getResult()) {
+        loadProfile("pR7PsciIRpdL24u54ZNoP85efh83");
+    }
+    private void loadProfile(String uid) {
+        Profile p = mHelper.getProfile(uid);
+        // Update UI
+        name.setValue(p.getFirstName());
+        bathroom.setValue(p.isPrivateBathroom());
+        bio.setValue(p.getBio());
+        pets.setValue(p.isPetFriendly());
+        hasPlace.setValue(p.isHasApartment());
+        isSmoking.setValue(p.isSmoking());
+        vm.getPriceMin().setValue(p.getMinPrice());
+        vm.getPriceMax().setValue(p.getMaxPrice());
+        if (p.getAvatarImage() != null) vm.getAvatarUri().setValue(Uri.parse(p.getAvatarImage()));
 
-                                // Update UI
-                                bathroom.setValue((boolean)document.getData().get("privateBathroom"));
-                                bio.setValue((String)document.getData().get("bio"));
-                                pets.setValue((boolean)document.getData().get("petFriendly"));
-                                hasPlace.setValue((boolean)document.getData().get("hasApartment"));
-                                isSmoking.setValue((boolean)document.getData().get("smoking"));
-                                name.setValue((String)document.getData().get("firstName"));
-
-                                int genderCode = Math.toIntExact((long)document.getData().get("gender"));
-                                if (genderCode == 1) {
-                                    gender.setValue("Female");
-                                } else {
-                                    gender.setValue("Male");
-                                }
-                            }
-                        } else {
-                            Log.w("firebase - homies", "Error getting documents.", task.getException());
-                        }
-                    }
-                });
+        int genderCode = p.getGender();
+        if (genderCode == 1) {
+            updateViewGender("Female");
+        } else {
+            updateViewGender("Male");
+        }
 
     }
 

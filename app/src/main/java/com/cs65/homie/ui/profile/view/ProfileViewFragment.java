@@ -839,7 +839,6 @@ public class ProfileViewFragment
         isSmoking.setValue(p.isSmoking());
         vm.getPriceMin().setValue(p.getMinPrice());
         vm.getPriceMax().setValue(p.getMaxPrice());
-
         if (p.getAvatarImage() != null) vm.getAvatarUri().setValue(Uri.parse(p.getAvatarImage()));
 
         int genderCode = p.getGender();
