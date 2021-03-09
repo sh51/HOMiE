@@ -298,9 +298,13 @@ public class FirebaseHelper {
                 pts.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
+                        String messageTitle = "You've got a new message.";
+                        if (profiles.get(msg.getSenderId()) != null && profiles.get(msg.getSenderId()).getFirstName() != null)
+                            messageTitle = profiles.get(msg.getSenderId()).getFirstName();
+
                         // TODO replace the userId with username
                         if (dataSnapshot.getValue() != null)
-                            sendPushNotification(dataSnapshot.getValue(String.class), msg.getSenderId(), msg.getText());
+                            sendPushNotification(dataSnapshot.getValue(String.class), messageTitle, msg.getText());
                     }
 
                     @Override
