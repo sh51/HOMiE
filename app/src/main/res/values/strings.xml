@@ -44,15 +44,23 @@
     <string name="field_Password_text">Password</string>
     <string name="field_HousingSearchOptions_text">Do you have housing</string>
     <string name="field_GenderPref_text">Do you have a preference for the gender of your roommate?</string>
+    <string name="field_HousingImage_text">Spark your future roommate\'s interest by sharing photos of your home.</string>
+    <string name="field_Address_text">Point of Interest Address</string>
+    <string name="field_Radius_text">Search Radius</string>
+    <string name="field_Budget_text">Budget</string>
     <string name="saved_preferences">SavedPreferences</string>
     <string name="button_Save_text">Save</string>
     <string name="button_Cancel_text">Cancel</string>
     <string name="avatar_description">Change Avatar</string>
     <string name="button_ChangePhoto_text">Change Avatar</string>
-    <string name="button_ChangeHousingPhoto_text">Spark your future roommate\'s interest by adding photos of your home.</string>
+    <string name="button_ChangeHousingPhoto_text">Add photos</string>
     <string name="edit_Name_hint">Your Name</string>
     <string name="edit_Email_hint">Your Email</string>
     <string name="edit_Password_hint">New Password</string>
+    <string name="edit_Address_hint">Point of Interest</string>
+    <string name="edit_Radius_hint">Max. Distance from Point of Interest</string>
+    <string name="edit_BudgetMin_hint">Min. Price</string>
+    <string name="edit_BudgetMax_hint">Max. Price</string>
     <string name="radio_Female_text">Female</string>
     <string name="radio_Male_text">Male</string>
     <string name="radio_NoPref_text">No Preference</string>
@@ -74,6 +82,11 @@
     <string name="key_noneSmoking">prefKey_noneSmoking</string>
     <string name="key_privateBathroom">prefKey_privateBathroom</string>
     <string name="key_lookingForHousing">prefKey_lookingForHousing</string>
+    <string name="key_housingImg">prefKey_housingImg</string>
+    <string name="key_address">prefKey_address</string>
+    <string name="key_radius">prefKey_radius</string>
+    <string name="key_minBudget">prefKey_minBudget</string>
+    <string name="key_maxBudget">prefKey_maxBudget</string>
     <!-- EDIT PROFILE SETTINGS -->
 
     <!-- LOGIN -->
