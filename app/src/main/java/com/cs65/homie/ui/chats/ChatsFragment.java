@@ -197,7 +197,9 @@ public class ChatsFragment extends Fragment
         Intent intent = new Intent(this.getContext(), ProfileViewActivity.class);
         intent.putExtra(ProfileViewFragment.BUNDLE_KEY_USER_ID, userId);
         intent.putExtra(ProfileViewFragment.BUNDLE_KEY_MY_ID, myId);
-        this.startActivity(intent);
+        this.startActivityForResult(
+            intent, PROFILE_VIEW_ACTIVITY_RESPONSE_CODE
+        );
 
     }
 
