@@ -35,6 +35,9 @@
     <string name="profile_view_min_price_value_placeholder">$0</string>
     <string name="profile_view_max_price_value_placeholder">$$$$</string>
     <string name="profile_view_radius_placeholder">Finding Homies within <b>∞</b> miles</string>
+    <string name="profile_view_gender_female">Prefers Female Roommates</string>
+    <string name="profile_view_gender_male">Prefers Male Roommates</string>
+    <string name="profile_view_gender_none">Has No Roommate Gender Preference</string>
     <!-- STATIC PROFILE VIEW -->
 
     <!-- EDIT PROFILE SETTINGS -->

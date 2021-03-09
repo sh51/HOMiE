@@ -34,18 +34,16 @@ import com.cs65.homie.MainActivity;
 import com.cs65.homie.R;
 import com.cs65.homie.ThreadPerTaskExecutor;
 import com.cs65.homie.Utilities;
+import com.cs65.homie.models.GenderEnum;
 import com.cs65.homie.ui.ProfileSettingsActivity;
 import com.cs65.homie.ui.carousel.ImageCarouselFragment;
 import com.cs65.homie.ui.ImageFullScreenActivity;
-import com.cs65.homie.ui.login.ui.login.LoginActivity;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FieldPath;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
@@ -154,9 +152,12 @@ public class ProfileViewFragment
 
         // Get the view model instance
         // ViewModel can never be null
-        this.vm = new ViewModelProvider(this).get(
+        if (this.vm == null)
+        {
+            this.vm = new ViewModelProvider(this).get(
                 ProfileViewFragmentViewModel.class
-        );
+            );
+        }
 
 
 //        // quick fix
@@ -602,11 +603,21 @@ public class ProfileViewFragment
         }
     }
 
-    public void updateViewGender(String gender)
+    public void updateViewGender(GenderEnum gender)
     {
         if (this.viewGender != null)
         {
-            this.viewGender.setText(gender);
+            switch (gender)
+            {
+                case FEMALE:
+                    this.viewGender.setText(R.string.profile_view_gender_male);
+                    break;
+                case MALE:
+                    this.viewGender.setText(R.string.profile_view_gender_female);
+                    break;
+                default:
+                    this.viewGender.setText(R.string.profile_view_gender_none);
+            }
         }
     }
 
@@ -878,14 +889,10 @@ public class ProfileViewFragment
         this.vm.getRadius().setValue(42.42);
 
 
-        // Firebase section --------------------
-        MutableLiveData<String> bio = this.vm.getBio();
-        MutableLiveData<Boolean> bathroom = this.vm.getBathroom();
-        MutableLiveData<String> gender = this.vm.getGender();
-        MutableLiveData<Boolean> pets = this.vm.getPets();
-        MutableLiveData<Boolean> hasPlace = this.vm.getPlace();
-        MutableLiveData<Boolean> isSmoking = this.vm.getSmoking();
-        MutableLiveData<String> name = this.vm.getProfileName();
+    }
+
+    private void pingFirebase()
+    {
 
         // Get firebase wrapper (in-built)
         // Fetch profiles and loads them
@@ -893,42 +900,33 @@ public class ProfileViewFragment
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         if (isMe()) {
             db.collection("profiles").whereEqualTo(FieldPath.documentId(), this.vm.getMyId()).get()
-                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                        @Override
-                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                            if (task.isSuccessful()) {
-                                for (QueryDocumentSnapshot document : task.getResult()) {
-                                    Log.d("firebase - homie", document.getId() + " => " + document.getData());
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                Log.d("firebase - homie", document.getId() + " => " + document.getData());
 
-                                    // Update UI
-                                    updateViewBathroomByBathroom((boolean)document.getData().get("privateBathroom"));
-                                    updateViewBio((String)document.getData().get("bio"));
-                                    updateViewPets((boolean)document.getData().get("petFriendly"));
-                                    updateViewBathroomByPlace((boolean)document.getData().get("hasApartment"));
-                                    updateViewSmoking((boolean)document.getData().get("smoking"));
-                                    updateViewName((String)document.getData().get("firstName"));
-
-                                    int genderCode = Math.toIntExact((long)document.getData().get("gender"));
-                                    if (genderCode == 1) {
-                                        updateViewGender("Female");
-                                    } else {
-                                        updateViewGender("Male");
-                                    }
-                                }
-                            } else {
-                                Log.d("firebase - homie", "Error getting documents: ", task.getException());
+                                // Update UI
+                                updateViewBathroomByBathroom((boolean)document.getData().get("privateBathroom"));
+                                updateViewBio((String)document.getData().get("bio"));
+                                updateViewPets((boolean)document.getData().get("petFriendly"));
+                                updateViewBathroomByPlace((boolean)document.getData().get("hasApartment"));
+                                updateViewSmoking((boolean)document.getData().get("smoking"));
+                                updateViewName((String)document.getData().get("firstName"));
+                                int genderCode = Math.toIntExact((long)document.getData().get("gender"));
+                                vm.getGender().postValue(GenderEnum.fromInt(genderCode));
                             }
+                        } else {
+                            Log.d("firebase - homie", "Error getting documents: ", task.getException());
                         }
-                    });
+                    }
+                });
 
         } else {
             // TODO: Handle ID doesnt exist
         }
 
-    }
-
-    private void pingFirebase()
-    {
         this.loadFakeData();
     }
 

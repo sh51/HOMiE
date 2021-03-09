@@ -5,6 +5,7 @@ import android.net.Uri;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import com.cs65.homie.models.GenderEnum;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
@@ -30,8 +31,8 @@ public class ProfileViewFragmentViewModel extends ViewModel
         );
     private final MutableLiveData<LatLng> loc
         = new MutableLiveData<LatLng>(new LatLng(0, 0));
-    private final MutableLiveData<String> gender
-        = new MutableLiveData<String>("");
+    private final MutableLiveData<GenderEnum> gender
+        = new MutableLiveData<GenderEnum>(GenderEnum.NONE);
     private final MutableLiveData<LatLng> myLoc
         = new MutableLiveData<LatLng>(new LatLng(0, 0));
     private final MutableLiveData<Boolean> myLocLive
@@ -74,7 +75,7 @@ public class ProfileViewFragmentViewModel extends ViewModel
     {
         return this.bio;
     }
-    public MutableLiveData<String> getGender()
+    public MutableLiveData<GenderEnum> getGender()
     {
         return this.gender;
     }

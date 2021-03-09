@@ -18,10 +18,13 @@ import androidx.lifecycle.MutableLiveData;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.ViewModel;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.cs65.homie.MainActivity;
 import com.cs65.homie.R;
 import com.cs65.homie.Utilities;
+import com.cs65.homie.models.GenderEnum;
 import com.cs65.homie.models.Profile;
 import com.cs65.homie.ui.gestures.OnSwipeGestureListener;
 import com.cs65.homie.ui.gestures.SwipeGesture;
@@ -59,6 +62,17 @@ public class ProfileMatchFragment
     private FloatingActionButton buttonReject = null;
 
     private List<Profile> matches = new ArrayList<>();
+
+
+    public void onCreate(Bundle savedInstanceState)
+    {
+        super.vm =  new ViewModelProvider(this).get(
+            ProfileViewFragmentViewModel.class
+        );
+        // FIXME Using fake data, need to set to the other user
+        super.vm.setUserId(((MainActivity)this.requireActivity()).getFakeUserId());
+        super.onCreate(savedInstanceState);
+    }
 
     public void onClick(View view)
     {
@@ -150,9 +164,6 @@ public class ProfileMatchFragment
 
     public void onViewCreated(View view, Bundle savedInstanceState)
     {
-
-        // FIXME Using fake data, need to set to the other user
-        super.vm.setUserId(((MainActivity)this.requireActivity()).getFakeUserId());
 
         super.onViewCreated(view, savedInstanceState);
 
@@ -277,7 +288,7 @@ public class ProfileMatchFragment
                 + "cupidatat non proident, sunt in culpa qui officia deserunt "
                 + "mollit anim id est laborum."
         );
-        this.vm.getGender().setValue("Female");
+        this.vm.getGender().setValue(GenderEnum.FEMALE);
         this.vm.getLoc().setValue(new LatLng(43.624794, -72.323171));
         this.vm.getMyLoc().setValue(new LatLng(43.704166, -72.288762));
         this.vm.getMyLocLive().setValue(true);
@@ -291,49 +302,6 @@ public class ProfileMatchFragment
         images.add(Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://com.cs65.homie/" + R.drawable.dart2));
         images.add(Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://com.cs65.homie/" + R.drawable.dart3));
         this.vm.getImages().setValue(images);
-
-
-        // Firebase section --------------------
-        MutableLiveData<String> bio = this.vm.getBio();
-        MutableLiveData<Boolean> bathroom = this.vm.getBathroom();
-        MutableLiveData<String> gender = this.vm.getGender();
-        MutableLiveData<Boolean> pets = this.vm.getPets();
-        MutableLiveData<Boolean> hasPlace = this.vm.getPlace();
-        MutableLiveData<Boolean> isSmoking = this.vm.getSmoking();
-        MutableLiveData<String> name = this.vm.getProfileName();
-
-        // Get firebase wrapper (in-built)
-        // Fetch profiles and loads them
-        // TODO: We need some stratagey of marking unliked and matched profiles to avoid showing the same profile twice and avoid showing our own profile
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        db.collection("profiles")
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-
-                                // Update UI
-                                bathroom.setValue((boolean)document.getData().get("privateBathroom"));
-                                bio.setValue((String)document.getData().get("bio"));
-                                pets.setValue((boolean)document.getData().get("petFriendly"));
-                                hasPlace.setValue((boolean)document.getData().get("hasApartment"));
-                                isSmoking.setValue((boolean)document.getData().get("smoking"));
-                                name.setValue((String)document.getData().get("firstName"));
-
-                                int genderCode = Math.toIntExact((long)document.getData().get("gender"));
-                                if (genderCode == 1) {
-                                    gender.setValue("Female");
-                                } else {
-                                    gender.setValue("Male");
-                                }
-                            }
-                        } else {
-                            Log.w("firebase - homies", "Error getting documents.", task.getException());
-                        }
-                    }
-                });
 
     }
 
