@@ -148,7 +148,7 @@ public class ProfileViewFragment extends Fragment
     )
     {
         this.getProfile(this.vm.getUserId());
-        //this.loadFakeData();
+        this.loadFakeData();
         // Load the layout
         return inflater.inflate(
             R.layout.fragment_profile_view, container, false
@@ -680,21 +680,21 @@ public class ProfileViewFragment extends Fragment
     private void loadFakeData()
     {
 
-        this.vm.getLoc().setValue(new LatLng(43.624794, -72.323171));
-        this.vm.getMyLoc().setValue(new LatLng(43.704166, -72.288762));
-        this.vm.getMyLocStr().setValue("Sanborn");
-        this.vm.getAvatarUri().setValue(null);
+        //this.vm.getLoc().setValue(new LatLng(43.624794, -72.323171));
+        //this.vm.getMyLoc().setValue(new LatLng(43.704166, -72.288762));
+        //this.vm.getMyLocStr().setValue("Sanborn");
+        //this.vm.getAvatarUri().setValue(null);
 
         List<Uri> images = new ArrayList<Uri>();
-        images.add(Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://com.cs65.homie/" + R.drawable.dart0));
-        images.add(Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://com.cs65.homie/" + R.drawable.dart1));
-        images.add(Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://com.cs65.homie/" + R.drawable.dart2));
-        images.add(Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://com.cs65.homie/" + R.drawable.dart3));
+        images.add(Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://com.cs65.homie/" + R.drawable.apt1));
+        images.add(Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://com.cs65.homie/" + R.drawable.apt2));
+        images.add(Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://com.cs65.homie/" + R.drawable.apt3));
+        images.add(Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://com.cs65.homie/" + R.drawable.apt4));
         this.vm.getImages().setValue(images);
 
-        this.vm.getPriceMin().setValue(42.42);
-        this.vm.getPriceMax().setValue(4242.42);
-        this.vm.getRadius().setValue(42.42);
+        //this.vm.getPriceMin().setValue(42.42);
+        //this.vm.getPriceMax().setValue(4242.42);
+        //this.vm.getRadius().setValue(42.42);
 
     }
 
