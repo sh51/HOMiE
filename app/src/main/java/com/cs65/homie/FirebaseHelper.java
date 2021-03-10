@@ -57,8 +57,11 @@ public class FirebaseHelper {
     private HashMap<String, ChildEventListener> chatListeners;
     private HashMap<String, Profile> profiles;
     private HashMap<String, Profile> matchedProfiles;
+    private HashMap<String, Profile> suggestedProfiles;
     private String server_key;
-    private int currIndex;
+    private String currSuggestion;
+    // local implementation for rejected profiles
+//    private List<String> bannedList;
 
     private FirebaseFirestore db;
     // realtime database object
@@ -79,9 +82,8 @@ public class FirebaseHelper {
         mAuth = FirebaseAuth.getInstance();
         profiles = new HashMap<>();
         matchedProfiles = new HashMap<>();
+        suggestedProfiles = new HashMap<>();
         chatListeners = new HashMap<>();
-        currIndex = 0;
-
 
         savePushToken();
 
@@ -131,6 +133,7 @@ public class FirebaseHelper {
         }
         // update local profile
         profiles.put(profile.getId(), profile);
+        // update profile on firestore
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         db.collection("profiles").document(profile.getId())
                 .set(profile)
@@ -140,6 +143,25 @@ public class FirebaseHelper {
                         Log.d(Globals.TAG, "Error setting document", e);
                     }
                 });
+        // recalculate profile suggestions
+        updateSuggestedProfiles();
+    }
+
+    private boolean isPotentialMatch(Profile p) {
+//        return false;
+        Profile userProfile = getMyProfile();
+
+        // check reject criteria
+        if (userProfile.getId() == p.getId()) return false; // can't match yourself
+        if (userProfile.isSmoking() != p.isSmoking()) return false; // smokers won't be matched with non-smokers
+        if (userProfile.isPrivateBathroom() != p.isPrivateBathroom()) return false; // private bath prefs have to be the same
+        if (userProfile.isHasApartment() && p.isHasApartment()) return false;   // owners won't be matched with owners
+        if (userProfile.isPetFriendly() != p.isPetFriendly()) return false;
+
+
+        // check location criteria
+
+        return true;
     }
 
     // Update profile
@@ -195,6 +217,7 @@ public class FirebaseHelper {
                     }
                 }
                 updateMatchedProfiles();
+                updateSuggestedProfiles();
                 callback.run(getProfiles());
             } else {
                 Log.d(Globals.TAG, "Error getting documents: ", task.getException());
@@ -212,21 +235,38 @@ public class FirebaseHelper {
     }
     // Get current suggested profile
     public Profile getSuggestedProfile() {
-        return getProfiles().get(currIndex);
+        // initialize currSuggestion
+        if (currSuggestion == null) {
+            suggestAnotherProfile();
+        }
+        return suggestedProfiles.get(currSuggestion);
     }
     // Get next suggested profile
     public void suggestAnotherProfile() {
-        currIndex = ++currIndex % profiles.size();
+        boolean newSuggestionFound = false;
+        for (String uid: suggestedProfiles.keySet()) {
+            if (!uid.equals(currSuggestion)) {
+                suggestedProfiles.remove(currSuggestion);
+                currSuggestion = uid;
+                newSuggestionFound = true;
+                break;
+            }
+        }
+        // if all suggestions have been viewed, recalculate suggestions
+        if (!newSuggestionFound) {Log.d(Globals.TAG, "Reached bottom of deck!");
+
+            updateSuggestedProfiles();
+        }
     }
     // Get all the profiles
     public List<Profile> getProfiles() {
         return new ArrayList<>(profiles.values());
     }
 
-    // Get profiles suggestions - these will be displayed on the match screen
-    public List<Profile> getSuggestedProfiles() {
-        return new ArrayList<Profile>(profiles.values());
-    }
+//    // Get profiles suggestions - these will be displayed on the match screen
+//    public List<Profile> getSuggestedProfiles() {
+//        return new ArrayList<>(suggestedProfiles.values());
+//    }
 
     // Get matched profiles for chat initialization - return the matched profiles, need to be called after a MatchedProfile update
     public List<Profile> getMatchedProfiles() {
@@ -243,6 +283,14 @@ public class FirebaseHelper {
             // since profiles is supposed to be a complete set of profiles, so this is guaranteed to be non-null
             Profile p = profiles.get(id);
             if (profiles.get(id).getLikes() != null && profiles.get(id).getLikes().contains(uid)) matchedProfiles.put(id, p);
+        });
+    }
+    // refresh suggested profiles from the list of profiles
+    private void updateSuggestedProfiles() {
+        profiles.forEach((uid, p) -> {
+            if (isPotentialMatch(p)) {
+                suggestedProfiles.put(uid, p);
+            }
         });
     }
     //

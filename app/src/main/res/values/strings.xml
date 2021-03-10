@@ -111,6 +111,7 @@
     <string name="menu_item_logout">LOGOUT</string>
     <string name="menu_item_login">LOGIN</string>
     <string name="menu_item_profile">Profile</string>
+    <string name="match_empty_warning"><b>Oh No!</b>\n\nYou don\'t have any Homies to match with!\nMaybe update your profile first?\n<b>→</b></string>
     <!-- LOGIN -->
 
 </resources>

@@ -350,7 +350,7 @@ public class ProfileSettingsActivity extends AppCompatActivity {
         newProfile.setBio(bio.getText().toString());
         newProfile.setGender(this.gender);
         newProfile.setHasApartment(hasApartment);
-        newProfile.setisPetFriendly(isPetFriendly.isChecked());
+        newProfile.setPetFriendly(isPetFriendly.isChecked());
         newProfile.setSmoking(!isSmoking.isChecked());
         newProfile.setPrivateBathroom(isPrivateBathroom.isChecked());
         newProfile.setId(FirebaseAuth.getInstance().getCurrentUser().getUid());

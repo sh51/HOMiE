@@ -70,6 +70,8 @@ public class ProfileViewFragment extends Fragment
     private TextView viewRadius = null;
     private TextView viewSmoking = null;
     protected ProfileViewFragmentViewModel vm = null;
+    private CardView cardView;
+    private TextView mMatchEmpty;
 
     // Aliases for easy access
     MutableLiveData<String> bio;
@@ -162,8 +164,9 @@ public class ProfileViewFragment extends Fragment
     public void onViewCreated(View view, Bundle savedInstanceState)
     {
 
-        CardView cardView = view.findViewById(R.id.profileViewCardView);
+        cardView = view.findViewById(R.id.profileViewCardView);
         cardView.setRadius(0);
+        mMatchEmpty = view.findViewById(R.id.matchEmptyTextView);
 
         // Set up the observers for all the relevant views
         this.viewAvatar = view.findViewById(R.id.profileViewAvatarImageView);
@@ -645,28 +648,36 @@ public class ProfileViewFragment extends Fragment
 
     protected void loadProfile(Profile profile)
     {
-        // Update UI
-        name.setValue(profile.getFirstName());
-        bathroom.setValue(profile.isPrivateBathroom());
-        bio.setValue(profile.getBio());
-        this.vm.getGender().setValue(
-            GenderEnum.fromInt(profile.getGender())
-        );
-        pets.setValue(profile.isPetFriendly());
-        hasPlace.setValue(profile.isHasApartment());
-        isSmoking.setValue(profile.isSmoking());
-        vm.getPriceMin().setValue(profile.getMinPrice());
-        vm.getPriceMax().setValue(profile.getMaxPrice());
-        if (profile.getAvatarImage() != null)
-        {
-            Log.d(
-                MainActivity.TAG,
-                this.getClass().getCanonicalName()
-                + "loadProfile(), profile avatar image string: "
-                + profile.getAvatarImage()
+        if (profile == null) {
+            cardView.setVisibility(View.GONE);
+            mMatchEmpty.setVisibility(View.VISIBLE);
+
+
+        } else {
+            // Update UI
+            name.setValue(profile.getFirstName());
+            bathroom.setValue(profile.isPrivateBathroom());
+            bio.setValue(profile.getBio());
+            this.vm.getGender().setValue(
+                    GenderEnum.fromInt(profile.getGender())
             );
-            vm.getAvatarUri().setValue(Uri.parse(profile.getAvatarImage()));
+            pets.setValue(profile.isPetFriendly());
+            hasPlace.setValue(profile.isHasApartment());
+            isSmoking.setValue(profile.isSmoking());
+            vm.getPriceMin().setValue(profile.getMinPrice());
+            vm.getPriceMax().setValue(profile.getMaxPrice());
+            if (profile.getAvatarImage() != null)
+            {
+                Log.d(
+                        MainActivity.TAG,
+                        this.getClass().getCanonicalName()
+                                + "loadProfile(), profile avatar image string: "
+                                + profile.getAvatarImage()
+                );
+                vm.getAvatarUri().setValue(Uri.parse(profile.getAvatarImage()));
+            }
         }
+
 
     }
 

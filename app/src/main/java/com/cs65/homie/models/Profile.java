@@ -62,8 +62,8 @@ public class Profile {
         address = "Dartmouth College";
         radius = 5; // imperial by default
         hasApartment = false;
-        isPetFriendly = true;
-        isSmoking = true;
+        isPetFriendly = false;
+        isSmoking = false;
 
         likes = new ArrayList<>();
         keywords = new ArrayList<>();
@@ -190,8 +190,8 @@ public class Profile {
         return isPetFriendly;
     }
 
-    public void setisPetFriendly(boolean isPetFriendly) {
-        this.isPetFriendly = isPetFriendly;
+    public void setPetFriendly(boolean petFriendly) {
+        isPetFriendly = petFriendly;
     }
 
     public boolean isSmoking() {

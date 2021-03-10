@@ -66,7 +66,6 @@ public class ChatsFragment extends Fragment {
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
 
-        Log.d(Globals.TAG, "Attached.");
     }
 
     public void onCreate(Bundle savedInstanceState) {
@@ -113,6 +112,8 @@ public class ChatsFragment extends Fragment {
     }
 
     public void onViewCreated(View view, Bundle savedInstanceState) {
+
+        Log.d(Globals.TAG, String.valueOf(mHelper.getMatchedProfiles().size()));
 
         this.viewTextWarning = view.findViewById(R.id.chatsEmptyTextView);
         if (

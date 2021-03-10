@@ -219,7 +219,6 @@ public class ProfileMatchFragment
             buttonReject.setOnClickListener(this);
             buttonReject.setVisibility(View.VISIBLE);
         }
-
     }
 
     @Override
