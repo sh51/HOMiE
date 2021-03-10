@@ -8,6 +8,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import androidx.cardview.widget.CardView;
 
@@ -67,6 +68,8 @@ public class ProfileMatchFragment
     private FloatingActionButton buttonReject = null;
     private boolean inMatchEvent = false;
 
+    Toast mToast;
+
     public void onClick(View view)
     {
         if (view.equals(buttonMatch))
@@ -103,6 +106,7 @@ public class ProfileMatchFragment
         // Call super last
         super.onCreate(savedInstanceState);
 
+        mToast = Toast.makeText(getActivity(), "Liked!", Toast.LENGTH_SHORT);
     }
 
     public View onCreateView(
@@ -223,7 +227,6 @@ public class ProfileMatchFragment
 
 
     private void handleMatch() {
-
         // TODO replace the index based loading
         List<Profile> profiles = mHelper.getProfiles();
         int size = profiles.size();
@@ -235,24 +238,33 @@ public class ProfileMatchFragment
                 ((MainActivity) this.requireActivity()).matchTransition(
                         this.vm.getProfileName().getValue()
                 );
-            else draw();
+            else {
+                draw("right");
+                mToast.show();
+            }
         });
     }
 
     private void handleReject() {
         // TODO Need to notify Firebase of the rejection
-        draw();
+        mToast.cancel();
+        draw("right");
     }
 
 
 
-    private void draw() {
+    private void draw(String direction) {
         // Animate the NEW fragment into focus
         // The next match option will be handled by the NEW fragment instance,
         // not this one
         FragmentManager activeFragManager = this.getParentFragmentManager();
         FragmentTransaction transaction = activeFragManager.beginTransaction();
-        transaction.setCustomAnimations(
+        if (direction.equals("right")) {
+            transaction.setCustomAnimations(
+                    R.anim.frag_enter_right, R.anim.frag_exit_right,
+                    R.anim.frag_enter_pop_right, R.anim.frag_exit_pop_right
+            );
+        } else transaction.setCustomAnimations(
                 R.anim.frag_enter_left, R.anim.frag_exit_left,
                 R.anim.frag_enter_pop_left, R.anim.frag_exit_pop_left
         );

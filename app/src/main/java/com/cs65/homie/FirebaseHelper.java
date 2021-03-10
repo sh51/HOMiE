@@ -273,7 +273,8 @@ public class FirebaseHelper {
         List<String> likes = userProfile.getLikes();
         if (!likes.contains(uid)) likes.add(uid);
         // lastly check if matched profiles needs an update
-        if (likedProfile.getLikes().contains(currId)) {
+        // * likes might not be initialized when they haven't liked anyone yet
+        if (likedProfile.getLikes() != null && likedProfile.getLikes().contains(currId)) {
             Log.d(Globals.TAG, "Matched with: " + uid);
             // update matched profiles if there is a match
             matchedProfiles.put(uid, likedProfile);
