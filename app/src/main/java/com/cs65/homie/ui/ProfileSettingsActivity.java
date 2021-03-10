@@ -4,6 +4,7 @@ import android.content.ClipData;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -25,6 +26,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
 
 import com.cs65.homie.FirebaseHelper;
+import com.cs65.homie.Globals;
 import com.cs65.homie.ui.login.ui.login.LoginActivity;
 import com.cs65.homie.ui.login.ui.login.RegistrationActivity;
 import com.google.firebase.auth.FirebaseAuth;
@@ -36,6 +38,7 @@ import com.cs65.homie.models.Profile;
 import com.google.android.material.textfield.TextInputEditText;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 public class ProfileSettingsActivity extends AppCompatActivity {
@@ -231,7 +234,7 @@ public class ProfileSettingsActivity extends AppCompatActivity {
 //        }
         else if (requestCode == SELECT_MULTIPLE_IMG && intent != null) {
             String[] filePathCol = {MediaStore.Images.Media.DATA};
-            housing_images = new ArrayList<String> ();
+            housing_images = new ArrayList<String>();
             if (intent.getData() != null) {
                 Uri uri = intent.getData();
                 Cursor cursor = getContentResolver().query(houseUri, filePathCol, null, null, null);
