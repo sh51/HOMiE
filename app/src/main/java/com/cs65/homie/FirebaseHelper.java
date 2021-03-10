@@ -256,7 +256,7 @@ public class FirebaseHelper {
         userProfile.getLikes().forEach((id) -> {
             // since profiles is supposed to be a complete set of profiles, so this is guaranteed to be non-null
             Profile p = profiles.get(id);
-            if (profiles.get(id).getLikes() != null && profiles.get(id).getLikes().contains(uid)) matchedProfiles.add(p);
+            if (profiles.get(id) != null && profiles.get(id).getLikes().contains(uid)) matchedProfiles.add(p);
         });
     }
 
