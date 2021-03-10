@@ -16,12 +16,15 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.Spinner;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
+
+import com.cs65.homie.FirebaseHelper;
 import com.cs65.homie.Globals;
 import com.cs65.homie.ui.login.ui.login.LoginActivity;
 import com.cs65.homie.ui.login.ui.login.RegistrationActivity;
@@ -48,14 +51,18 @@ public class ProfileSettingsActivity extends AppCompatActivity {
     // TODO: Make better pattern, just testing functionality
     public static String userID = null;
 
+    private FirebaseHelper mHelper;
     private ImageView photoView;
     private String tempImgFileName = "temp.png";
     private EditText editedName, editedEmail, changedPassword;
     private String tempImgHomeName = "temp.png";
     private RadioButton radioFemale, radioMale, radioNoPref;
     private Spinner housingSearchOptions;
+    private Switch isPetFriendly, isSmoking, isPrivateBathroom;
 
     private Uri photoUri, houseUri;
+    private int gender;
+    private boolean hasApartment;
     private String photoPath, name, email, password,
             genderPref, housingSearch, housePhotoPath,
             address, radius, minBudget, maxBudget,
@@ -75,6 +82,7 @@ public class ProfileSettingsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_profile_settings);
 
 
+        mHelper = FirebaseHelper.getInstance();
         SharedPreferences savedProfile = getSharedPreferences(getString(R.string.saved_preferences), MODE_PRIVATE);
 
 
@@ -87,6 +95,9 @@ public class ProfileSettingsActivity extends AppCompatActivity {
         this.photoView = (ImageView) findViewById(R.id.photoView);
         this.housingSearchOptions = (Spinner) findViewById(R.id.spinnerNeedHousing);
 
+        isPetFriendly = (Switch) findViewById(R.id.switchPetFriendly);
+        isSmoking = (Switch) findViewById(R.id.switchNoneSmoking);
+        isPrivateBathroom = (Switch) findViewById(R.id.switchPrivateBathroom);
 
         Button changeHousing = (Button) findViewById(R.id.button_ChangeHousingPhoto);
         TextView changeHousingImgPrompt = (TextView) findViewById(R.id.textView_HousingImageView);
@@ -116,11 +127,13 @@ public class ProfileSettingsActivity extends AppCompatActivity {
                     changeHousing.setVisibility(View.VISIBLE);
                     changeHousingImgPrompt.setVisibility(View.VISIBLE);
                     housingImgView.setVisibility(View.VISIBLE);
+                    hasApartment = true;
                 }
                 else {
                     changeHousing.setVisibility(View.GONE);
                     changeHousingImgPrompt.setVisibility(View.GONE);
                     housingImgView.setVisibility(View.GONE);
+                    hasApartment = false;
                 }
             }
 
@@ -231,6 +244,8 @@ public class ProfileSettingsActivity extends AppCompatActivity {
     }
 
     public void onGenderRadioToggled(View view) {
+        gender = radioFemale.isChecked() ? 1 : 0;
+
         if (view.getId() == R.id.radioButton_female)
             this.genderPref = getString(R.string.radio_Female_text);
         else if (view.getId() == R.id.radioButton_male)
@@ -289,33 +304,27 @@ public class ProfileSettingsActivity extends AppCompatActivity {
         Toast.makeText(this, R.string.toast_saved, Toast.LENGTH_SHORT).show();
         Log.d(TAG, "toasted");
 
-        // Firebase
-        TextInputEditText bio = (TextInputEditText)findViewById(R.id.bio);
 
+        TextInputEditText bio = (TextInputEditText)findViewById(R.id.bio);
+        // Firebase
         Profile newProfile = new Profile();
+        newProfile.setId(mHelper.getUid());
         newProfile.setFirstName(this.name);
         newProfile.setEmail(this.email);
         newProfile.setPassword(this.password);
         newProfile.setBio(bio.getText().toString());
+        newProfile.setGender(this.gender);
+        newProfile.setHasApartment(hasApartment);
+        newProfile.setisPetFriendly(isPetFriendly.isChecked());
+        newProfile.setSmoking(!isSmoking.isChecked());
+        newProfile.setPrivateBathroom(isPrivateBathroom.isChecked());
         newProfile.setId(FirebaseAuth.getInstance().getCurrentUser().getUid());
 
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        db.collection("profiles")
-                .add(newProfile)
-                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                    @Override
-                    public void onSuccess(DocumentReference documentReference) {
-                        Log.d(TAG, "DocumentSnapshot added with ID: " + documentReference.getId());
-                        MainActivity.userId = documentReference.getId();
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.w(TAG, "Error adding document", e);
+        // TODO add these to saveProfile
+//        editedProfile.putString(getString(R.string.key_filename), this.photoPath);
 
-                        // TODO: Registration failed, handle
-                    }
-                });
+        mHelper.createProfile(newProfile);
+
+
     }
 }

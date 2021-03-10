@@ -21,6 +21,8 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.cs65.homie.FirebaseHelper;
+import com.cs65.homie.Globals;
 import com.cs65.homie.MainActivity;
 import com.cs65.homie.R;
 import com.cs65.homie.Utilities;
@@ -32,12 +34,15 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -59,22 +64,15 @@ public class ProfileMatchFragment
     private static final double CARD_MARGIN = 20.0;
     private static final double MATCH_BUTTONS_PADDING = 60.0;
 
+    // TODO add more logic to match suggestion
+    private int currentIndex;
+
+    private FirebaseHelper mHelper;
     private FloatingActionButton buttonMatch = null;
     private FloatingActionButton buttonReject = null;
 
     private List<Profile> matches = new ArrayList<>();
 
-
-    public void onCreate(Bundle savedInstanceState)
-    {
-        super.vm =  new ViewModelProvider(this).get(
-            ProfileViewFragmentViewModel.class
-        );
-        // FIXME Using fake data, need to set to the other user
-        super.vm.setUserId(((MainActivity)this.requireActivity()).getFakeUserId());
-        // Must come last in this function
-        super.onCreate(savedInstanceState);
-    }
 
     public void onClick(View view)
     {
@@ -92,36 +90,16 @@ public class ProfileMatchFragment
         }
     }
 
-    private void loadMatches() {
-        // TODO: Improve matches
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        db.collection("profiles")
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-                                Profile newMatch = new Profile();
-                                newMatch.setBio((String)document.getData().get("bio"));
-                                newMatch.setPrivateBathroom((boolean)document.getData().get("privateBathroom"));
-                                newMatch.setisPetFriendly((boolean)document.getData().get("petFriendly"));
-                                newMatch.setHasApartment((boolean)document.getData().get("hasApartment"));
-                                newMatch.setSmoking((boolean)document.getData().get("smoking"));
-                                newMatch.setFirstName((String)document.getData().get("firstName"));
-                                newMatch.setGender(Math.toIntExact((long)document.getData().get("gender")));
 
-                                matches.add(newMatch);
-                            }
-                        } else {
-                            Log.w("firebase - homies", "Error getting documents.", task.getException());
-                        }
-                    }
-                });
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        mHelper = FirebaseHelper.getInstance();
     }
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        loadMatches();
+//        loadMatches();
         return super.onCreateView(inflater, container, savedInstanceState);
     }
 
@@ -162,6 +140,10 @@ public class ProfileMatchFragment
 
     public void onViewCreated(View view, Bundle savedInstanceState)
     {
+
+        // FIXME Using fake data, need to set to the other user
+//        super.vm.setUserId(((MainActivity)this.requireActivity()).getFakeUserId());
+        super.vm.setUserId("pR7PsciIRpdL24u54ZNoP85efh83");
 
         super.onViewCreated(view, savedInstanceState);
 
@@ -230,8 +212,8 @@ public class ProfileMatchFragment
             buttonReject.setOnClickListener(this);
             buttonReject.setVisibility(View.VISIBLE);
         }
-        // TODO Using fake data for now
-        this.loadFakeData();
+
+        loadProfile();
 
     }
 
@@ -244,17 +226,21 @@ public class ProfileMatchFragment
         return true;
     }
 
-    private void handleMatch()
-    {
 
-        // TODO Need to send match to Firebase
+    private void handleMatch() {
+        if (this.isMatch()) {
+            final Map<String, Object> likeMap = new HashMap<>();
+            List<Profile> profiles = mHelper.getProfiles();
+            int size = profiles.size();
+            Profile matchedProfile = profiles.get(currentIndex % size);
 
-        if (this.isMatch())
-        {
+            likeMap.put("likes", FieldValue.arrayUnion(matchedProfile.getId()));
+
+            mHelper.updateProfile(mHelper.getUid(), likeMap);
+
             ((MainActivity)this.requireActivity()).matchTransition(
                 this.vm.getProfileName().getValue()
             );
-
         }
 
     }
@@ -266,39 +252,31 @@ public class ProfileMatchFragment
             R.string.profile_view_match_reject_description,
             this.getActivity()
         );
+
+        currentIndex++;
+        loadProfile();
     }
 
-    /**
-     * Load fake data in lieu of Firebase, for testing
-     */
-    private void loadFakeData()
-    {
-
-        this.vm.getBathroom().setValue(true);
-        this.vm.getBio().setValue(
-            "i Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do "
-                + "eiusmod tempor incididunt ut labore et dolore magna aliqua. "
-                + "Ut enim ad minim veniam, quis nostrud exercitation ullamco "
-                + "laboris nisi ut aliquip ex ea commodo consequat. Duis aute "
-                + "irure dolor in reprehenderit in voluptate velit esse cillum "
-                + "dolore eu fugiat nulla pariatur. Excepteur sint occaecat "
-                + "cupidatat non proident, sunt in culpa qui officia deserunt "
-                + "mollit anim id est laborum."
-        );
-        this.vm.getGender().setValue(GenderEnum.FEMALE);
-        this.vm.getLoc().setValue(new LatLng(43.624794, -72.323171));
-        this.vm.getMyLoc().setValue(new LatLng(43.704166, -72.288762));
-        this.vm.getMyLocStr().setValue("Loops");
-        //this.vm.getAvatarUri().setValue(
-        //    Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://com.cs65.homie/" + R.drawable.ai)
-        //);
-        List<Uri> images = new ArrayList<Uri>();
-        images.add(Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://com.cs65.homie/" + R.drawable.dart0));
-        images.add(Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://com.cs65.homie/" + R.drawable.dart1));
-        images.add(Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://com.cs65.homie/" + R.drawable.dart2));
-        images.add(Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://com.cs65.homie/" + R.drawable.dart3));
-        this.vm.getImages().setValue(images);
-
+    private void loadProfile(String uid) {
+        updateUI(mHelper.getProfile(uid));
     }
 
+    private void loadProfile() {
+        List<Profile> profiles = mHelper.getProfiles();
+        int size = profiles.size();
+        updateUI(profiles.get(currentIndex % size));
+    }
+
+    // Update UI given a profile
+    private void updateUI(Profile p) {
+        name.setValue(p.getFirstName());
+        bathroom.setValue(p.isPrivateBathroom());
+        bio.setValue(p.getBio());
+        pets.setValue(p.isPetFriendly());
+        hasPlace.setValue(p.isHasApartment());
+        isSmoking.setValue(p.isSmoking());
+        vm.getPriceMin().setValue(p.getMinPrice());
+        vm.getPriceMax().setValue(p.getMaxPrice());
+        if (p.getAvatarImage() != null) vm.getAvatarUri().setValue(Uri.parse(p.getAvatarImage()));
+    }
 }

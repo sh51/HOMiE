@@ -14,26 +14,20 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.core.text.HtmlCompat;
-import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentContainerView;
+import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.cs65.homie.FirebaseHelper;
 import com.cs65.homie.MainActivity;
 import com.cs65.homie.R;
 import com.cs65.homie.Utilities;
 import com.cs65.homie.models.GenderEnum;
-import com.cs65.homie.ui.ProfileSettingsActivity;
-import com.cs65.homie.ui.carousel.ImageCarouselFragment;
+import com.cs65.homie.models.Profile;
 import com.cs65.homie.ui.ImageFullScreenActivity;
+import com.cs65.homie.ui.carousel.ImageCarouselFragment;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.FieldPath;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,6 +39,7 @@ import java.util.Locale;
 @SuppressWarnings("Convert2Diamond")
 public class ProfileViewFragment extends Fragment
 {
+    private FirebaseHelper mHelper;
 
     @SuppressWarnings("unused")
     public static final String BUNDLE_KEY_MY_ID
@@ -76,6 +71,15 @@ public class ProfileViewFragment extends Fragment
     private TextView viewRadius = null;
     private TextView viewSmoking = null;
     protected ProfileViewFragmentViewModel vm = null;
+
+    // Aliases for easy access
+    MutableLiveData<String> bio;
+    MutableLiveData<Boolean> bathroom;
+    MutableLiveData<String> gender;
+    MutableLiveData<Boolean> pets;
+    MutableLiveData<Boolean> hasPlace;
+    MutableLiveData<Boolean> isSmoking;
+    MutableLiveData<String> name;
 
     public ProfileViewFragment()
     {
@@ -112,6 +116,8 @@ public class ProfileViewFragment extends Fragment
 
         super.onCreate(savedInstanceState);
 
+
+
         // Get the view model instance
         // ViewModel can never be null
         if (this.vm == null)
@@ -121,104 +127,22 @@ public class ProfileViewFragment extends Fragment
             );
         }
 
+        mHelper = FirebaseHelper.getInstance();
+        bio = this.vm.getBio();
+        bathroom = this.vm.getBathroom();
+//        gender = this.vm.getGender();
+        pets = this.vm.getPets();
+        hasPlace = this.vm.getPlace();
+        isSmoking = this.vm.getSmoking();
+        name = this.vm.getProfileName();
 
-//        // quick fix
-//        mHelper = FirebaseHelper.getInstance();
-//        this.vm.setMyId(mHelper.getUid());
 
+        // Setup My ID
+        this.vm.setMyId(mHelper.getUid());
 
-        // If no current USERid, go to profile page
-        if (MainActivity.userId == null) {
-            if (FirebaseAuth.getInstance().getCurrentUser().getUid() != null) {
-                FirebaseFirestore db = FirebaseFirestore.getInstance();
-                db.collection("profiles").whereEqualTo("id", FirebaseAuth.getInstance().getCurrentUser().getUid()).get()
-                        .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                            @Override
-                            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                                if (task.isSuccessful()) {
-                                    for (QueryDocumentSnapshot document : task.getResult()) {
-                                        Log.d("firebase - homie", document.getId() + " => " + document.getData());
-                                        MainActivity.userId = document.getId();
-                                    }
-                                } else {
-                                    Log.d("firebase - homie", "Error getting documents: ", task.getException());
-                                }
-                            }
-                        });
-            } else {
-                Intent myIntent = new Intent(ProfileViewFragment.this.getActivity(), ProfileSettingsActivity.class);
-                startActivity(myIntent);
-            }
-        } else {
-
-            // Setup My ID
-            // FIXME Default user ID (empty string) is magic
-            if (this.vm.getMyId().equals(""))
-            {
-
-                if (savedInstanceState != null)
-                {
-                    this.vm.setMyId(savedInstanceState.getString(
-                        BUNDLE_KEY_MY_ID, ""
-                    ));
-                }
-                else if (this.getArguments() != null)
-                {
-                    this.vm.setMyId(this.getArguments().getString(
-                        BUNDLE_KEY_MY_ID, ""
-                    ));
-                }
-                // FIXME There IS a race condition here
-                this.vm.setMyId(MainActivity.userId);
-
-            }
-            // FIXME Default user ID (empty string) is magic
-            if (this.vm.getMyId().equals(""))
-            {
-                // TODO Handle
-                Log.d(
-                    MainActivity.TAG,
-                    String.format(
-                        "%s.onCreate(), MyId is %s",
-                        this.getClass().getCanonicalName(),
-                        this.vm.getMyId()
-                    )
-                );
-                return;
-            }
-
-            // Setup User ID
-            // FIXME Default user ID (empty string) is magic
-            if (this.vm.getUserId().equals("") && this.getActivity() != null)
-            {
-                if (savedInstanceState != null)
-                {
-                    this.vm.setUserId(savedInstanceState.getString(
-                            BUNDLE_KEY_USER_ID, ""
-                    ));
-                }
-                else if (this.getArguments() != null)
-                {
-                    this.vm.setUserId(this.getArguments().getString(
-                            BUNDLE_KEY_USER_ID, ""
-                    ));
-                }
-                // FIXME There IS a race condition here
-                this.vm.setUserId(MainActivity.userId);
-            }
-            // FIXME Default user ID (empty string) is magic
-            if (this.vm.getUserId().equals(""))
-            {
-                // TODO Handle
-                Log.d(MainActivity.TAG, String.format(
-                    "%s.onCreate(), UserID is %s",
-                    this.getClass().getCanonicalName(),
-                    this.vm.getUserId()
-                ));
-            }
 
         }
-    }
+//    }
 
     public View onCreateView(
         LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState
@@ -279,13 +203,6 @@ public class ProfileViewFragment extends Fragment
             this.updateViewBio(this.vm.getBio().getValue());
         }
         this.viewGender = view.findViewById(R.id.profileViewGenderTextView);
-        if (this.viewGender != null)
-        {
-            this.vm.getGender().observe(
-                this.getViewLifecycleOwner(), this::updateViewGender
-            );
-            this.updateViewGender(this.vm.getGender().getValue());
-        }
         this.viewLoc = view.findViewById(R.id.profileViewLocationTextView);
         if (this.viewLoc != null)
         {
@@ -719,11 +636,7 @@ public class ProfileViewFragment extends Fragment
      */
     private boolean isMe()
     {
-        if (this.vm.getMyId().equals(""))
-        {
-            return false;
-        }
-        return this.vm.getMyId().equals(this.vm.getUserId());
+        return this.vm.getMyId().equals(mHelper.getUid());
     }
 
     /**
@@ -749,44 +662,36 @@ public class ProfileViewFragment extends Fragment
         this.vm.getRadius().setValue(42.42);
 
 
-    }
-
-    private void pingFirebase()
-    {
+        // Firebase section --------------------
 
         // Get firebase wrapper (in-built)
         // Fetch profiles and loads them
 
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
         if (isMe()) {
-            db.collection("profiles").whereEqualTo(FieldPath.documentId(), this.vm.getMyId()).get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-                                Log.d("firebase - homie", document.getId() + " => " + document.getData());
-
-                                // Update UI
-                                updateViewBathroomByBathroom((boolean)document.getData().get("privateBathroom"));
-                                updateViewBio((String)document.getData().get("bio"));
-                                updateViewPets((boolean)document.getData().get("petFriendly"));
-                                updateViewBathroomByPlace((boolean)document.getData().get("hasApartment"));
-                                updateViewSmoking((boolean)document.getData().get("smoking"));
-                                updateViewName((String)document.getData().get("firstName"));
-                                int genderCode = Math.toIntExact((long)document.getData().get("gender"));
-                                vm.getGender().postValue(GenderEnum.fromInt(genderCode));
-                            }
-                        } else {
-                            Log.d("firebase - homie", "Error getting documents: ", task.getException());
-                        }
-                    }
-                });
+            loadProfile(this.vm.getMyId());
 
         } else {
             // TODO: Handle ID doesn't exist
         }
 
+    }
+
+    private void loadProfile(String myId) {
+        Profile p = mHelper.getProfile(myId);
+        // Update UI
+        name.setValue(p.getFirstName());
+        bathroom.setValue(p.isPrivateBathroom());
+        bio.setValue(p.getBio());
+        pets.setValue(p.isPetFriendly());
+        hasPlace.setValue(p.isHasApartment());
+        isSmoking.setValue(p.isSmoking());
+        vm.getPriceMin().setValue(p.getMinPrice());
+        vm.getPriceMax().setValue(p.getMaxPrice());
+        if (p.getAvatarImage() != null) vm.getAvatarUri().setValue(Uri.parse(p.getAvatarImage()));
+    }
+
+    private void pingFirebase()
+    {
         this.loadFakeData();
     }
 

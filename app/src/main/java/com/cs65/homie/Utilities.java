@@ -19,6 +19,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.cs65.homie.models.Message;
+import com.cs65.homie.models.Profile;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.io.IOException;
@@ -300,6 +301,13 @@ public class Utilities
 
     }
 
+
+    public interface onProfileFetchedCallbackInterface {
+        void run(Profile profile);
+    }
+    public interface onProfilesFetchedCallbackInterface {
+        void run(List<Profile> profiles);
+    }
     public interface onMessageSentCallbackInterface {
         void run(Message msg);
     }

@@ -2,13 +2,17 @@ package com.cs65.homie.ui.login.ui.login;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
+import android.view.animation.AlphaAnimation;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -18,10 +22,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.cs65.homie.FirebaseHelper;
 import com.cs65.homie.Globals;
 import com.cs65.homie.MainActivity;
 import com.cs65.homie.R;
 
+import com.cs65.homie.models.Profile;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
@@ -35,24 +41,37 @@ import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import java.util.concurrent.TimeUnit;
+
 
 public class LoginActivity extends AppCompatActivity {
 
     private LoginViewModel loginViewModel;
     private static final int RC_REGISTRATION = 0;
     private FirebaseAuth mAuth;
+    private FirebaseHelper mHelper;
     private Intent mainIntent;
+    private boolean loading = false;
+
+    // for loading indicator
+    AlphaAnimation inAnimation;
+    AlphaAnimation outAnimation;
+    FrameLayout progressBarHolder;
+    LinearLayout container;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-
         setContentView(R.layout.activity_login);
+        progressBarHolder = (FrameLayout) findViewById(R.id.progressBarHolder);
+        container = (LinearLayout) findViewById(R.id.container);
+
         loginViewModel = new ViewModelProvider(this, new LoginViewModelFactory())
                 .get(LoginViewModel.class);
 
         mAuth = FirebaseAuth.getInstance();
+        mHelper = FirebaseHelper.getInstance();
         mainIntent = new Intent(getApplicationContext(), MainActivity.class);
 
 //        if (mAuth.getCurrentUser() != null) Log.d(Globals.TAG, "login -> curent user is " + mAuth.getCurrentUser().getUid());
@@ -171,24 +190,27 @@ public class LoginActivity extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(Globals.TAG, "signInWithEmail:success");
-                            FirebaseUser user = mAuth.getCurrentUser();
-                            FirebaseFirestore db = FirebaseFirestore.getInstance();
-                            Query capitalCities = db.collection("profiles").whereEqualTo("id", user.getUid());
-                            capitalCities
-                                    .get()
-                                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                                        @Override
-                                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                                            if (task.isSuccessful()) {
-                                                for (QueryDocumentSnapshot document : task.getResult()) {
-                                                    MainActivity.userId = document.getId();
-                                                    break;
-                                                }
-                                            } else {
-                                                Log.d("firebase --> homies", "Error getting documents: ", task.getException());
-                                            }
-                                        }
-                                    });
+
+                            // Commented out as the document is not saved
+//                            FirebaseUser user = mAuth.getCurrentUser();
+//                            FirebaseFirestore db = FirebaseFirestore.getInstance();
+//                            Query capitalCities = db.collection("profiles").whereEqualTo("id", user.getUid());
+//                            capitalCities
+//                                    .get()
+//                                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+//                                        @Override
+//                                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
+//                                            if (task.isSuccessful()) {
+//                                                for (QueryDocumentSnapshot document : task.getResult()) {
+//                                                    MainActivity.userId = document.getId();
+//                                                    Log.d(Globals.TAG, document.toString());
+//                                                    break;
+//                                                }
+//                                            } else {
+//                                                Log.d("firebase --> homies", "Error getting documents: ", task.getException());
+//                                            }
+//                                        }
+//                                    });
 
                             proceedIfLoggedIn();
 
@@ -224,8 +246,15 @@ public class LoginActivity extends AppCompatActivity {
 
     private void proceedIfLoggedIn() {
         if (mAuth.getCurrentUser() != null) {
-            startActivity(mainIntent);
-            finish();
+            // start fetching profiles after login
+            mHelper.fetchProfiles((profiles) -> {
+                // only navigate to when the loading of profiles is complete
+                loading = false;
+            });
+            loading = true;
+            // start fetching profiles, show the loading indicator while loading
+            new ShowLoading().execute();
+
         }
     }
 
@@ -259,5 +288,44 @@ public class LoginActivity extends AppCompatActivity {
                     proceedIfLoggedIn();
                 }
 
+    }
+
+    private class ShowLoading extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            inAnimation = new AlphaAnimation(0f, 1f);
+            inAnimation.setDuration(200);
+            progressBarHolder.setAnimation(inAnimation);
+            container.setVisibility(View.GONE);
+            progressBarHolder.setVisibility(View.VISIBLE);
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+//            outAnimation = new AlphaAnimation(1f, 0f);
+//            outAnimation.setDuration(200);
+//            progressBarHolder.setAnimation(outAnimation);
+//            progressBarHolder.setVisibility(View.GONE);
+//            container.setVisibility(View.VISIBLE);
+
+            // finished loading profiles, navigate to main activity
+            startActivity(mainIntent);
+            finish();
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            try {
+                while (loading) {
+                    TimeUnit.SECONDS.sleep(1);
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
     }
 }
