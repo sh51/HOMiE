@@ -3,6 +3,11 @@ package com.cs65.homie.ui;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.Matrix;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -14,6 +19,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -42,6 +48,11 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.soundcloud.android.crop.Crop;
 
 import java.io.File;
+import java.time.Instant;
+import java.time.temporal.TemporalAdjuster;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.NoSuchElementException;
 
 public class ProfileSettingsActivity extends AppCompatActivity {
 
@@ -64,6 +75,9 @@ public class ProfileSettingsActivity extends AppCompatActivity {
     private static final int RC_LOGIN = 0;
 
     public static final int CAMERA_REQUEST_CODE = 1;
+    private static final int SELECT_MULTIPLE_IMG = 2;
+    private List<String> housing_images;
+    private ImageView housingImgView;
 
     private static final String TAG = "ajb";
 
@@ -90,7 +104,7 @@ public class ProfileSettingsActivity extends AppCompatActivity {
 
         Button changeHousing = (Button) findViewById(R.id.button_ChangeHousingPhoto);
         TextView changeHousingImgPrompt = (TextView) findViewById(R.id.textView_HousingImageView);
-        ImageView housingImgView = (ImageView) findViewById(R.id.imageViewHousing);
+        this.housingImgView = (ImageView) findViewById(R.id.imageViewHousing);
 
         Utilities.checkPermission(this);
 
@@ -190,9 +204,15 @@ public class ProfileSettingsActivity extends AppCompatActivity {
     // TODO ADD FUNCTIONALITY FOR ADDING MULTIPLE IMAGES
     public void onChangeHousingPhotoClicked(View view) {
         Log.d(TAG, "onChangeHousingPhotoClicked");
+//        Intent intent = new Intent();
+//        intent.setType("image/*");
+//        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+//        intent.setAction(Intent.ACTION_GET_CONTENT);
+//        startActivityForResult(Intent.createChooser(intent, "Select Picture"), SELECT_MULTIPLE_IMG);
+
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         intent.putExtra(MediaStore.EXTRA_OUTPUT, this.houseUri);
-        startActivityForResult(intent, CAMERA_REQUEST_CODE);
+        startActivityForResult(intent, SELECT_MULTIPLE_IMG);
     }
 
     @Override
@@ -211,7 +231,31 @@ public class ProfileSettingsActivity extends AppCompatActivity {
             photoView.setImageURI(tempUri);
             photoPath = photoUri.getPath();
         }
+        else if (requestCode == SELECT_MULTIPLE_IMG) {
+            this.housingImgView.setImageURI(houseUri);
+            housePhotoPath = houseUri.getPath();
+        }
+//        else if (requestCode == SELECT_MULTIPLE_IMG && intent != null) {
+//            String[] filePathCol = {MediaStore.Images.Media.DATA};
+//            housing_images = new ArrayList<String> ();
+//            if (intent.getData() != null) {
+//                Uri uri = intent.getData();
+//                Cursor cursor = getContentResolver().query(houseUri, filePathCol, null, null, null);
+//                cursor.moveToFirst();
+//
+//                int ind = cursor.getColumnIndex(filePathCol[0]);
+//                this.housePhotoPath = cursor.getString(ind);
+//                cursor.close();
+//
+//            }
+//            else {
+//
+//            }
+//
+//        }
     }
+
+
     public void onSaveClicked(View view) {
         this.hideKeyboard(view);
         this.saveProfile();
