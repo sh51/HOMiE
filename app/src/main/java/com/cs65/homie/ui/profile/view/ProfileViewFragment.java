@@ -156,7 +156,7 @@ public class ProfileViewFragment extends Fragment
     )
     {
 
-//        this.loadFakeData();
+        this.loadFakeData();
 
         // Load the layout
         return inflater.inflate(
