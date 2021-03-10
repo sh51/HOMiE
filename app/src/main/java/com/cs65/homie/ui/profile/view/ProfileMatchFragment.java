@@ -26,14 +26,11 @@ import com.cs65.homie.ui.gestures.OnSwipeGestureListener;
 import com.cs65.homie.ui.gestures.SwipeGesture;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.firebase.firestore.FieldValue;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 
 /**
@@ -50,7 +47,7 @@ public class ProfileMatchFragment
         View.OnTouchListener {
 
     public static final String BUNDLE_KEY_MATCH_PROFILES_INDEX
-        = "PROFILE_MATCH_FRAG_BUNDLE_KEY_PROFILES_INDEX";
+            = "PROFILE_MATCH_FRAG_BUNDLE_KEY_PROFILES_INDEX";
 
     // Whether or not to show the matching buttons
     private static final boolean BUTTON = false;
@@ -70,10 +67,8 @@ public class ProfileMatchFragment
 
     Toast mToast;
 
-    public void onClick(View view)
-    {
-        if (view.equals(buttonMatch))
-        {
+    public void onClick(View view) {
+        if (view.equals(buttonMatch)) {
             this.handleMatch();
         } else if (view.equals(this.buttonReject)) {
             this.handleReject();
@@ -82,24 +77,20 @@ public class ProfileMatchFragment
 
 
     @Override
-    public void onCreate(Bundle savedInstanceState)
-    {
+    public void onCreate(Bundle savedInstanceState) {
 
-        if (this.getArguments() != null)
-        {
+        if (this.getArguments() != null) {
             this.currentIndex = this.getArguments().getInt(
-                BUNDLE_KEY_MATCH_PROFILES_INDEX, 0
+                    BUNDLE_KEY_MATCH_PROFILES_INDEX, 0
             );
-        }
-        else if (savedInstanceState != null)
-        {
+        } else if (savedInstanceState != null) {
             this.currentIndex = savedInstanceState.getInt(
-                BUNDLE_KEY_MATCH_PROFILES_INDEX, 0
+                    BUNDLE_KEY_MATCH_PROFILES_INDEX, 0
             );
         }
 
         super.vm = new ViewModelProvider(this).get(
-            ProfileViewFragmentViewModel.class
+                ProfileViewFragmentViewModel.class
         );
         mHelper = FirebaseHelper.getInstance();
 
@@ -110,16 +101,14 @@ public class ProfileMatchFragment
     }
 
     public View onCreateView(
-        LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState
-    )
-    {
+            LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState
+    ) {
         this.loadProfile();
         //this.loadFakeData();
         return super.onCreateView(inflater, container, savedInstanceState);
     }
 
-    public void onSaveInstanceState(@NotNull Bundle outState)
-    {
+    public void onSaveInstanceState(@NotNull Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putInt(BUNDLE_KEY_MATCH_PROFILES_INDEX, this.currentIndex);
     }
@@ -189,8 +178,7 @@ public class ProfileMatchFragment
         }
 
         View topLayout = view.findViewById(R.id.profileViewContainerLayout);
-        if (topLayout != null && BUTTON)
-        {
+        if (topLayout != null && BUTTON) {
             // The match buttons require more padding
             topLayout.setPadding(
                     0, 0, 0, (int) Math.round(Utilities.pixelDensity(
@@ -211,14 +199,12 @@ public class ProfileMatchFragment
         this.buttonMatch = view.findViewById(
                 R.id.profileViewButtonMatchRight
         );
-        if (this.buttonMatch != null && BUTTON)
-        {
+        if (this.buttonMatch != null && BUTTON) {
             buttonMatch.setOnClickListener(this);
             buttonMatch.setVisibility(View.VISIBLE);
         }
         this.buttonReject = view.findViewById(R.id.profileViewButtonMatchLeft);
-        if (this.buttonReject != null && BUTTON)
-        {
+        if (this.buttonReject != null && BUTTON) {
             buttonReject.setOnClickListener(this);
             buttonReject.setVisibility(View.VISIBLE);
         }
@@ -239,7 +225,7 @@ public class ProfileMatchFragment
                         this.vm.getProfileName().getValue()
                 );
             else {
-                draw("right");
+                draw("left");
                 mToast.show();
             }
         });
@@ -252,7 +238,6 @@ public class ProfileMatchFragment
     }
 
 
-
     private void draw(String direction) {
         // Animate the NEW fragment into focus
         // The next match option will be handled by the NEW fragment instance,
@@ -261,12 +246,16 @@ public class ProfileMatchFragment
         FragmentTransaction transaction = activeFragManager.beginTransaction();
         if (direction.equals("right")) {
             transaction.setCustomAnimations(
-                    R.anim.frag_enter_right, R.anim.frag_exit_right,
-                    R.anim.frag_enter_pop_right, R.anim.frag_exit_pop_right
+//                    R.anim.frag_enter_right, R.anim.frag_exit_right,
+//                    R.anim.frag_enter_pop_right, R.anim.frag_exit_pop_right
+                    R.anim.frag_fade_in, R.anim.frag_exit_right,
+                    R.anim.frag_fade_in, R.anim.frag_exit_pop_right
             );
         } else transaction.setCustomAnimations(
-                R.anim.frag_enter_left, R.anim.frag_exit_left,
-                R.anim.frag_enter_pop_left, R.anim.frag_exit_pop_left
+//                R.anim.frag_enter_left, R.anim.frag_exit_left,
+//                R.anim.frag_enter_pop_left, R.anim.frag_exit_pop_left
+                R.anim.frag_fade_in, R.anim.frag_exit_left,
+                R.anim.frag_fade_in, R.anim.frag_exit_pop_left
         );
 
         // Put the next index into the new fragments args
@@ -289,19 +278,18 @@ public class ProfileMatchFragment
     /**
      * Load fake data in lieu of Firebase, for testing
      */
-    private void loadFakeData()
-    {
+    private void loadFakeData() {
 
         this.vm.getBathroom().setValue(true);
         this.vm.getBio().setValue(
-            "i Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do "
-                + "eiusmod tempor incididunt ut labore et dolore magna aliqua. "
-                + "Ut enim ad minim veniam, quis nostrud exercitation ullamco "
-                + "laboris nisi ut aliquip ex ea commodo consequat. Duis aute "
-                + "irure dolor in reprehenderit in voluptate velit esse cillum "
-                + "dolore eu fugiat nulla pariatur. Excepteur sint occaecat "
-                + "cupidatat non proident, sunt in culpa qui officia deserunt "
-                + "mollit anim id est laborum."
+                "i Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do "
+                        + "eiusmod tempor incididunt ut labore et dolore magna aliqua. "
+                        + "Ut enim ad minim veniam, quis nostrud exercitation ullamco "
+                        + "laboris nisi ut aliquip ex ea commodo consequat. Duis aute "
+                        + "irure dolor in reprehenderit in voluptate velit esse cillum "
+                        + "dolore eu fugiat nulla pariatur. Excepteur sint occaecat "
+                        + "cupidatat non proident, sunt in culpa qui officia deserunt "
+                        + "mollit anim id est laborum."
         );
         this.vm.getGender().setValue(GenderEnum.FEMALE);
         this.vm.getLoc().setValue(new LatLng(43.624794, -72.323171));
