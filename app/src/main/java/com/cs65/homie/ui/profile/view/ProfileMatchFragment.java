@@ -1,7 +1,6 @@
 package com.cs65.homie.ui.profile.view;
 
 import android.content.ContentResolver;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -14,11 +13,7 @@ import android.widget.LinearLayout;
 import androidx.cardview.widget.CardView;
 
 import androidx.annotation.NonNull;
-import androidx.lifecycle.MutableLiveData;
 
-import androidx.annotation.NonNull;
-import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.cs65.homie.MainActivity;
@@ -53,6 +48,9 @@ public class ProfileMatchFragment
     View.OnClickListener,
     View.OnTouchListener
 {
+
+    // Whether or not to show the matching buttons
+    private static final boolean BUTTON = false;
 
     private static final int CARD_BACKGROUND_COLOR = 0xFFDDDDDD;
     private static final double CARD_ELEVATION = 5.0;
@@ -196,7 +194,7 @@ public class ProfileMatchFragment
         }
 
         View topLayout = view.findViewById(R.id.profileViewContainerLayout);
-        if (topLayout != null)
+        if (topLayout != null && BUTTON)
         {
             // The match buttons require more padding
             topLayout.setPadding(
@@ -219,13 +217,13 @@ public class ProfileMatchFragment
         this.buttonMatch = view.findViewById(
             R.id.profileViewButtonMatchRight
         );
-        if (this.buttonMatch != null)
+        if (this.buttonMatch != null && BUTTON)
         {
             buttonMatch.setOnClickListener(this);
             buttonMatch.setVisibility(View.VISIBLE);
         }
         this.buttonReject = view.findViewById(R.id.profileViewButtonMatchLeft);
-        if (this.buttonReject != null)
+        if (this.buttonReject != null && BUTTON)
         {
             buttonReject.setOnClickListener(this);
             buttonReject.setVisibility(View.VISIBLE);
