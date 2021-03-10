@@ -4,8 +4,6 @@ import android.content.ContentResolver;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.HandlerThread;
-import android.os.Process;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -57,7 +55,6 @@ public class ProfileViewFragment extends Fragment
     public static final String PRICE_FORMAT_STR = "$%.2f";
 
     private ImageCarouselFragment fragImageCarousel = null;
-    private final HandlerThread workerThread;
     private ImageView viewAvatar = null;
     private TextView viewBathroom = null;
     private TextView viewBio = null;
@@ -79,15 +76,6 @@ public class ProfileViewFragment extends Fragment
     MutableLiveData<Boolean> hasPlace;
     MutableLiveData<Boolean> isSmoking;
     MutableLiveData<String> name;
-
-    public ProfileViewFragment()
-    {
-        this.workerThread = new HandlerThread(
-            this.getClass().getCanonicalName(),
-            Process.THREAD_PRIORITY_BACKGROUND
-        );
-        this.workerThread.start();
-    }
 
     ///// ///// /////
 
@@ -164,14 +152,6 @@ public class ProfileViewFragment extends Fragment
         return inflater.inflate(
             R.layout.fragment_profile_view, container, false
         );
-    }
-
-    public void onDestroy()
-    {
-        if (workerThread != null) {
-            this.workerThread.quitSafely();
-        }
-        super.onDestroy();
     }
 
     public void onViewCreated(View view, Bundle savedInstanceState)
@@ -349,7 +329,8 @@ public class ProfileViewFragment extends Fragment
             if (images.isEmpty())
             {
                 this.viewCarousel.setVisibility(View.GONE);
-            } else
+            }
+            else
             {
                 this.viewCarousel.setVisibility(View.VISIBLE);
             }
@@ -694,6 +675,7 @@ public class ProfileViewFragment extends Fragment
     /**
      * Load fake data in lieu of Firebase, for testing
      */
+    @SuppressWarnings("unused")
     private void loadFakeData()
     {
 
