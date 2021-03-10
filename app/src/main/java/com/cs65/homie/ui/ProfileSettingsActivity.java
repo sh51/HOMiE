@@ -228,11 +228,11 @@ public class ProfileSettingsActivity extends AppCompatActivity {
             photoView.setImageURI(tempUri);
             photoPath = photoUri.getPath();
         }
-//        else if (requestCode == SELECT_MULTIPLE_IMG) {
-//            this.housingImgView.setImageURI(houseUri);
-//            housePhotoPath = houseUri.getPath();
-//        }
-        else if (requestCode == SELECT_MULTIPLE_IMG && intent != null) {
+        else if (requestCode == SELECT_MULTIPLE_IMG) {
+            this.housingImgView.setImageURI(houseUri);
+            housePhotoPath = houseUri.getPath();
+        }
+        /*else if (requestCode == SELECT_MULTIPLE_IMG && intent != null) {
             String[] filePathCol = {MediaStore.Images.Media.DATA};
             housing_images = new ArrayList<String>();
             if (intent.getData() != null) {
@@ -265,7 +265,7 @@ public class ProfileSettingsActivity extends AppCompatActivity {
                     Log.d(Globals.TAG, "select images");
                 }
             }
-        }
+        } */
     }
 
 
