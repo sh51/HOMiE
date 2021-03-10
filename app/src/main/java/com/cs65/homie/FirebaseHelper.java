@@ -58,6 +58,7 @@ public class FirebaseHelper {
     private HashMap<String, Profile> profiles;
     private HashMap<String, Profile> matchedProfiles;
     private String server_key;
+    private int currIndex;
 
     private FirebaseFirestore db;
     // realtime database object
@@ -79,6 +80,7 @@ public class FirebaseHelper {
         profiles = new HashMap<>();
         matchedProfiles = new HashMap<>();
         chatListeners = new HashMap<>();
+        currIndex = 0;
 
 
         savePushToken();
@@ -207,6 +209,14 @@ public class FirebaseHelper {
     // Get certain profile
     public Profile getProfile(String uid) {
         return profiles.get(uid);
+    }
+    // Get current suggested profile
+    public Profile getSuggestedProfile() {
+        return getProfiles().get(currIndex);
+    }
+    // Get next suggested profile
+    public void suggestAnotherProfile() {
+        currIndex = ++currIndex % profiles.size();
     }
     // Get all the profiles
     public List<Profile> getProfiles() {

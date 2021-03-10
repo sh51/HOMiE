@@ -62,9 +62,6 @@ public class ProfileMatchFragment
     private static final double CARD_MARGIN = 20.0;
     private static final double MATCH_BUTTONS_PADDING = 60.0;
 
-    // TODO add more logic to match suggestion
-    private int currentIndex = 0;
-
     private FirebaseHelper mHelper;
     private FloatingActionButton buttonMatch = null;
     private FloatingActionButton buttonReject = null;
@@ -84,17 +81,16 @@ public class ProfileMatchFragment
     @Override
     public void onCreate(Bundle savedInstanceState) {
 
-        if (this.getArguments() != null) {
-            this.currentIndex = this.getArguments().getInt(
-                    BUNDLE_KEY_MATCH_PROFILES_INDEX, 0
-            );
-            Log.d(Globals.TAG, "currIndex: " + currentIndex);
-        } else if (savedInstanceState != null) {
-            this.currentIndex = savedInstanceState.getInt(
-                    BUNDLE_KEY_MATCH_PROFILES_INDEX, 0
-            );
-            Log.d(Globals.TAG, "currIndex: " + currentIndex);
-        }
+//        if (this.getArguments() != null) {
+//            this.currentIndex = this.getArguments().getInt(
+//                    BUNDLE_KEY_MATCH_PROFILES_INDEX, 0
+//            );
+//        } else if (savedInstanceState != null) {
+//            this.currentIndex = savedInstanceState.getInt(
+//                    BUNDLE_KEY_MATCH_PROFILES_INDEX, 0
+//            );
+//        }
+
 
         super.vm = new ViewModelProvider(this).get(
                 ProfileViewFragmentViewModel.class
@@ -110,14 +106,13 @@ public class ProfileMatchFragment
     public View onCreateView(
             LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState
     ) {
-        this.loadProfile();
         //this.loadFakeData();
         return super.onCreateView(inflater, container, savedInstanceState);
     }
 
     public void onSaveInstanceState(@NotNull Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putInt(BUNDLE_KEY_MATCH_PROFILES_INDEX, this.currentIndex);
+//        outState.putInt(BUNDLE_KEY_MATCH_PROFILES_INDEX, this.currentIndex);
     }
 
     public void onSwipeLeft() {
@@ -227,13 +222,19 @@ public class ProfileMatchFragment
 
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        this.loadProfile();
+    }
+
 
     private void handleMatch() {
         // TODO replace the index based loading
         List<Profile> profiles = mHelper.getProfiles();
         int size = profiles.size();
-        Profile matchedProfile = profiles.get(currentIndex % size);
-
+//        Profile matchedProfile = profiles.get(currentIndex % size);
+        Profile matchedProfile = mHelper.getSuggestedProfile();
         // only called when there is a match
         mHelper.like(matchedProfile.getId(), (matched) -> {
             if (matched)
@@ -276,7 +277,8 @@ public class ProfileMatchFragment
 
         // Put the next index into the new fragments args
         Bundle args = new Bundle();
-        args.putInt(BUNDLE_KEY_MATCH_PROFILES_INDEX, (++this.currentIndex % mHelper.getProfiles().size()));
+//        args.putInt(BUNDLE_KEY_MATCH_PROFILES_INDEX, (++this.currentIndex % mHelper.getProfiles().size()));
+        mHelper.suggestAnotherProfile();
 
         // Get the current fragment from the active manager (this fragment)
         transaction.remove(activeFragManager.getFragments().get(0));
@@ -323,7 +325,7 @@ public class ProfileMatchFragment
     private void loadProfile() {
         List<Profile> profiles = mHelper.getProfiles();
         int size = profiles.size();
-        super.loadProfile(profiles.get(currentIndex % size));
+        super.loadProfile(mHelper.getSuggestedProfile());
     }
 
 }

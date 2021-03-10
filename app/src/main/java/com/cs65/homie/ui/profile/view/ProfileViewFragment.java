@@ -105,8 +105,6 @@ public class ProfileViewFragment extends Fragment
 
         super.onCreate(savedInstanceState);
 
-        Log.d(Globals.TAG, "Profile view created.");
-
         // Get the view model instance
         // ViewModel can never be null
         if (this.vm == null)
@@ -647,7 +645,6 @@ public class ProfileViewFragment extends Fragment
 
     protected void loadProfile(Profile profile)
     {
-
         // Update UI
         name.setValue(profile.getFirstName());
         bathroom.setValue(profile.isPrivateBathroom());
