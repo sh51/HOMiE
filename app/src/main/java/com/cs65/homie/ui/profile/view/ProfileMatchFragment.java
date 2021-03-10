@@ -21,6 +21,7 @@ import androidx.cardview.widget.CardView;
 
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.cs65.homie.FirebaseHelper;
@@ -29,7 +30,9 @@ import com.cs65.homie.MainActivity;
 import com.cs65.homie.R;
 import com.cs65.homie.Utilities;
 import com.cs65.homie.models.GenderEnum;
+import com.cs65.homie.models.Message;
 import com.cs65.homie.models.Profile;
+import com.cs65.homie.ui.chats.ChatsViewModel;
 import com.cs65.homie.ui.gestures.OnSwipeGestureListener;
 import com.cs65.homie.ui.gestures.SwipeGesture;
 import com.google.android.gms.maps.model.LatLng;
@@ -39,6 +42,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TreeMap;
 
 
 /**
@@ -69,6 +73,7 @@ public class ProfileMatchFragment
     private FloatingActionButton buttonMatch = null;
     private FloatingActionButton buttonReject = null;
     private boolean inMatchEvent = false;
+    private ChatsViewModel cvm;
 
     Toast mToast;
 
@@ -99,6 +104,10 @@ public class ProfileMatchFragment
                 ProfileViewFragmentViewModel.class
         );
         mHelper = FirebaseHelper.getInstance();
+
+        cvm = new ViewModelProvider(
+                this.requireActivity()
+        ).get(ChatsViewModel.class);
 
         // Call super last
         super.onCreate(savedInstanceState);
@@ -239,14 +248,45 @@ public class ProfileMatchFragment
         // TODO replace the index based loading
         List<Profile> profiles = mHelper.getProfiles();
         int size = profiles.size();
-//        Profile matchedProfile = profiles.get(currentIndex % size);
         Profile matchedProfile = mHelper.getSuggestedProfile();
+        String matchedUid = matchedProfile.getId();
         // only called when there is a match
         mHelper.like(matchedProfile.getId(), (matched) -> {
-            if (matched)
+            if (matched) {
+
+                // load messages of that matched user
+                TreeMap<String, Profile> users = this.cvm.getUsers().getValue();
+                TreeMap<String, MutableLiveData<List<Message>>> usersMessages = this.cvm.getUsersMessages().getValue();
+                users.put(matchedUid, matchedProfile);
+                usersMessages.put(matchedUid, new MutableLiveData<List<Message>>());
+                this.cvm.getUsersMessages().setValue(usersMessages);
+                this.cvm.getUsers().setValue(users);
+                usersMessages.get(matchedUid).setValue(new ArrayList<>());
+                List<Message> msgs = usersMessages.get(matchedUid).getValue();
+                mHelper.loadMessages(matchedUid, (changedMsg -> {
+                    if (changedMsg.getTimestamp() == -1) {
+                        // this message is removed
+                        Log.d(Globals.TAG, "Removing message...");
+                        for (int i = 0; i < msgs.size(); i++)
+                            if (msgs.get(i).getMid().equals(changedMsg.getMid())) {
+                                msgs.remove(i);
+                                break;
+                            }
+
+                    } else {
+                        // a new message received
+                        msgs.add(changedMsg);
+                    }
+//                usersMessages.put(profile.getId(), new MutableLiveData<List<Message>>(msgs));
+                    // force a ui update
+                    this.cvm.getUsersMessages().setValue(usersMessages);
+                }));
+
+                // always transition
                 ((MainActivity) this.requireActivity()).matchTransition(
                         this.vm.getProfileName().getValue()
                 );
+            }
             else {
                 draw("left");
                 mToast.show();
