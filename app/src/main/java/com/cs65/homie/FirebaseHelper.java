@@ -26,6 +26,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -55,7 +56,7 @@ public class FirebaseHelper {
 
     private HashMap<String, ChildEventListener> chatListeners;
     private HashMap<String, Profile> profiles;
-    private List<Profile> matchedProfiles;
+    private HashMap<String, Profile> matchedProfiles;
     private String server_key;
 
     private FirebaseFirestore db;
@@ -76,8 +77,9 @@ public class FirebaseHelper {
         rdb = FirebaseDatabase.getInstance();
         mAuth = FirebaseAuth.getInstance();
         profiles = new HashMap<>();
+        matchedProfiles = new HashMap<>();
         chatListeners = new HashMap<>();
-        matchedProfiles = new ArrayList<>();
+
 
         savePushToken();
 
@@ -107,7 +109,6 @@ public class FirebaseHelper {
 //        profiles.put(profile2.getId(), profile2);
 
         // TODO also call updateMatchedProfiles when the profiles gets updated
-//        updateMatchedProfiles();
     }
 
     public String getUid() {
@@ -172,12 +173,11 @@ public class FirebaseHelper {
         db.collection("profiles")
                 .document(userId)
                 .update(data);
-
     }
 
 
     // Delete profile
-    public static void deleteProfile(String profileId) {
+    public void deleteProfile(String profileId) {
 
     }
 
@@ -244,7 +244,7 @@ public class FirebaseHelper {
 
     // Get matched profiles for chat initialization - return the matched profiles, need to be called after a MatchedProfile update
     public List<Profile> getMatchedProfiles() {
-        return matchedProfiles;
+        return new ArrayList<Profile>(matchedProfiles.values());
     }
 
     // refresh matched profiles from the list of profiles
@@ -256,10 +256,36 @@ public class FirebaseHelper {
         userProfile.getLikes().forEach((id) -> {
             // since profiles is supposed to be a complete set of profiles, so this is guaranteed to be non-null
             Profile p = profiles.get(id);
-            if (profiles.get(id).getLikes() != null && profiles.get(id).getLikes().contains(uid)) matchedProfiles.add(p);
+            if (profiles.get(id).getLikes() != null && profiles.get(id).getLikes().contains(uid)) matchedProfiles.put(id, p);
         });
     }
+    //
+    // like a profile, the callback is only called when there is a new match
+    public void like(String uid, Utilities.onLikeCallbackInterface callback) {
+        String currId = getUid();
+        Profile userProfile = profiles.get(currId), likedProfile = profiles.get(uid);;
 
+        // first update firestore profile
+        final Map<String, Object> update = new HashMap<>();
+        update.put("likes", FieldValue.arrayUnion(uid));  // arrayUnion would not generate duplicates
+        updateProfile(currId, update);
+        // upon success update local profile
+        List<String> likes = userProfile.getLikes();
+        if (!likes.contains(uid)) likes.add(uid);
+        // lastly check if matched profiles needs an update
+        if (likedProfile.getLikes().contains(currId)) {
+            Log.d(Globals.TAG, "Matched with: " + uid);
+            // update matched profiles if there is a match
+            matchedProfiles.put(uid, likedProfile);
+            // execute callback
+            callback.run(true);
+        } else { callback.run(false); }
+    }
+
+    // unlike a profile
+    public static void unlike(String uid, Utilities.onUnlikeCallbackInterface callback) {
+
+    }
 
     // Chat & notification related functions: !must be logged in
 
@@ -390,17 +416,6 @@ public class FirebaseHelper {
             ref.removeEventListener(chatListener);
             callback.run();
         }
-    }
-
-
-    // like a user
-    public static void like(String uid, Utilities.onLikeCallbackInterface callback) {
-
-    }
-
-    // unlike a user
-    public static void unlike(String uid, Utilities.onUnlikeCallbackInterface callback) {
-
     }
 
 

@@ -325,7 +325,7 @@ public class Utilities
         void run(Message msg);
     }
     public interface onLikeCallbackInterface {
-        void run();
+        void run(boolean matched);
     }
     public interface onUnlikeCallbackInterface {
         void run();

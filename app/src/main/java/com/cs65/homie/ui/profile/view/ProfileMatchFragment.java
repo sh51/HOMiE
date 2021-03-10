@@ -47,17 +47,16 @@ import java.util.Map;
 
 /**
  * Matching fragment, to handle matching functionality
- *
+ * <p>
  * This fragment assumes that its parent is ALWAYS MainActivity,
  * and that's not a temporary fake-data dependency
  */
 @SuppressWarnings("Convert2Diamond")
 public class ProfileMatchFragment
-    extends ProfileViewFragment
-    implements OnSwipeGestureListener,
-    View.OnClickListener,
-    View.OnTouchListener
-{
+        extends ProfileViewFragment
+        implements OnSwipeGestureListener,
+        View.OnClickListener,
+        View.OnTouchListener {
 
     private static final int CARD_BACKGROUND_COLOR = 0xFFDDDDDD;
     private static final double CARD_ELEVATION = 5.0;
@@ -74,18 +73,14 @@ public class ProfileMatchFragment
     private List<Profile> matches = new ArrayList<>();
 
 
-    public void onClick(View view)
-    {
+    public void onClick(View view) {
 
         // TODO After-matching action, ping to Firebase, "you have a match!"
         // etc happens here
         // For now, toasts
-        if (view.equals(buttonMatch))
-        {
+        if (view.equals(buttonMatch)) {
             this.handleMatch();
-        }
-        else if (view.equals(this.buttonReject))
-        {
+        } else if (view.equals(this.buttonReject)) {
             this.handleReject();
         }
     }
@@ -104,42 +99,39 @@ public class ProfileMatchFragment
     }
 
 
-    public void onSwipeLeft()
-    {
+    public void onSwipeLeft() {
         this.handleReject();
     }
 
-    public void onSwipeRight()
-    {
+    public void onSwipeRight() {
         this.handleMatch();
     }
 
     /**
      * Do nothing on up swipes
      */
-    public void onSwipeDown() {}
+    public void onSwipeDown() {
+    }
 
     /**
      * Do nothing on down swipes
      */
-    public void onSwipeUp() {}
+    public void onSwipeUp() {
+    }
 
     /**
      * Capture a touch event, and do not let it propagate (return true)
      *
      * @param view  View that was touched. Always the image carousel fragment.
      * @param event Touch event
-     *
-     * @return      True
+     * @return True
      */
-    public boolean onTouch(View view, MotionEvent event)
-    {
+    public boolean onTouch(View view, MotionEvent event) {
         view.performClick();
         return true;
     }
 
-    public void onViewCreated(View view, Bundle savedInstanceState)
-    {
+    public void onViewCreated(View view, Bundle savedInstanceState) {
 
         // FIXME Using fake data, need to set to the other user
 //        super.vm.setUserId(((MainActivity)this.requireActivity()).getFakeUserId());
@@ -148,67 +140,61 @@ public class ProfileMatchFragment
         super.onViewCreated(view, savedInstanceState);
 
         View scrollLayout = view.findViewById(R.id.profileViewScrollLayout);
-        if (scrollLayout != null)
-        {
+        if (scrollLayout != null) {
             new SwipeGesture(
-                this.getContext(), scrollLayout, this
+                    this.getContext(), scrollLayout, this
             );
         }
 
         CardView cardView = view.findViewById(R.id.profileViewCardView);
-        if (cardView != null)
-        {
+        if (cardView != null) {
 
             // Sets up the card view for the matching view
             // By default the card view hides itself for the profile view
 
             LinearLayout.LayoutParams layoutParams
-                = (LinearLayout.LayoutParams)cardView.getLayoutParams();
-            int margin = (int)Math.round(Utilities.pixelDensity(
-                this.requireContext(), CARD_MARGIN)
+                    = (LinearLayout.LayoutParams) cardView.getLayoutParams();
+            int margin = (int) Math.round(Utilities.pixelDensity(
+                    this.requireContext(), CARD_MARGIN)
             );
             layoutParams.setMargins(margin, margin, margin, margin);
             cardView.setLayoutParams(layoutParams);
             cardView.setCardBackgroundColor(CARD_BACKGROUND_COLOR);
-            int elevation = (int)Math.round(
-                Utilities.pixelDensity(this.requireContext(), CARD_ELEVATION)
+            int elevation = (int) Math.round(
+                    Utilities.pixelDensity(this.requireContext(), CARD_ELEVATION)
             );
             cardView.setCardElevation(elevation);
 
         }
 
         View topLayout = view.findViewById(R.id.profileViewContainerLayout);
-        if (topLayout != null)
-        {
+        if (topLayout != null) {
             // The match buttons require more padding
             topLayout.setPadding(
-                0, 0, 0, (int)Math.round(Utilities.pixelDensity(
-                    this.requireContext(), MATCH_BUTTONS_PADDING
-                ))
+                    0, 0, 0, (int) Math.round(Utilities.pixelDensity(
+                            this.requireContext(), MATCH_BUTTONS_PADDING
+                    ))
             );
         }
 
         // We need to steal propagating touches from the carousel view
         // to not trigger swipes that are captured on the scroll view level
         View carouselView = view.findViewById(R.id.profileViewCarouselFragView);
-        if (carouselView != null)
-        {
+        if (carouselView != null) {
             carouselView.setOnTouchListener(this);
         }
 
         // Set up the listener for the match buttons
         // And make them visible
         this.buttonMatch = view.findViewById(
-            R.id.profileViewButtonMatchRight
+                R.id.profileViewButtonMatchRight
         );
-        if (this.buttonMatch != null)
-        {
+        if (this.buttonMatch != null) {
             buttonMatch.setOnClickListener(this);
             buttonMatch.setVisibility(View.VISIBLE);
         }
         this.buttonReject = view.findViewById(R.id.profileViewButtonMatchLeft);
-        if (this.buttonReject != null)
-        {
+        if (this.buttonReject != null) {
             buttonReject.setOnClickListener(this);
             buttonReject.setVisibility(View.VISIBLE);
         }
@@ -217,44 +203,39 @@ public class ProfileMatchFragment
 
     }
 
-    ///// ///// /////
-
-    private boolean isMatch()
-    {
-        // TODO A real implementation would somehow ping firebase (or a cache)
-        // and see if userId has matched myId.
-        return true;
-    }
-
 
     private void handleMatch() {
-        if (this.isMatch()) {
-            final Map<String, Object> likeMap = new HashMap<>();
-            List<Profile> profiles = mHelper.getProfiles();
-            int size = profiles.size();
-            Profile matchedProfile = profiles.get(currentIndex % size);
 
-            likeMap.put("likes", FieldValue.arrayUnion(matchedProfile.getId()));
+        // TODO replace the index based loading
+        List<Profile> profiles = mHelper.getProfiles();
+        int size = profiles.size();
+        Profile matchedProfile = profiles.get(currentIndex % size);
 
-            mHelper.updateProfile(mHelper.getUid(), likeMap);
-
-            ((MainActivity)this.requireActivity()).matchTransition(
-                this.vm.getProfileName().getValue()
+        // only called when there is a match
+        mHelper.like(matchedProfile.getId(), (matched) -> {
+            if (matched)
+            ((MainActivity) this.requireActivity()).matchTransition(
+                    this.vm.getProfileName().getValue()
             );
-        }
-
+            else draw();
+        });
     }
 
-    private void handleReject()
-    {
-        // TODO Need a real implementation
-        Utilities.showErrorToast(
-            R.string.profile_view_match_reject_description,
-            this.getActivity()
-        );
+    private void handleReject() {
 
+        Utilities.showErrorToast(
+                R.string.profile_view_match_reject_description,
+                this.getActivity()
+        );
+        draw();
+    }
+
+    // draw a new card from the stack
+    private void draw() {
+        // TODO Need a real implementation
         currentIndex++;
         loadProfile();
+
     }
 
     private void loadProfile(String uid) {
