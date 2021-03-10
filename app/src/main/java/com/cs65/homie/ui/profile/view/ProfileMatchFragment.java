@@ -8,12 +8,15 @@ import android.os.Bundle;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ActionMenuView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import androidx.appcompat.view.menu.ActionMenuItemView;
 import androidx.cardview.widget.CardView;
 
 import androidx.fragment.app.FragmentManager;
@@ -150,6 +153,10 @@ public class ProfileMatchFragment
     public void onViewCreated(View view, Bundle savedInstanceState) {
 
         super.onViewCreated(view, savedInstanceState);
+
+
+        ActionMenuItemView settings = getActivity().findViewById(R.id.menu_item_settingsgear);
+        settings.setVisibility(View.GONE);
 
         View scrollLayout = view.findViewById(R.id.profileViewScrollLayout);
         if (scrollLayout != null) {
@@ -322,8 +329,6 @@ public class ProfileMatchFragment
     }
 
     private void loadProfile() {
-        List<Profile> profiles = mHelper.getProfiles();
-        int size = profiles.size();
         super.loadProfile(mHelper.getSuggestedProfile());
     }
 

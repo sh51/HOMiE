@@ -14,6 +14,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.appcompat.view.menu.ActionMenuItemView;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -94,6 +95,9 @@ public class ChatFragment extends Fragment implements View.OnClickListener
 
         super.onCreate(savedInstanceState);
         mHelper = FirebaseHelper.getInstance();
+
+        ActionMenuItemView settings = getActivity().findViewById(R.id.menu_item_settingsgear);
+        if (settings != null) settings.setVisibility(View.GONE);
 
         if (this.getArguments() != null)
         {

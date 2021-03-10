@@ -168,7 +168,14 @@ public class FirebaseHelper {
     public void updateProfile(String userId, Map<String, Object> data) {
         db.collection("profiles")
                 .document(userId)
-                .update(data);
+                .update(data).addOnCompleteListener(task -> {
+                    fetchProfile(userId, (p) -> {
+                        updateSuggestedProfiles();
+                    });
+
+                });
+
+
     }
 
 
@@ -254,7 +261,6 @@ public class FirebaseHelper {
         }
         // if all suggestions have been viewed, recalculate suggestions
         if (!newSuggestionFound) {Log.d(Globals.TAG, "Reached bottom of deck!");
-
             updateSuggestedProfiles();
         }
     }
@@ -278,10 +284,14 @@ public class FirebaseHelper {
         String uid = getUid();
         Profile userProfile = profiles.get(uid);
 
+        // this is not supposed to happen
+        if (userProfile == null) return;
+
         // likes is an array of userIds, iterate through likes to populate matched profiles
         userProfile.getLikes().forEach((id) -> {
             // since profiles is supposed to be a complete set of profiles, so this is guaranteed to be non-null
             Profile p = profiles.get(id);
+            Log.d(Globals.TAG,  "Their: " + p.getLikes().size());
             if (profiles.get(id).getLikes() != null && profiles.get(id).getLikes().contains(uid)) matchedProfiles.put(id, p);
         });
     }
@@ -290,8 +300,19 @@ public class FirebaseHelper {
         profiles.forEach((uid, p) -> {
             if (isPotentialMatch(p)) {
                 suggestedProfiles.put(uid, p);
-            }
+            } else suggestedProfiles.remove(uid);
         });
+        // clear the current suggestion if the profile is no longer suggested
+        if (currSuggestion != null && suggestedProfiles.get(currSuggestion) == null) currSuggestion = null;
+        if (currSuggestion == null) {
+            for (String uid: suggestedProfiles.keySet()) {
+                if (!uid.equals(currSuggestion)) {
+                    suggestedProfiles.remove(currSuggestion);
+                    currSuggestion = uid;
+                    break;
+                }
+            }
+        }
     }
     //
     // like a profile, the callback is only called when there is a new match

@@ -31,6 +31,7 @@ import com.cs65.homie.models.GenderEnum;
 import com.cs65.homie.ui.login.ui.login.LoginActivity;
 import com.cs65.homie.ui.login.ui.login.RegistrationActivity;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FieldValue;
 import com.soundcloud.android.crop.Crop;
 
 import com.cs65.homie.R;
@@ -40,7 +41,9 @@ import com.google.android.material.textfield.TextInputEditText;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ProfileSettingsActivity extends AppCompatActivity {
 
@@ -157,9 +160,11 @@ public class ProfileSettingsActivity extends AppCompatActivity {
         isPrivateBathroom.setChecked(myProfile.isPrivateBathroom());
         if (myProfile.getGender() == 0) {
             radioFemale.setChecked(true);
+            gender = 0;
         } else if (myProfile.getGender() == 1) {
             radioMale.setChecked(true);
-        } else { radioNoPref.setChecked(true); }
+            gender = 1;
+        } else { radioNoPref.setChecked(true); gender = 2; }
         housingSearchOptions.setSelection(myProfile.isHasApartment() ? 1 : 0);
         this.housePhotoPath = savedProfile.getString(getString(R.string.key_housingImg), null);
         mEditAddress.setText(myProfile.getAddress());
@@ -341,19 +346,20 @@ public class ProfileSettingsActivity extends AppCompatActivity {
         Toast.makeText(this, R.string.toast_saved, Toast.LENGTH_SHORT).show();
         Log.d(TAG, "toasted");
 
-        // Firebase
-        Profile newProfile = new Profile();
-        newProfile.setId(mHelper.getUid());
-        newProfile.setFirstName(this.name);
-        newProfile.setEmail(this.email);
-        newProfile.setPassword(this.password);
-        newProfile.setBio(bio.getText().toString());
-        newProfile.setGender(this.gender);
-        newProfile.setHasApartment(hasApartment);
-        newProfile.setPetFriendly(isPetFriendly.isChecked());
-        newProfile.setSmoking(!isSmoking.isChecked());
-        newProfile.setPrivateBathroom(isPrivateBathroom.isChecked());
-        newProfile.setId(FirebaseAuth.getInstance().getCurrentUser().getUid());
+        // Firebase update
+        final Map<String, Object> updates = new HashMap<>();
+        updates.put("firstName", name);
+        updates.put("email", email);
+        // TODO change auth too
+        updates.put("password", password);
+        updates.put("bio", bio.getText().toString());
+        Log.d(Globals.TAG,  "updating gender to: " + gender);
+        updates.put("gender", gender);
+        updates.put("hasApartment", hasApartment);
+        updates.put("petFriendly", isPetFriendly.isChecked());
+        updates.put("smoking", !isSmoking.isChecked());
+        updates.put("privateBathroom", isPrivateBathroom.isChecked());
+        updates.put("id", mHelper.getUid());
 
         double minPrice, maxPrice, radius;
         // TODO call geocoder to translate the address
@@ -370,13 +376,12 @@ public class ProfileSettingsActivity extends AppCompatActivity {
             radius = 10;
         }
 
-        newProfile.setMinPrice(minPrice);
-        newProfile.setMaxPrice(maxPrice);
-        newProfile.setRadius(radius);
-        newProfile.setAddress(address);
-
-        mHelper.createProfile(newProfile);
-
+        updates.put("minPrice", minPrice);
+        updates.put("maxPrice", maxPrice);
+        updates.put("radius", radius);
+        updates.put("address", address);
+//        mHelper.createProfile(newProfile);
+        mHelper.updateProfile(mHelper.getUid(), updates);
 
     }
 }

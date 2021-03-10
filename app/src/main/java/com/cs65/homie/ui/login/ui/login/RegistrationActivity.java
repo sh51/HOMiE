@@ -19,8 +19,10 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.cs65.homie.FirebaseHelper;
 import com.cs65.homie.Globals;
 import com.cs65.homie.R;
+import com.cs65.homie.models.Profile;
 import com.cs65.homie.ui.ProfileSettingsActivity;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -36,6 +38,7 @@ public class RegistrationActivity extends AppCompatActivity {
     private EditText usernameEditText, passwordEditText;
     private Button createAccount_Button;
     private FirebaseAuth mAuth;
+    private FirebaseHelper mHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,8 +51,11 @@ public class RegistrationActivity extends AppCompatActivity {
         usernameEditText = findViewById(R.id.username);
         passwordEditText = findViewById(R.id.password);
         createAccount_Button = findViewById(R.id.createAccount);
+
         // Initialize Firebase Auth, a shared instance
         mAuth = FirebaseAuth.getInstance();
+        // also helper
+        mHelper = FirebaseHelper.getInstance();
         // disabled at first as the fields are empty
         createAccount_Button.setEnabled(false);
 
@@ -159,7 +165,14 @@ public class RegistrationActivity extends AppCompatActivity {
                             // Navigate to CreateProfile
                             Intent intent = new Intent(RegistrationActivity.this, ProfileSettingsActivity.class);
                             intent.putExtra(KEY_EMAIL, email);
-                            // TD: update UserProfile: display name & photoUri
+
+                            // create a default account right away
+                            Profile newProfile = new Profile();
+                            newProfile.setId(user.getUid());
+                            newProfile.setEmail(email);
+                            newProfile.setPassword(password);
+                            mHelper.createProfile(newProfile);
+
                             startActivityForResult(intent, CREATE_PROFILE);
 
 

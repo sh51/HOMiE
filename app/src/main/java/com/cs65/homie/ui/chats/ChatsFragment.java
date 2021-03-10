@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.view.menu.ActionMenuItemView;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModelProvider;
@@ -71,6 +72,9 @@ public class ChatsFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
+
+        ActionMenuItemView settings = getActivity().findViewById(R.id.menu_item_settingsgear);
+        settings.setVisibility(View.GONE);
 
         // Returned VM cannot be null
         this.vm = new ViewModelProvider(

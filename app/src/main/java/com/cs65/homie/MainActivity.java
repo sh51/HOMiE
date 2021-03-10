@@ -145,8 +145,6 @@ public class MainActivity extends AppCompatActivity {
 
         super.onCreate(savedInstanceState);
 
-
-
         if (savedInstanceState != null) {
             this.inChat = savedInstanceState.getBoolean(
                 BUNDLE_KEY_IN_CHAT_BOOL, false

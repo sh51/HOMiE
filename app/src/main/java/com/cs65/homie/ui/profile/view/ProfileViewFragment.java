@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.appcompat.view.menu.ActionMenuItemView;
 import androidx.cardview.widget.CardView;
 import androidx.core.text.HtmlCompat;
 import androidx.fragment.app.Fragment;
@@ -106,6 +107,9 @@ public class ProfileViewFragment extends Fragment
     {
 
         super.onCreate(savedInstanceState);
+
+        ActionMenuItemView settings = getActivity().findViewById(R.id.menu_item_settingsgear);
+        if (settings != null) settings.setVisibility(View.VISIBLE);
 
         // Get the view model instance
         // ViewModel can never be null
