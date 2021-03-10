@@ -118,7 +118,7 @@ public class ProfileMatchFragment
     )
     {
         this.loadProfile();
-        this.loadFakeData();
+        //this.loadFakeData();
         return super.onCreateView(inflater, container, savedInstanceState);
     }
 

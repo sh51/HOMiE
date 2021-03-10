@@ -148,6 +148,7 @@ public class ProfileViewFragment extends Fragment
     )
     {
         this.getProfile(this.vm.getUserId());
+        //this.loadFakeData();
         // Load the layout
         return inflater.inflate(
             R.layout.fragment_profile_view, container, false
