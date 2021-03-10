@@ -324,8 +324,8 @@ public class MainActivity extends AppCompatActivity {
 
         FragmentTransaction transaction = activeFragManager.beginTransaction();
         transaction.setCustomAnimations(
-            R.anim.frag_enter, R.anim.frag_exit,
-            R.anim.frag_enter_pop, R.anim.frag_exit_pop
+            R.anim.frag_enter_left, R.anim.frag_exit_left,
+            R.anim.frag_enter_pop_left, R.anim.frag_exit_pop_left
         );
 
         // Since there are more than one fragment in the navigator, we must

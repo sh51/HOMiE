@@ -14,6 +14,8 @@ import androidx.cardview.widget.CardView;
 
 import androidx.annotation.NonNull;
 
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.cs65.homie.MainActivity;
@@ -259,11 +261,29 @@ public class ProfileMatchFragment
 
     private void handleReject()
     {
-        // TODO Need a real implementation
-        Utilities.showErrorToast(
-            R.string.profile_view_match_reject_description,
-            this.getActivity()
+
+        // TODO Must notify Firebase of the rejection
+
+        // Animate the NEW fragment into focus
+        // The next match option will be handled by the NEW fragment instance,
+        // not this one
+        FragmentManager activeFragManager = this.getParentFragmentManager();
+        FragmentTransaction transaction = activeFragManager.beginTransaction();
+        transaction.setCustomAnimations(
+            R.anim.frag_enter_right, R.anim.frag_exit_right,
+            R.anim.frag_enter_pop_right, R.anim.frag_exit_pop_right
         );
+        // Get the current fragment from the active manager (this fragment)
+        transaction.remove(activeFragManager.getFragments().get(0));
+        transaction.add(
+            R.id.nav_host_fragment, ProfileMatchFragment.class, null
+        );
+        transaction.commit();
+        activeFragManager.executePendingTransactions();
+
+        // Don't finish() because you don't finish fragments
+        // We're effectively finished though
+
     }
 
     /**
