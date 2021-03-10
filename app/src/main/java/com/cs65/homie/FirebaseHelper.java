@@ -291,12 +291,8 @@ public class FirebaseHelper {
         userProfile.getLikes().forEach((id) -> {
             // since profiles is supposed to be a complete set of profiles, so this is guaranteed to be non-null
             Profile p = profiles.get(id);
-<<<<<<< HEAD
-            if (profiles.get(id) != null && profiles.get(id).getLikes().contains(uid)) matchedProfiles.add(p);
-=======
-            Log.d(Globals.TAG,  "Their: " + p.getLikes().size());
             if (profiles.get(id).getLikes() != null && profiles.get(id).getLikes().contains(uid)) matchedProfiles.put(id, p);
->>>>>>> d14ba2d (chats synchronized + improved match flow)
+
         });
     }
     // refresh suggested profiles from the list of profiles
