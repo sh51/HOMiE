@@ -15,6 +15,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageSwitcher;
 import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.Spinner;
@@ -67,7 +68,9 @@ public class ProfileSettingsActivity extends AppCompatActivity {
 
     public static final int CAMERA_REQUEST_CODE = 1;
     private static final int SELECT_MULTIPLE_IMG = 2;
-    private List<String> housing_images;
+    private List<String> housePhotoPathList;
+//    private ImageSwitcher housingImgView;
+    private int position = 0;
     private ImageView housingImgView;
 
     private static final String TAG = "ajb";
@@ -234,16 +237,18 @@ public class ProfileSettingsActivity extends AppCompatActivity {
         }
         /*else if (requestCode == SELECT_MULTIPLE_IMG && intent != null) {
             String[] filePathCol = {MediaStore.Images.Media.DATA};
-            housing_images = new ArrayList<String>();
+            this.housePhotoPathList = new ArrayList<String>();
             if (intent.getData() != null) {
                 Uri uri = intent.getData();
-                Cursor cursor = getContentResolver().query(houseUri, filePathCol, null, null, null);
+                Cursor cursor = getContentResolver().query(uri, filePathCol, null, null, null);
                 cursor.moveToFirst();
 
                 int ind = cursor.getColumnIndex(filePathCol[0]);
                 this.housePhotoPath = cursor.getString(ind);
-                this.housing_images.add(this.housePhotoPath);
+//                this.housePhotoPathList.add(this.housePhotoPath);
                 cursor.close();
+                this.housingImgView.setImageURI(houseUri);
+                housePhotoPath = houseUri.getPath();
 
             }
             else {
@@ -254,18 +259,29 @@ public class ProfileSettingsActivity extends AppCompatActivity {
                         ClipData.Item item = clipData.getItemAt(i);
                         Uri uri = item.getUri();
                         uriArrayList.add(uri);
-                        Cursor cursor = getContentResolver().query(uri, filePathCol, null, null, null);
-                        cursor.moveToFirst();
-                        int colInd = cursor.getColumnIndex(filePathCol[0]);
-                        this.housePhotoPath = cursor.getString(colInd);
-                        this.housing_images.add(this.housePhotoPath);
-                        cursor.close();
+//                        Cursor cursor = getContentResolver().query(uri, filePathCol, null, null, null);
+//                        cursor.moveToFirst();
+//                        int colInd = cursor.getColumnIndex(filePathCol[0]);
+//                        this.housePhotoPath = cursor.getString(colInd);
+//                        this.housePhotoPathList.add(this.housePhotoPath);
+//                        cursor.close();
+
+                     housingImgView.setImageURI(uriArrayList.get(0));
+                     position = 0;
 
                     }
                     Log.d(Globals.TAG, "select images");
                 }
             }
-        } */
+            if (housePhotoPathList != null || housePhotoPathList.size() > 0) {
+                for (String path : housePhotoPathList) {
+
+                }
+            }
+            else if (housePhotoPath != null) {
+                housingImgView.setImageURI(Uri.fromFile(new File(housePhotoPath)));
+            }
+        }*/
     }
 
 

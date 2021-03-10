@@ -223,6 +223,13 @@
             android:scaleType="centerInside"
             android:adjustViewBounds="true"
             app:srcCompat="@drawable/dart0" />
+<!--        <ImageSwitcher-->
+<!--            android:id="@+id/imageViewHousing"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="110dp"-->
+<!--            android:adjustViewBounds="true"-->
+<!--            android:scaleType="centerInside"-->
+<!--            app:srcCompat="@drawable/dart0" />-->
         <Button
             android:id="@+id/button_ChangeHousingPhoto"
             style="?android:attr/buttonBarButtonStyle"
@@ -278,7 +285,7 @@
                 android:layout_marginEnd="2dp"
                 android:onClick="onSaveClicked"
                 android:paddingHorizontal="25dp"
-                android:text="@string/button_Save_text" />
+                android:text="@string/button_Save_text"/>
 
             <Button
                 android:id="@+id/button_Cancel"
