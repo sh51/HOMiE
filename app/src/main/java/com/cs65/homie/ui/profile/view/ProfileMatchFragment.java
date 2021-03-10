@@ -56,6 +56,9 @@ public class ProfileMatchFragment
     View.OnTouchListener
 {
 
+    public static final String BUNDLE_KEY_MATCH_PROFILES_INDEX
+        = "PROFILE_MATCH_FRAG_BUNDLE_KEY_PROFILES_INDEX";
+
     // Whether or not to show the matching buttons
     private static final boolean BUTTON = false;
 
@@ -65,7 +68,7 @@ public class ProfileMatchFragment
     private static final double MATCH_BUTTONS_PADDING = 60.0;
 
     // TODO add more logic to match suggestion
-    private int currentIndex;
+    private int currentIndex = 0;
 
     private FirebaseHelper mHelper;
     private FloatingActionButton buttonMatch = null;
@@ -92,17 +95,41 @@ public class ProfileMatchFragment
 
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState)
+    {
+
+        if (this.getArguments() != null)
+        {
+            this.currentIndex = this.getArguments().getInt(
+                BUNDLE_KEY_MATCH_PROFILES_INDEX, 0
+            );
+        }
+        else if (savedInstanceState != null)
+        {
+            this.currentIndex = this.getArguments().getInt(
+                BUNDLE_KEY_MATCH_PROFILES_INDEX, 0
+            );
+        }
+
+        super.vm = new ViewModelProvider(this).get(
+            ProfileViewFragmentViewModel.class
+        );
+        mHelper = FirebaseHelper.getInstance();
+
+        // Call super last
         super.onCreate(savedInstanceState);
 
-        mHelper = FirebaseHelper.getInstance();
     }
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-//        loadMatches();
         return super.onCreateView(inflater, container, savedInstanceState);
     }
 
+    public void onSaveInstanceState(Bundle outState)
+    {
+        super.onSaveInstanceState(outState);
+        outState.putInt(BUNDLE_KEY_MATCH_PROFILES_INDEX, this.currentIndex);
+    }
 
     public void onSwipeLeft()
     {
@@ -260,19 +287,20 @@ public class ProfileMatchFragment
             R.anim.frag_enter_pop_right, R.anim.frag_exit_pop_right
         );
 
+        // Put the next index into the new fragments args
+        Bundle args = new Bundle();
+        args.putInt(BUNDLE_KEY_MATCH_PROFILES_INDEX, ++this.currentIndex);
+
         // Get the current fragment from the active manager (this fragment)
         transaction.remove(activeFragManager.getFragments().get(0));
         transaction.add(
-            R.id.nav_host_fragment, ProfileMatchFragment.class, null
+            R.id.nav_host_fragment, ProfileMatchFragment.class, args
         );
         transaction.commit();
         activeFragManager.executePendingTransactions();
 
         // Don't finish() because you don't finish fragments
         // We're effectively finished though
-
-        currentIndex++;
-        loadProfile();
 
     }
 
