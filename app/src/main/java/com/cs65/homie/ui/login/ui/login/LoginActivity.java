@@ -73,6 +73,9 @@ public class LoginActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
         mHelper = FirebaseHelper.getInstance();
         mainIntent = new Intent(getApplicationContext(), MainActivity.class);
+        // push notificaiton handling: detect if it's opened from a notification
+        String senderId = getIntent().getStringExtra("senderId");
+        if (senderId != null) mainIntent.putExtra("senderId", senderId);
 
 //        if (mAuth.getCurrentUser() != null) Log.d(Globals.TAG, "login -> curent user is " + mAuth.getCurrentUser().getUid());
 //        else Log.d(Globals.TAG, "login -> not logged in");

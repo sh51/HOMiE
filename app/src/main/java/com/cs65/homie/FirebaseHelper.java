@@ -333,7 +333,7 @@ public class FirebaseHelper {
 
                         // TODO replace the userId with username
                         if (dataSnapshot.getValue() != null)
-                            sendPushNotification(dataSnapshot.getValue(String.class), messageTitle, msg.getText());
+                            sendPushNotification(dataSnapshot.getValue(String.class), msg.getSenderId(), messageTitle, msg.getText());
                     }
 
                     @Override
@@ -442,7 +442,7 @@ public class FirebaseHelper {
     }
 
     // send a push notification to a certain user
-    public void sendPushNotification(String token, String title, String text) {
+    public void sendPushNotification(String token, String uid, String title, String text) {
         if (server_key == null) return;
         Log.d(Globals.TAG, "Sending push notification to " + token);
 
@@ -464,9 +464,14 @@ public class FirebaseHelper {
                 JSONObject body = new JSONObject();
                 body.put("to", token);
                 JSONObject notification = new JSONObject();
-                notification.put("title", title);
+                notification.put("title", title + " sent you a message:");
                 notification.put("body", text);
+                JSONObject data = new JSONObject();
+                data.put("senderId", uid);
+//                data.put("title", title);
+//                data.put("text", text);
                 body.put("notification", notification);
+                body.put("data", data);
 
                 DataOutputStream wr = new DataOutputStream(conn.getOutputStream());
                 wr.write(body.toString().getBytes());
@@ -482,14 +487,14 @@ public class FirebaseHelper {
 
                 bufferedReader.close();
                 Log.d(Globals.TAG, "Push notification sent.");
-                Log.d(Globals.TAG, sb.toString());
+//                Log.d(Globals.TAG, sb.toString());
             } catch (Exception e) {
                 e.printStackTrace();
             }
 
 
             thread.quit();
-        }, 0);
+        }, 1000);
     }
 
     // save the push tokens to realtime database

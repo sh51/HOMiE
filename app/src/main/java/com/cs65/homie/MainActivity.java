@@ -11,8 +11,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.cs65.homie.models.Message;
+import com.cs65.homie.models.Profile;
 import com.cs65.homie.ui.ProfileSettingsActivity;
 import com.cs65.homie.ui.chats.ChatFragment;
+import com.cs65.homie.ui.chats.ChatsViewModel;
 import com.cs65.homie.ui.login.ui.login.LoginActivity;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
@@ -20,6 +23,8 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -27,7 +32,11 @@ import androidx.navigation.ui.NavigationUI;
 
 
 import org.jetbrains.annotations.NotNull;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
+import java.util.TreeMap;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -49,6 +58,7 @@ public class MainActivity extends AppCompatActivity {
 
     private FirebaseHelper mHelper;
     private Intent loginIntent;
+    private ChatsViewModel vm;
     // the menu, login and logout action button
     private MenuItem mLogout, mLogin;
     private View hostView = null;
@@ -135,6 +145,8 @@ public class MainActivity extends AppCompatActivity {
 
         super.onCreate(savedInstanceState);
 
+
+
         if (savedInstanceState != null) {
             this.inChat = savedInstanceState.getBoolean(
                 BUNDLE_KEY_IN_CHAT_BOOL, false
@@ -153,6 +165,19 @@ public class MainActivity extends AppCompatActivity {
         mHelper.loadServerKey(this);
 
         loginIntent = new Intent(this, LoginActivity.class);
+        // if the intent contains this field, spawn a chat fragment
+        String senderId = getIntent().getStringExtra("senderId");
+
+        this.vm = new ViewModelProvider(
+                this
+        ).get(ChatsViewModel.class);
+
+
+        loadChats(mHelper.getMatchedProfiles());
+        if (senderId != null) {
+            Log.d(Globals.TAG, "From: " + senderId);
+            spawnChatFragment(senderId);
+        }
 
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
@@ -379,6 +404,49 @@ public class MainActivity extends AppCompatActivity {
                 this.navController.navigate(R.id.navigation_chats);
             }
         }
+    }
+
+    private void loadChats(List<Profile> profiles) {
+
+        if (profiles == null) profiles = new ArrayList<>();
+
+        TreeMap<String, Profile> users = this.vm.getUsers().getValue();
+        TreeMap<String, MutableLiveData<List<Message>>> usersMessages = this.vm.getUsersMessages().getValue();
+
+        // user profiles and chats initialized
+        profiles.forEach((profile) -> {
+            users.put(profile.getId(), profile);
+            usersMessages.put(profile.getId(), new MutableLiveData<List<Message>>());
+        });
+
+        this.vm.getUsersMessages().setValue(usersMessages);
+        this.vm.getUsers().setValue(users);
+
+        // load chats
+        profiles.forEach((profile) -> {
+            // initialize the message list for each profile
+            usersMessages.get(profile.getId()).setValue(new ArrayList<>());
+            List<Message> msgs = usersMessages.get(profile.getId()).getValue();
+
+            mHelper.loadMessages(profile.getId(), (changedMsg -> {
+                if (changedMsg.getTimestamp() == -1) {
+                    // this message is removed
+                    Log.d(Globals.TAG, "Removing message...");
+                    for (int i = 0; i < msgs.size(); i++)
+                        if (msgs.get(i).getMid().equals(changedMsg.getMid())) {
+                            msgs.remove(i);
+                            break;
+                        }
+
+                } else {
+                    // a new message received
+                    msgs.add(changedMsg);
+                }
+//                usersMessages.put(profile.getId(), new MutableLiveData<List<Message>>(msgs));
+                // force a ui update
+                this.vm.getUsersMessages().setValue(usersMessages);
+            }));
+        });
     }
 
 }
