@@ -1,7 +1,6 @@
 package com.cs65.homie.ui.profile.view;
 
 import android.content.ContentResolver;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -14,11 +13,9 @@ import android.widget.LinearLayout;
 import androidx.cardview.widget.CardView;
 
 import androidx.annotation.NonNull;
-import androidx.lifecycle.MutableLiveData;
 
-import androidx.annotation.NonNull;
-import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.cs65.homie.FirebaseHelper;
@@ -58,6 +55,9 @@ public class ProfileMatchFragment
     View.OnClickListener,
     View.OnTouchListener
 {
+
+    // Whether or not to show the matching buttons
+    private static final boolean BUTTON = false;
 
     private static final int CARD_BACKGROUND_COLOR = 0xFFDDDDDD;
     private static final double CARD_ELEVATION = 5.0;
@@ -142,7 +142,7 @@ public class ProfileMatchFragment
     {
 
         // FIXME Using fake data, need to set to the other user
-//        super.vm.setUserId(((MainActivity)this.requireActivity()).getFakeUserId());
+        //super.vm.setUserId(((MainActivity)this.requireActivity()).getFakeUserId());
         super.vm.setUserId("pR7PsciIRpdL24u54ZNoP85efh83");
 
         super.onViewCreated(view, savedInstanceState);
@@ -178,7 +178,7 @@ public class ProfileMatchFragment
         }
 
         View topLayout = view.findViewById(R.id.profileViewContainerLayout);
-        if (topLayout != null)
+        if (topLayout != null && BUTTON)
         {
             // The match buttons require more padding
             topLayout.setPadding(
@@ -201,13 +201,13 @@ public class ProfileMatchFragment
         this.buttonMatch = view.findViewById(
             R.id.profileViewButtonMatchRight
         );
-        if (this.buttonMatch != null)
+        if (this.buttonMatch != null && BUTTON)
         {
             buttonMatch.setOnClickListener(this);
             buttonMatch.setVisibility(View.VISIBLE);
         }
         this.buttonReject = view.findViewById(R.id.profileViewButtonMatchLeft);
-        if (this.buttonReject != null)
+        if (this.buttonReject != null && BUTTON)
         {
             buttonReject.setOnClickListener(this);
             buttonReject.setVisibility(View.VISIBLE);
@@ -247,14 +247,33 @@ public class ProfileMatchFragment
 
     private void handleReject()
     {
-        // TODO Need a real implementation
-        Utilities.showErrorToast(
-            R.string.profile_view_match_reject_description,
-            this.getActivity()
+
+        // TODO Must notify Firebase of the rejection
+
+        // Animate the NEW fragment into focus
+        // The next match option will be handled by the NEW fragment instance,
+        // not this one
+        FragmentManager activeFragManager = this.getParentFragmentManager();
+        FragmentTransaction transaction = activeFragManager.beginTransaction();
+        transaction.setCustomAnimations(
+            R.anim.frag_enter_right, R.anim.frag_exit_right,
+            R.anim.frag_enter_pop_right, R.anim.frag_exit_pop_right
         );
+
+        // Get the current fragment from the active manager (this fragment)
+        transaction.remove(activeFragManager.getFragments().get(0));
+        transaction.add(
+            R.id.nav_host_fragment, ProfileMatchFragment.class, null
+        );
+        transaction.commit();
+        activeFragManager.executePendingTransactions();
+
+        // Don't finish() because you don't finish fragments
+        // We're effectively finished though
 
         currentIndex++;
         loadProfile();
+
     }
 
     private void loadProfile(String uid) {
