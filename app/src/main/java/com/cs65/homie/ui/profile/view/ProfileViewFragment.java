@@ -75,7 +75,6 @@ public class ProfileViewFragment extends Fragment
     // Aliases for easy access
     MutableLiveData<String> bio;
     MutableLiveData<Boolean> bathroom;
-    MutableLiveData<String> gender;
     MutableLiveData<Boolean> pets;
     MutableLiveData<Boolean> hasPlace;
     MutableLiveData<Boolean> isSmoking;
@@ -116,8 +115,6 @@ public class ProfileViewFragment extends Fragment
 
         super.onCreate(savedInstanceState);
 
-
-
         // Get the view model instance
         // ViewModel can never be null
         if (this.vm == null)
@@ -130,24 +127,39 @@ public class ProfileViewFragment extends Fragment
         mHelper = FirebaseHelper.getInstance();
         bio = this.vm.getBio();
         bathroom = this.vm.getBathroom();
-//        gender = this.vm.getGender();
         pets = this.vm.getPets();
         hasPlace = this.vm.getPlace();
         isSmoking = this.vm.getSmoking();
         name = this.vm.getProfileName();
 
-
-        // Setup My ID
-        this.vm.setMyId(mHelper.getUid());
-
-
+        // Setup User ID
+        // This is not necessarily the app owner's ID
+        if (this.vm.getUserId().equals(""))
+        {
+            if (this.getArguments() != null)
+            {
+                this.vm.setUserId(
+                    this.getArguments().getString(BUNDLE_KEY_USER_ID, "")
+                );
+            }
+            else if (savedInstanceState != null)
+            {
+                this.vm.setUserId(
+                    savedInstanceState.getString(BUNDLE_KEY_USER_ID, "")
+                );
+            }
+            else
+            {
+                this.vm.setUserId(this.mHelper.getUid());
+            }
         }
-//    }
+    }
 
     public View onCreateView(
         LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState
     )
     {
+        this.getProfile(this.vm.getUserId());
         // Load the layout
         return inflater.inflate(
             R.layout.fragment_profile_view, container, false
@@ -174,10 +186,7 @@ public class ProfileViewFragment extends Fragment
                 this.getViewLifecycleOwner(), this::updateViewAvatar
             );
             Uri avatarUri = this.vm.getAvatarUri().getValue();
-            if (avatarUri != null)
-            {
-                this.updateViewAvatar(avatarUri);
-            }
+            this.updateViewAvatar(avatarUri);
         }
         this.viewBathroom = view.findViewById(R.id.profileViewBathroomTextView);
         if (this.viewBathroom != null)
@@ -203,6 +212,13 @@ public class ProfileViewFragment extends Fragment
             this.updateViewBio(this.vm.getBio().getValue());
         }
         this.viewGender = view.findViewById(R.id.profileViewGenderTextView);
+        if (this.viewGender != null)
+        {
+            this.vm.getGender().observe(
+                this.getViewLifecycleOwner(), this::updateViewGender
+            );
+            this.updateViewGender(this.vm.getGender().getValue());
+        }
         this.viewLoc = view.findViewById(R.id.profileViewLocationTextView);
         if (this.viewLoc != null)
         {
@@ -318,9 +334,6 @@ public class ProfileViewFragment extends Fragment
             }
         }
 
-        // Fetch Firebase data asynchronously (eventually, somehow)
-        this.pingFirebase();
-
     }
 
     public void setImages(List<Uri> images)
@@ -350,6 +363,12 @@ public class ProfileViewFragment extends Fragment
 
     public void updateViewAvatar(Uri avatar)
     {
+
+        if (this.viewAvatar == null)
+        {
+            return;
+        }
+
         if (avatar == null)
         {
             String name = this.vm.getProfileName().getValue();
@@ -368,6 +387,7 @@ public class ProfileViewFragment extends Fragment
             this.viewAvatar.setImageURI(null);
             this.viewAvatar.setImageURI(avatar);
         }
+
     }
 
     /**
@@ -519,6 +539,7 @@ public class ProfileViewFragment extends Fragment
         {
             this.viewName.setText(name);
         }
+        this.updateViewAvatar(this.vm.getAvatarUri().getValue());
     }
 
     public void updateViewPets(boolean pets)
@@ -626,6 +647,33 @@ public class ProfileViewFragment extends Fragment
         }
     }
 
+    protected void loadProfile(Profile profile)
+    {
+
+        // Update UI
+        name.setValue(profile.getFirstName());
+        bathroom.setValue(profile.isPrivateBathroom());
+        bio.setValue(profile.getBio());
+        this.vm.getGender().setValue(
+            GenderEnum.fromInt(profile.getGender())
+        );
+        pets.setValue(profile.isPetFriendly());
+        hasPlace.setValue(profile.isHasApartment());
+        isSmoking.setValue(profile.isSmoking());
+        vm.getPriceMin().setValue(profile.getMinPrice());
+        vm.getPriceMax().setValue(profile.getMaxPrice());
+        if (profile.getAvatarImage() != null)
+        {
+            Log.d(
+                MainActivity.TAG,
+                this.getClass().getCanonicalName()
+                + "loadProfile(), profile avatar image string: "
+                + profile.getAvatarImage()
+            );
+            vm.getAvatarUri().setValue(Uri.parse(profile.getAvatarImage()));
+        }
+
+    }
 
     ///// ///// /////
 
@@ -636,7 +684,11 @@ public class ProfileViewFragment extends Fragment
      */
     private boolean isMe()
     {
-        return this.vm.getMyId().equals(mHelper.getUid());
+        if (this.mHelper.getUid().equals(""))
+        {
+            return false;
+        }
+        return this.mHelper.getUid().equals(this.vm.getUserId());
     }
 
     /**
@@ -661,38 +713,25 @@ public class ProfileViewFragment extends Fragment
         this.vm.getPriceMax().setValue(4242.42);
         this.vm.getRadius().setValue(42.42);
 
+    }
 
-        // Firebase section --------------------
+    private void getProfile(String myId) {
 
-        // Get firebase wrapper (in-built)
-        // Fetch profiles and loads them
-
-        if (isMe()) {
-            loadProfile(this.vm.getMyId());
-
-        } else {
-            // TODO: Handle ID doesn't exist
+        Profile p = mHelper.getProfile(myId);
+        if (p == null)
+        {
+            Log.d(
+                MainActivity.TAG,
+                this.getClass().getCanonicalName()
+                + ".loadProfile(), profile was null: "
+                + myId
+            );
+        }
+        else
+        {
+            this.loadProfile(p);
         }
 
-    }
-
-    private void loadProfile(String myId) {
-        Profile p = mHelper.getProfile(myId);
-        // Update UI
-        name.setValue(p.getFirstName());
-        bathroom.setValue(p.isPrivateBathroom());
-        bio.setValue(p.getBio());
-        pets.setValue(p.isPetFriendly());
-        hasPlace.setValue(p.isHasApartment());
-        isSmoking.setValue(p.isSmoking());
-        vm.getPriceMin().setValue(p.getMinPrice());
-        vm.getPriceMax().setValue(p.getMaxPrice());
-        if (p.getAvatarImage() != null) vm.getAvatarUri().setValue(Uri.parse(p.getAvatarImage()));
-    }
-
-    private void pingFirebase()
-    {
-        this.loadFakeData();
     }
 
     private void updateViewBathroom(boolean bathroom, boolean place)
