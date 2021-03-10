@@ -1,8 +1,11 @@
 package com.cs65.homie.ui.profile.view;
 
 import android.content.ContentResolver;
+import android.content.res.Resources;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -156,7 +159,15 @@ public class ProfileMatchFragment
             );
         }
 
+        float dip = 10f;
+        Resources r = getResources();
+        float px = TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP,
+                dip,
+                r.getDisplayMetrics()
+        );
         CardView cardView = view.findViewById(R.id.profileViewCardView);
+        cardView.setRadius(px);
         if (cardView != null) {
 
             // Sets up the card view for the matching view
@@ -169,7 +180,8 @@ public class ProfileMatchFragment
             );
             layoutParams.setMargins(margin, margin, margin, margin);
             cardView.setLayoutParams(layoutParams);
-            cardView.setCardBackgroundColor(CARD_BACKGROUND_COLOR);
+//            cardView.setCardBackgroundColor(CARD_BACKGROUND_COLOR);
+            cardView.setCardBackgroundColor(Color.WHITE);
             int elevation = (int) Math.round(
                     Utilities.pixelDensity(this.requireContext(), CARD_ELEVATION)
             );

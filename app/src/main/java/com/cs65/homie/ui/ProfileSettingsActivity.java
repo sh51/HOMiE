@@ -363,6 +363,7 @@ public class ProfileSettingsActivity extends AppCompatActivity {
         newProfile.setSmoking(!isSmoking.isChecked());
         newProfile.setPrivateBathroom(isPrivateBathroom.isChecked());
         newProfile.setId(FirebaseAuth.getInstance().getCurrentUser().getUid());
+        //
 
         // TODO add these to saveProfile
 //        editedProfile.putString(getString(R.string.key_filename), this.photoPath);

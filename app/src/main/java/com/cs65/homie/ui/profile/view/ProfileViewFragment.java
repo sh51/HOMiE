@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.cardview.widget.CardView;
 import androidx.core.text.HtmlCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentContainerView;
@@ -149,6 +150,7 @@ public class ProfileViewFragment extends Fragment
     {
         this.getProfile(this.vm.getUserId());
         //this.loadFakeData();
+
         // Load the layout
         return inflater.inflate(
             R.layout.fragment_profile_view, container, false
@@ -157,6 +159,9 @@ public class ProfileViewFragment extends Fragment
 
     public void onViewCreated(View view, Bundle savedInstanceState)
     {
+
+        CardView cardView = view.findViewById(R.id.profileViewCardView);
+        cardView.setRadius(0);
 
         // Set up the observers for all the relevant views
         this.viewAvatar = view.findViewById(R.id.profileViewAvatarImageView);

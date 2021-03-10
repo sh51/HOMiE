@@ -17,7 +17,7 @@
             android:id="@+id/profileViewCardView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            app:cardCornerRadius="5dp"
+            app:cardCornerRadius="10dp"
             app:contentPadding="0dp">
 
             <ScrollView
@@ -26,7 +26,9 @@
                 android:layout_height="match_parent"
                 android:layout_margin="5dp"
                 android:background="#FFFFFF"
-                android:overScrollMode="never">
+                android:overScrollMode="never"
+                android:paddingTop="15dp"
+                android:paddingHorizontal="10dp">
 
                 <LinearLayout
                     android:id="@+id/profileViewLayout"
