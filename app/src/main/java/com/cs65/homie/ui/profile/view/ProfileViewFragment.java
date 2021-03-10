@@ -19,6 +19,7 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.cs65.homie.FirebaseHelper;
+import com.cs65.homie.Globals;
 import com.cs65.homie.MainActivity;
 import com.cs65.homie.R;
 import com.cs65.homie.Utilities;
@@ -104,6 +105,8 @@ public class ProfileViewFragment extends Fragment
 
         super.onCreate(savedInstanceState);
 
+        Log.d(Globals.TAG, "Profile view created.");
+
         // Get the view model instance
         // ViewModel can never be null
         if (this.vm == null)
@@ -148,7 +151,8 @@ public class ProfileViewFragment extends Fragment
         LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState
     )
     {
-        this.getProfile(this.vm.getUserId());
+        // profile is loaded in onResume
+//        this.getProfile(this.vm.getUserId());
         //this.loadFakeData();
 
         // Load the layout
@@ -320,6 +324,13 @@ public class ProfileViewFragment extends Fragment
             }
         }
 
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        loadProfile(mHelper.getMyProfile());
     }
 
     public void setImages(List<Uri> images)

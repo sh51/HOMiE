@@ -51,6 +51,7 @@ public class ProfileSettingsActivity extends AppCompatActivity {
     private ImageView photoView;
     private String tempImgFileName = "temp.png";
     private EditText editedName, editedEmail, changedPassword, mEditBudgetMax, mEditBudgetMin, mEditAddress, mEditRadius;
+    private TextInputEditText bio;
     private String tempImgHomeName = "temp.png";
     private RadioButton radioFemale, radioMale, radioNoPref;
     private Spinner housingSearchOptions;
@@ -97,6 +98,7 @@ public class ProfileSettingsActivity extends AppCompatActivity {
         mEditBudgetMin = findViewById(R.id.editBudgetMin);
         mEditAddress = findViewById(R.id.editTextPostalAddress);
         mEditRadius = findViewById(R.id.editTextRadius);
+        bio = (TextInputEditText) findViewById(R.id.bio);
 
         isPetFriendly = (Switch) findViewById(R.id.switchPetFriendly);
         isSmoking = (Switch) findViewById(R.id.switchNoneSmoking);
@@ -145,6 +147,7 @@ public class ProfileSettingsActivity extends AppCompatActivity {
             }
         });
 
+        // load data from fetched profile
         this.photoPath = savedProfile.getString(getString(R.string.key_filename), null);
         if (photoPath != null) photoView.setImageURI(Uri.fromFile(new File(this.photoPath)));
         editedName.setText(myProfile.getFirstName());
@@ -163,6 +166,8 @@ public class ProfileSettingsActivity extends AppCompatActivity {
         mEditRadius.setText(String.valueOf(myProfile.getRadius()));
         mEditBudgetMin.setText(String.valueOf(myProfile.getMinPrice()));
         mEditBudgetMax.setText(String.valueOf(myProfile.getMaxPrice()));
+        bio.setText(myProfile.getBio());
+
 
 //        this.photoView.setImageURI(this.photoUri);
         this.loadProfile();
@@ -336,8 +341,6 @@ public class ProfileSettingsActivity extends AppCompatActivity {
         Toast.makeText(this, R.string.toast_saved, Toast.LENGTH_SHORT).show();
         Log.d(TAG, "toasted");
 
-
-        TextInputEditText bio = (TextInputEditText) findViewById(R.id.bio);
         // Firebase
         Profile newProfile = new Profile();
         newProfile.setId(mHelper.getUid());

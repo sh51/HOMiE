@@ -127,6 +127,8 @@ public class FirebaseHelper {
             Log.d(Globals.TAG, "Error creating profile: uid empty.");
             return;
         }
+        // update local profile
+        profiles.put(profile.getId(), profile);
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         db.collection("profiles").document(profile.getId())
                 .set(profile)
@@ -136,36 +138,6 @@ public class FirebaseHelper {
                         Log.d(Globals.TAG, "Error setting document", e);
                     }
                 });
-
-//        if (uid == null) {
-//            Log.d(Globals.TAG, "CreateProfile: null user.");
-//            return;
-//        }
-//
-//        Log.d(Globals.TAG, "Profile hasApartment - " + profile.isHasApartment());
-//
-//        Map<String, Object> p = new HashMap<>();
-//        p.put("uid", uid);
-//        // Strings
-//        p.put("bio", profile.getBio());
-//        p.put("address", profile.getAddress());
-//        p.put("email", profile.getEmail());
-//        p.put("password", profile.getPassword());
-//        p.put("firstName", profile.getFirstName());
-//        p.put("avatarImage", profile.getAvatarImage());
-//        // numbers
-//        p.put("hasApartment", profile.isHasApartment());
-//        p.put("isPetFriendly", profile.isPetFriendly());
-//        p.put("isSmoking", profile.isSmoking());
-//        p.put("privateBathroom", profile.isPrivateBathroom());
-//        p.put("gender", profile.getGender());
-//        p.put("minPrice", profile.getMinPrice());
-//        p.put("maxPrice", profile.getMaxPrice());
-//        p.put("radius", profile.getRadius());
-//        // geolocation
-//        // TODO async geodecoding?
-//        p.put("location", profile.getLocation());
-//        // TODO array fields
     }
 
     // Update profile
