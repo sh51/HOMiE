@@ -1,5 +1,7 @@
 package com.cs65.homie.ui.profile.view;
 
+import android.content.ContentResolver;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -17,14 +19,17 @@ import com.cs65.homie.FirebaseHelper;
 import com.cs65.homie.MainActivity;
 import com.cs65.homie.R;
 import com.cs65.homie.Utilities;
+import com.cs65.homie.models.GenderEnum;
 import com.cs65.homie.models.Profile;
 import com.cs65.homie.ui.gestures.OnSwipeGestureListener;
 import com.cs65.homie.ui.gestures.SwipeGesture;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.firestore.FieldValue;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,6 +41,7 @@ import java.util.Map;
  * This fragment assumes that its parent is ALWAYS MainActivity,
  * and that's not a temporary fake-data dependency
  */
+@SuppressWarnings("Convert2Diamond")
 public class ProfileMatchFragment
     extends ProfileViewFragment
     implements OnSwipeGestureListener,
@@ -112,6 +118,7 @@ public class ProfileMatchFragment
     )
     {
         this.loadProfile();
+        this.loadFakeData();
         return super.onCreateView(inflater, container, savedInstanceState);
     }
 
@@ -327,6 +334,36 @@ public class ProfileMatchFragment
 
         // Don't finish() because you don't finish fragments
         // We're effectively finished though
+
+    }
+
+    /**
+     * Load fake data in lieu of Firebase, for testing
+     */
+    private void loadFakeData()
+    {
+
+        this.vm.getBathroom().setValue(true);
+        this.vm.getBio().setValue(
+            "i Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do "
+                + "eiusmod tempor incididunt ut labore et dolore magna aliqua. "
+                + "Ut enim ad minim veniam, quis nostrud exercitation ullamco "
+                + "laboris nisi ut aliquip ex ea commodo consequat. Duis aute "
+                + "irure dolor in reprehenderit in voluptate velit esse cillum "
+                + "dolore eu fugiat nulla pariatur. Excepteur sint occaecat "
+                + "cupidatat non proident, sunt in culpa qui officia deserunt "
+                + "mollit anim id est laborum."
+        );
+        this.vm.getGender().setValue(GenderEnum.FEMALE);
+        this.vm.getLoc().setValue(new LatLng(43.624794, -72.323171));
+        this.vm.getMyLoc().setValue(new LatLng(43.704166, -72.288762));
+        this.vm.getMyLocStr().setValue("Loops");
+        List<Uri> images = new ArrayList<Uri>();
+        images.add(Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://com.cs65.homie/" + R.drawable.dart0));
+        images.add(Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://com.cs65.homie/" + R.drawable.dart1));
+        images.add(Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://com.cs65.homie/" + R.drawable.dart2));
+        images.add(Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://com.cs65.homie/" + R.drawable.dart3));
+        this.vm.getImages().setValue(images);
 
     }
 
