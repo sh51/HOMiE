@@ -79,7 +79,7 @@
     <string name="switch_PetFriendly">Pet-friendly</string>
     <string name="switch_PrivateBathroom">Private Bathroom</string>
     <string name="image_content_desc">Select Profile Photo from Camera or Gallery</string>
-    <string name="toast_saved">Success!\nProfile changes saved.</string>
+    <string name="toast_saved">Profile changes saved.</string>
     <string name="key_filename">prefKey_filename</string>
     <string name="key_name">prefKey_name</string>
     <string name="key_email">prefKey_email</string>

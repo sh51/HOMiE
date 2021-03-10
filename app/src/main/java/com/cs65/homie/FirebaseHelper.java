@@ -228,6 +228,10 @@ public class FirebaseHelper {
         });
     }
 
+    // Get my profile
+    public Profile getMyProfile() {
+        return profiles.get(getUid());
+    }
     // Get certain profile
     public Profile getProfile(String uid) {
         return profiles.get(uid);
