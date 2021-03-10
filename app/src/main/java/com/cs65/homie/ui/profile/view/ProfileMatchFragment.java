@@ -1,9 +1,6 @@
 package com.cs65.homie.ui.profile.view;
 
-import android.content.ContentResolver;
-import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -12,33 +9,22 @@ import android.widget.LinearLayout;
 
 import androidx.cardview.widget.CardView;
 
-import androidx.annotation.NonNull;
-
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.cs65.homie.FirebaseHelper;
-import com.cs65.homie.Globals;
 import com.cs65.homie.MainActivity;
 import com.cs65.homie.R;
 import com.cs65.homie.Utilities;
-import com.cs65.homie.models.GenderEnum;
 import com.cs65.homie.models.Profile;
 import com.cs65.homie.ui.gestures.OnSwipeGestureListener;
 import com.cs65.homie.ui.gestures.SwipeGesture;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.firestore.FieldValue;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,7 +36,6 @@ import java.util.Map;
  * This fragment assumes that its parent is ALWAYS MainActivity,
  * and that's not a temporary fake-data dependency
  */
-@SuppressWarnings("Convert2Diamond")
 public class ProfileMatchFragment
     extends ProfileViewFragment
     implements OnSwipeGestureListener,
@@ -75,8 +60,7 @@ public class ProfileMatchFragment
     private FirebaseHelper mHelper;
     private FloatingActionButton buttonMatch = null;
     private FloatingActionButton buttonReject = null;
-
-    private List<Profile> matches = new ArrayList<>();
+    private boolean inMatchEvent = false;
 
 
     public void onClick(View view)
@@ -255,7 +239,16 @@ public class ProfileMatchFragment
 
 
     private void handleMatch() {
-        if (this.isMatch()) {
+
+        if (this.inMatchEvent)
+        {
+            return;
+        }
+        this.inMatchEvent = true;
+
+        if (this.isMatch())
+        {
+
             final Map<String, Object> likeMap = new HashMap<>();
             List<Profile> profiles = mHelper.getProfiles();
             int size = profiles.size();
@@ -268,6 +261,33 @@ public class ProfileMatchFragment
             ((MainActivity)this.requireActivity()).matchTransition(
                 this.vm.getProfileName().getValue()
             );
+
+        }
+        else
+        {
+
+            FragmentManager activeFragManager = this.getParentFragmentManager();
+            FragmentTransaction transaction = activeFragManager.beginTransaction();
+            transaction.setCustomAnimations(
+                R.anim.frag_enter_left, R.anim.frag_exit_left,
+                R.anim.frag_enter_pop_left, R.anim.frag_exit_pop_left
+            );
+
+            // Put the next index into the new fragments args
+            Bundle args = new Bundle();
+            args.putInt(BUNDLE_KEY_MATCH_PROFILES_INDEX, ++this.currentIndex);
+
+            // Get the current fragment from the active manager (this fragment)
+            transaction.remove(activeFragManager.getFragments().get(0));
+            transaction.add(
+                R.id.nav_host_fragment, ProfileMatchFragment.class, args
+            );
+            transaction.commit();
+            activeFragManager.executePendingTransactions();
+
+            // Don't finish() because you don't finish fragments
+            // We're effectively finished though
+
         }
 
     }
@@ -275,7 +295,13 @@ public class ProfileMatchFragment
     private void handleReject()
     {
 
-        // TODO Must notify Firebase of the rejection
+        if (this.inMatchEvent)
+        {
+            return;
+        }
+        this.inMatchEvent = true;
+
+        // TODO Need to notify Firebase of the rejection
 
         // Animate the NEW fragment into focus
         // The next match option will be handled by the NEW fragment instance,
