@@ -37,7 +37,6 @@ public class ProfileViewFragmentViewModel extends ViewModel
         = new MutableLiveData<LatLng>(new LatLng(0, 0));
     private final MutableLiveData<String> myLocStr
         = new MutableLiveData<String>("");
-    private String myId = "";
     private final MutableLiveData<String> name
         = new MutableLiveData<String>("");
     private final MutableLiveData<Boolean> pets
@@ -120,16 +119,6 @@ public class ProfileViewFragmentViewModel extends ViewModel
     }
 
     /**
-     * Get the Firebase identifier of the user of the app
-     *
-     * @return  The Firebase identifier of the user of the app
-     */
-    public String getMyId()
-    {
-        return this.myId;
-    }
-
-    /**
      * Get whether or not the profile user's has a place, rather than is
      * looking for a place
      *
@@ -168,21 +157,6 @@ public class ProfileViewFragmentViewModel extends ViewModel
     public String getUserId()
     {
         return this.userId;
-    }
-    /**
-     * Set the app user's Firebase ID
-     *
-     * This should be set with the ID passed from Firebase.
-     * Default value is -1.
-     *
-     * @param id    The app user's Firebase ID
-     * @return      The app user's updated Firebase ID
-     */
-    @SuppressWarnings("UnusedReturnValue")
-    public String setMyId(String id)
-    {
-        this.myId = id;
-        return this.myId;
     }
     /**
      * Set the profile user's Firebase ID

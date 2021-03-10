@@ -36,6 +36,8 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -106,7 +108,7 @@ public class ProfileMatchFragment
         }
         else if (savedInstanceState != null)
         {
-            this.currentIndex = this.getArguments().getInt(
+            this.currentIndex = savedInstanceState.getInt(
                 BUNDLE_KEY_MATCH_PROFILES_INDEX, 0
             );
         }
@@ -121,11 +123,15 @@ public class ProfileMatchFragment
 
     }
 
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(
+        LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState
+    )
+    {
+        this.loadProfile();
         return super.onCreateView(inflater, container, savedInstanceState);
     }
 
-    public void onSaveInstanceState(Bundle outState)
+    public void onSaveInstanceState(@NotNull Bundle outState)
     {
         super.onSaveInstanceState(outState);
         outState.putInt(BUNDLE_KEY_MATCH_PROFILES_INDEX, this.currentIndex);
@@ -167,10 +173,6 @@ public class ProfileMatchFragment
 
     public void onViewCreated(View view, Bundle savedInstanceState)
     {
-
-        // FIXME Using fake data, need to set to the other user
-        //super.vm.setUserId(((MainActivity)this.requireActivity()).getFakeUserId());
-        super.vm.setUserId("pR7PsciIRpdL24u54ZNoP85efh83");
 
         super.onViewCreated(view, savedInstanceState);
 
@@ -240,8 +242,6 @@ public class ProfileMatchFragment
             buttonReject.setVisibility(View.VISIBLE);
         }
 
-        loadProfile();
-
     }
 
     ///// ///// /////
@@ -304,26 +304,10 @@ public class ProfileMatchFragment
 
     }
 
-    private void loadProfile(String uid) {
-        updateUI(mHelper.getProfile(uid));
-    }
-
     private void loadProfile() {
         List<Profile> profiles = mHelper.getProfiles();
         int size = profiles.size();
-        updateUI(profiles.get(currentIndex % size));
+        super.loadProfile(profiles.get(currentIndex % size));
     }
 
-    // Update UI given a profile
-    private void updateUI(Profile p) {
-        name.setValue(p.getFirstName());
-        bathroom.setValue(p.isPrivateBathroom());
-        bio.setValue(p.getBio());
-        pets.setValue(p.isPetFriendly());
-        hasPlace.setValue(p.isHasApartment());
-        isSmoking.setValue(p.isSmoking());
-        vm.getPriceMin().setValue(p.getMinPrice());
-        vm.getPriceMax().setValue(p.getMaxPrice());
-        if (p.getAvatarImage() != null) vm.getAvatarUri().setValue(Uri.parse(p.getAvatarImage()));
-    }
 }
