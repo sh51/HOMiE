@@ -28,9 +28,11 @@ import androidx.core.content.FileProvider;
 
 import com.cs65.homie.FirebaseHelper;
 import com.cs65.homie.Globals;
+import com.cs65.homie.models.GenderEnum;
 import com.cs65.homie.ui.login.ui.login.LoginActivity;
 import com.cs65.homie.ui.login.ui.login.RegistrationActivity;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FieldValue;
 import com.soundcloud.android.crop.Crop;
 
 import com.cs65.homie.R;
@@ -40,7 +42,9 @@ import com.google.android.material.textfield.TextInputEditText;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ProfileSettingsActivity extends AppCompatActivity {
 
@@ -50,7 +54,8 @@ public class ProfileSettingsActivity extends AppCompatActivity {
     private FirebaseHelper mHelper;
     private ImageView photoView;
     private String tempImgFileName = "temp.png";
-    private EditText editedName, editedEmail, changedPassword;
+    private EditText editedName, editedEmail, changedPassword, mEditBudgetMax, mEditBudgetMin, mEditAddress, mEditRadius;
+    private TextInputEditText bio;
     private String tempImgHomeName = "temp.png";
     private RadioButton radioFemale, radioMale, radioNoPref;
     private Spinner housingSearchOptions;
@@ -75,15 +80,15 @@ public class ProfileSettingsActivity extends AppCompatActivity {
 
     private static final String TAG = "ajb";
 
-//    private SharedPreferences savedProfile;
+    private SharedPreferences savedProfile;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile_settings);
 
-
         mHelper = FirebaseHelper.getInstance();
+        Profile myProfile = mHelper.getMyProfile();
         SharedPreferences savedProfile = getSharedPreferences(getString(R.string.saved_preferences), MODE_PRIVATE);
 
 
@@ -95,6 +100,11 @@ public class ProfileSettingsActivity extends AppCompatActivity {
         this.radioNoPref = (RadioButton) findViewById(R.id.radioButton_nopref);
         this.photoView = (ImageView) findViewById(R.id.photoView);
         this.housingSearchOptions = (Spinner) findViewById(R.id.spinnerNeedHousing);
+        mEditBudgetMax = findViewById(R.id.editBudgetMax);
+        mEditBudgetMin = findViewById(R.id.editBudgetMin);
+        mEditAddress = findViewById(R.id.editTextPostalAddress);
+        mEditRadius = findViewById(R.id.editTextRadius);
+        bio = (TextInputEditText) findViewById(R.id.bio);
 
         isPetFriendly = (Switch) findViewById(R.id.switchPetFriendly);
         isSmoking = (Switch) findViewById(R.id.switchNoneSmoking);
@@ -129,8 +139,7 @@ public class ProfileSettingsActivity extends AppCompatActivity {
                     changeHousingImgPrompt.setVisibility(View.VISIBLE);
                     housingImgView.setVisibility(View.VISIBLE);
                     hasApartment = true;
-                }
-                else {
+                } else {
                     changeHousing.setVisibility(View.GONE);
                     changeHousingImgPrompt.setVisibility(View.GONE);
                     housingImgView.setVisibility(View.GONE);
@@ -144,39 +153,29 @@ public class ProfileSettingsActivity extends AppCompatActivity {
             }
         });
 
-        if (savedInstanceState != null) {
-            this.photoPath = savedInstanceState.getString(getString(R.string.key_filename));
-            this.name = savedProfile.getString(getString(R.string.key_name), null);
-            this.email = savedInstanceState.getString(getString(R.string.key_email));
-            this.petFriendly = savedProfile.getString(getString(R.string.key_petFriendly), null);
-            this.noneSmoking = savedProfile.getString(getString(R.string.key_noneSmoking), null);
-            this.privateBathroom = savedProfile.getString(getString(R.string.key_privateBathroom), null);
-            this.genderPref = savedProfile.getString(getString(R.string.key_genderpref), null);
-            this.housingSearch = savedProfile.getString(getString(R.string.key_lookingForHousing), null);
-            this.housePhotoPath = savedInstanceState.getString(getString(R.string.key_housingImg), null);
-            this.address = savedProfile.getString(getString(R.string.key_address), null);
-            this.radius = savedProfile.getString(getString(R.string.key_radius), null);
-            this.minBudget = savedProfile.getString(getString(R.string.key_minBudget), null);
-            this.maxBudget = savedProfile.getString(getString(R.string.key_maxBudget), null);
-        }
-        else {
-            this.photoPath = savedProfile.getString(getString(R.string.key_filename), null);
-            this.name = savedProfile.getString(getString(R.string.key_name), null);
-//            this.email = savedProfile.getString(getString(R.string.key_email), null);
-            // load email from registration intent
-            this.email = getIntent().getStringExtra(RegistrationActivity.KEY_EMAIL);
-            this.petFriendly = savedProfile.getString(getString(R.string.key_petFriendly), null);
-            this.noneSmoking = savedProfile.getString(getString(R.string.key_noneSmoking), null);
-            this.privateBathroom = savedProfile.getString(getString(R.string.key_privateBathroom), null);
-            this.genderPref = savedProfile.getString(getString(R.string.key_genderpref), null);
-            this.housingSearch = savedProfile.getString(getString(R.string.key_lookingForHousing), null);
-            this.housePhotoPath = savedProfile.getString(getString(R.string.key_housingImg), null);
-            this.address = savedProfile.getString(getString(R.string.key_address), null);
-            this.radius = savedProfile.getString(getString(R.string.key_radius), null);
-            this.minBudget = savedProfile.getString(getString(R.string.key_minBudget), null);
-            this.maxBudget = savedProfile.getString(getString(R.string.key_maxBudget), null);
+        // load data from fetched profile
+        this.photoPath = savedProfile.getString(getString(R.string.key_filename), null);
+        if (photoPath != null) photoView.setImageURI(Uri.fromFile(new File(this.photoPath)));
+        editedName.setText(myProfile.getFirstName());
+        editedEmail.setText(myProfile.getEmail());
+        isPetFriendly.setChecked(myProfile.isPetFriendly());
+        isSmoking.setChecked(!myProfile.isSmoking());
+        isPrivateBathroom.setChecked(myProfile.isPrivateBathroom());
+        if (myProfile.getGender() == 0) {
+            radioFemale.setChecked(true);
+            gender = 0;
+        } else if (myProfile.getGender() == 1) {
+            radioMale.setChecked(true);
+            gender = 1;
+        } else { radioNoPref.setChecked(true); gender = 2; }
+        housingSearchOptions.setSelection(myProfile.isHasApartment() ? 1 : 0);
+        this.housePhotoPath = savedProfile.getString(getString(R.string.key_housingImg), null);
+        mEditAddress.setText(myProfile.getAddress());
+        mEditRadius.setText(String.valueOf(myProfile.getRadius()));
+        mEditBudgetMin.setText(String.valueOf(myProfile.getMinPrice()));
+        mEditBudgetMax.setText(String.valueOf(myProfile.getMaxPrice()));
+        bio.setText(myProfile.getBio());
 
-        }
 
 //        this.photoView.setImageURI(this.photoUri);
         this.loadProfile();
@@ -186,6 +185,7 @@ public class ProfileSettingsActivity extends AppCompatActivity {
     /**
      * Save location of temporary profile picture
      * Reloaded on onCreate
+     *
      * @param outState
      */
     public void onSaveInstanceState(Bundle outState) {
@@ -219,12 +219,11 @@ public class ProfileSettingsActivity extends AppCompatActivity {
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
         super.onActivityResult(requestCode, resultCode, intent);
         Log.d(TAG, Integer.toString(resultCode));
-        if(resultCode != RESULT_OK) return;
-        if(requestCode == CAMERA_REQUEST_CODE) {
+        if (resultCode != RESULT_OK) return;
+        if (requestCode == CAMERA_REQUEST_CODE) {
             Log.d(TAG, "requested camera");
             Crop.of(photoUri, photoUri).asSquare().start(this);
-        }
-        else if (requestCode == Crop.REQUEST_CROP) {
+        } else if (requestCode == Crop.REQUEST_CROP) {
             Log.d(TAG, "requested crop");
             Uri tempUri = Crop.getOutput(intent);
             photoView.setImageURI(null);
@@ -250,8 +249,7 @@ public class ProfileSettingsActivity extends AppCompatActivity {
                 this.housingImgView.setImageURI(houseUri);
                 housePhotoPath = houseUri.getPath();
 
-            }
-            else {
+            } else {
                 if (intent.getClipData() != null) {
                     ClipData clipData = intent.getClipData();
                     ArrayList<Uri> uriArrayList = new ArrayList<Uri>();
@@ -304,7 +302,7 @@ public class ProfileSettingsActivity extends AppCompatActivity {
     }
 
     public void onGenderRadioToggled(View view) {
-        gender = radioFemale.isChecked() ? 1 : 0;
+        gender = radioFemale.isChecked() ? 0 : (radioMale.isChecked() ? 1 : 2);
 
         if (view.getId() == R.id.radioButton_female)
             this.genderPref = getString(R.string.radio_Female_text);
@@ -314,25 +312,25 @@ public class ProfileSettingsActivity extends AppCompatActivity {
             this.genderPref = getString(R.string.radio_NoPref_text);
     }
 
-    private void hideKeyboard(View view)
-    {
+    private void hideKeyboard(View view) {
         InputMethodManager inputManager
-            = (InputMethodManager)this.getSystemService(
+                = (InputMethodManager) this.getSystemService(
                 Context.INPUT_METHOD_SERVICE
-            );
+        );
         inputManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
 
     /**
      * load user data that has already been saved
      */
-    private void loadProfile(){
-//        this.savedProfile = getSharedPreferences(getString(R.string.saved_preferences), MODE_PRIVATE);
+    private void loadProfile() {
+        this.savedProfile = getSharedPreferences(getString(R.string.saved_preferences), MODE_PRIVATE);
         if (this.name != null) editedName.setText(this.name);
         if (this.email != null) editedEmail.setText(this.email);
         if (this.genderPref != null) {
             if (this.genderPref == getString(R.string.radio_Male_text)) radioMale.setChecked(true);
-            else if (this.genderPref == getString(R.string.radio_Female_text)) radioFemale.setChecked(true);
+            else if (this.genderPref == getString(R.string.radio_Female_text))
+                radioFemale.setChecked(true);
             else radioNoPref.setChecked(true);
         }
         if (this.photoPath != null) photoView.setImageURI(Uri.fromFile(new File(this.photoPath)));
@@ -342,7 +340,7 @@ public class ProfileSettingsActivity extends AppCompatActivity {
      * save user data using a SharedPreference object
      * after calling saveProfile(), let user know that data is saved
      */
-    private void saveProfile(){
+    private void saveProfile() {
         Log.d(TAG, "in saveProfile");
         this.name = editedName.getText().toString();
         this.email = editedEmail.getText().toString();
@@ -364,27 +362,42 @@ public class ProfileSettingsActivity extends AppCompatActivity {
         Toast.makeText(this, R.string.toast_saved, Toast.LENGTH_SHORT).show();
         Log.d(TAG, "toasted");
 
+        // Firebase update
+        final Map<String, Object> updates = new HashMap<>();
+        updates.put("firstName", name);
+        updates.put("email", email);
+        // TODO change auth too
+        updates.put("password", password);
+        updates.put("bio", bio.getText().toString());
+        Log.d(Globals.TAG,  "updating gender to: " + gender);
+        updates.put("gender", gender);
+        updates.put("hasApartment", hasApartment);
+        updates.put("petFriendly", isPetFriendly.isChecked());
+        updates.put("smoking", !isSmoking.isChecked());
+        updates.put("privateBathroom", isPrivateBathroom.isChecked());
+        updates.put("id", mHelper.getUid());
 
-        TextInputEditText bio = (TextInputEditText)findViewById(R.id.bio);
-        // Firebase
-        Profile newProfile = new Profile();
-        newProfile.setId(mHelper.getUid());
-        newProfile.setFirstName(this.name);
-        newProfile.setEmail(this.email);
-        newProfile.setPassword(this.password);
-        newProfile.setBio(bio.getText().toString());
-        newProfile.setGender(this.gender);
-        newProfile.setHasApartment(hasApartment);
-        newProfile.setisPetFriendly(isPetFriendly.isChecked());
-        newProfile.setSmoking(!isSmoking.isChecked());
-        newProfile.setPrivateBathroom(isPrivateBathroom.isChecked());
-        newProfile.setId(FirebaseAuth.getInstance().getCurrentUser().getUid());
+        double minPrice, maxPrice, radius;
+        // TODO call geocoder to translate the address
+        String address = mEditAddress.getText().toString();
 
-        // TODO add these to saveProfile
-//        editedProfile.putString(getString(R.string.key_filename), this.photoPath);
+        try {
+            minPrice = Double.valueOf(mEditBudgetMin.getText().toString());
+            maxPrice = Double.valueOf(mEditBudgetMax.getText().toString());
+            radius = Double.valueOf(mEditRadius.getText().toString());
+        } catch (Exception e) {
+            Log.d(Globals.TAG, "Cast price failed.");
+            minPrice = 600;
+            maxPrice = 1000;
+            radius = 10;
+        }
 
-        mHelper.createProfile(newProfile);
-
+        updates.put("minPrice", minPrice);
+        updates.put("maxPrice", maxPrice);
+        updates.put("radius", radius);
+        updates.put("address", address);
+//        mHelper.createProfile(newProfile);
+        mHelper.updateProfile(mHelper.getUid(), updates);
 
     }
 }

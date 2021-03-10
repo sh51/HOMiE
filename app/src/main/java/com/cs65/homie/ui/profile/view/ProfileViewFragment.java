@@ -11,6 +11,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.appcompat.view.menu.ActionMenuItemView;
+import androidx.cardview.widget.CardView;
 import androidx.core.text.HtmlCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentContainerView;
@@ -18,6 +20,7 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.cs65.homie.FirebaseHelper;
+import com.cs65.homie.Globals;
 import com.cs65.homie.MainActivity;
 import com.cs65.homie.R;
 import com.cs65.homie.Utilities;
@@ -68,6 +71,8 @@ public class ProfileViewFragment extends Fragment
     private TextView viewRadius = null;
     private TextView viewSmoking = null;
     protected ProfileViewFragmentViewModel vm = null;
+    private CardView cardView;
+    private TextView mMatchEmpty;
 
     // Aliases for easy access
     MutableLiveData<String> bio;
@@ -102,6 +107,9 @@ public class ProfileViewFragment extends Fragment
     {
 
         super.onCreate(savedInstanceState);
+
+        ActionMenuItemView settings = getActivity().findViewById(R.id.menu_item_settingsgear);
+        if (settings != null) settings.setVisibility(View.VISIBLE);
 
         // Get the view model instance
         // ViewModel can never be null
@@ -147,8 +155,9 @@ public class ProfileViewFragment extends Fragment
         LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState
     )
     {
-        this.getProfile(this.vm.getUserId());
-        this.loadFakeData();
+
+//        this.loadFakeData();
+
         // Load the layout
         return inflater.inflate(
             R.layout.fragment_profile_view, container, false
@@ -157,6 +166,10 @@ public class ProfileViewFragment extends Fragment
 
     public void onViewCreated(View view, Bundle savedInstanceState)
     {
+
+        cardView = view.findViewById(R.id.profileViewCardView);
+        cardView.setRadius(0);
+        mMatchEmpty = view.findViewById(R.id.matchEmptyTextView);
 
         // Set up the observers for all the relevant views
         this.viewAvatar = view.findViewById(R.id.profileViewAvatarImageView);
@@ -315,6 +328,13 @@ public class ProfileViewFragment extends Fragment
             }
         }
 
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        this.getProfile(this.vm.getUserId());
     }
 
     public void setImages(List<Uri> images)
@@ -631,29 +651,36 @@ public class ProfileViewFragment extends Fragment
 
     protected void loadProfile(Profile profile)
     {
+        if (profile == null) {
+            cardView.setVisibility(View.GONE);
+            mMatchEmpty.setVisibility(View.VISIBLE);
 
-        // Update UI
-        name.setValue(profile.getFirstName());
-        bathroom.setValue(profile.isPrivateBathroom());
-        bio.setValue(profile.getBio());
-        this.vm.getGender().setValue(
-            GenderEnum.fromInt(profile.getGender())
-        );
-        pets.setValue(profile.isPetFriendly());
-        hasPlace.setValue(profile.isHasApartment());
-        isSmoking.setValue(profile.isSmoking());
-        vm.getPriceMin().setValue(profile.getMinPrice());
-        vm.getPriceMax().setValue(profile.getMaxPrice());
-        if (profile.getAvatarImage() != null)
-        {
-            Log.d(
-                MainActivity.TAG,
-                this.getClass().getCanonicalName()
-                + "loadProfile(), profile avatar image string: "
-                + profile.getAvatarImage()
+
+        } else {
+            // Update UI
+            name.setValue(profile.getFirstName());
+            bathroom.setValue(profile.isPrivateBathroom());
+            bio.setValue(profile.getBio());
+            this.vm.getGender().setValue(
+                    GenderEnum.fromInt(profile.getGender())
             );
-            vm.getAvatarUri().setValue(Uri.parse(profile.getAvatarImage()));
+            pets.setValue(profile.isPetFriendly());
+            hasPlace.setValue(profile.isHasApartment());
+            isSmoking.setValue(profile.isSmoking());
+            vm.getPriceMin().setValue(profile.getMinPrice());
+            vm.getPriceMax().setValue(profile.getMaxPrice());
+            if (profile.getAvatarImage() != null)
+            {
+                Log.d(
+                        MainActivity.TAG,
+                        this.getClass().getCanonicalName()
+                                + "loadProfile(), profile avatar image string: "
+                                + profile.getAvatarImage()
+                );
+                vm.getAvatarUri().setValue(Uri.parse(profile.getAvatarImage()));
+            }
         }
+
 
     }
 

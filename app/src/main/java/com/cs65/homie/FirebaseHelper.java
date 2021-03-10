@@ -26,6 +26,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -55,8 +56,12 @@ public class FirebaseHelper {
 
     private HashMap<String, ChildEventListener> chatListeners;
     private HashMap<String, Profile> profiles;
-    private List<Profile> matchedProfiles;
+    private HashMap<String, Profile> matchedProfiles;
+    private HashMap<String, Profile> suggestedProfiles;
     private String server_key;
+    private String currSuggestion;
+    // local implementation for rejected profiles
+//    private List<String> bannedList;
 
     private FirebaseFirestore db;
     // realtime database object
@@ -76,8 +81,9 @@ public class FirebaseHelper {
         rdb = FirebaseDatabase.getInstance();
         mAuth = FirebaseAuth.getInstance();
         profiles = new HashMap<>();
+        matchedProfiles = new HashMap<>();
+        suggestedProfiles = new HashMap<>();
         chatListeners = new HashMap<>();
-        matchedProfiles = new ArrayList<>();
 
         savePushToken();
 
@@ -107,7 +113,6 @@ public class FirebaseHelper {
 //        profiles.put(profile2.getId(), profile2);
 
         // TODO also call updateMatchedProfiles when the profiles gets updated
-//        updateMatchedProfiles();
     }
 
     public String getUid() {
@@ -126,6 +131,9 @@ public class FirebaseHelper {
             Log.d(Globals.TAG, "Error creating profile: uid empty.");
             return;
         }
+        // update local profile
+        profiles.put(profile.getId(), profile);
+        // update profile on firestore
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         db.collection("profiles").document(profile.getId())
                 .set(profile)
@@ -135,49 +143,44 @@ public class FirebaseHelper {
                         Log.d(Globals.TAG, "Error setting document", e);
                     }
                 });
+        // recalculate profile suggestions
+        updateSuggestedProfiles();
+    }
 
-//        if (uid == null) {
-//            Log.d(Globals.TAG, "CreateProfile: null user.");
-//            return;
-//        }
-//
-//        Log.d(Globals.TAG, "Profile hasApartment - " + profile.isHasApartment());
-//
-//        Map<String, Object> p = new HashMap<>();
-//        p.put("uid", uid);
-//        // Strings
-//        p.put("bio", profile.getBio());
-//        p.put("address", profile.getAddress());
-//        p.put("email", profile.getEmail());
-//        p.put("password", profile.getPassword());
-//        p.put("firstName", profile.getFirstName());
-//        p.put("avatarImage", profile.getAvatarImage());
-//        // numbers
-//        p.put("hasApartment", profile.isHasApartment());
-//        p.put("isPetFriendly", profile.isPetFriendly());
-//        p.put("isSmoking", profile.isSmoking());
-//        p.put("privateBathroom", profile.isPrivateBathroom());
-//        p.put("gender", profile.getGender());
-//        p.put("minPrice", profile.getMinPrice());
-//        p.put("maxPrice", profile.getMaxPrice());
-//        p.put("radius", profile.getRadius());
-//        // geolocation
-//        // TODO async geodecoding?
-//        p.put("location", profile.getLocation());
-//        // TODO array fields
+    private boolean isPotentialMatch(Profile p) {
+//        return false;
+        Profile userProfile = getMyProfile();
+
+        // check reject criteria
+        if (userProfile.getId() == p.getId()) return false; // can't match yourself
+        if (userProfile.isSmoking() != p.isSmoking()) return false; // smokers won't be matched with non-smokers
+        if (userProfile.isPrivateBathroom() != p.isPrivateBathroom()) return false; // private bath prefs have to be the same
+        if (userProfile.isHasApartment() && p.isHasApartment()) return false;   // owners won't be matched with owners
+        if (userProfile.isPetFriendly() != p.isPetFriendly()) return false;
+
+
+        // check location criteria
+
+        return true;
     }
 
     // Update profile
     public void updateProfile(String userId, Map<String, Object> data) {
         db.collection("profiles")
                 .document(userId)
-                .update(data);
+                .update(data).addOnCompleteListener(task -> {
+                    fetchProfile(userId, (p) -> {
+                        updateSuggestedProfiles();
+                    });
+
+                });
+
 
     }
 
 
     // Delete profile
-    public static void deleteProfile(String profileId) {
+    public void deleteProfile(String profileId) {
 
     }
 
@@ -221,6 +224,7 @@ public class FirebaseHelper {
                     }
                 }
                 updateMatchedProfiles();
+                updateSuggestedProfiles();
                 callback.run(getProfiles());
             } else {
                 Log.d(Globals.TAG, "Error getting documents: ", task.getException());
@@ -228,23 +232,51 @@ public class FirebaseHelper {
         });
     }
 
+    // Get my profile
+    public Profile getMyProfile() {
+        return profiles.get(getUid());
+    }
     // Get certain profile
     public Profile getProfile(String uid) {
         return profiles.get(uid);
     }
+    // Get current suggested profile
+    public Profile getSuggestedProfile() {
+        // initialize currSuggestion
+        if (currSuggestion == null) {
+            suggestAnotherProfile();
+        }
+        return suggestedProfiles.get(currSuggestion);
+    }
+    // Get next suggested profile
+    public void suggestAnotherProfile() {
+        boolean newSuggestionFound = false;
+        for (String uid: suggestedProfiles.keySet()) {
+            if (!uid.equals(currSuggestion)) {
+                suggestedProfiles.remove(currSuggestion);
+                currSuggestion = uid;
+                newSuggestionFound = true;
+                break;
+            }
+        }
+        // if all suggestions have been viewed, recalculate suggestions
+        if (!newSuggestionFound) {Log.d(Globals.TAG, "Reached bottom of deck!");
+            updateSuggestedProfiles();
+        }
+    }
     // Get all the profiles
     public List<Profile> getProfiles() {
-        return new ArrayList<Profile>(profiles.values());
+        return new ArrayList<>(profiles.values());
     }
 
-    // Get profiles suggestions - these will be displayed on the match screen
-    public List<Profile> getSuggestedProfiles() {
-        return new ArrayList<Profile>(profiles.values());
-    }
+//    // Get profiles suggestions - these will be displayed on the match screen
+//    public List<Profile> getSuggestedProfiles() {
+//        return new ArrayList<>(suggestedProfiles.values());
+//    }
 
     // Get matched profiles for chat initialization - return the matched profiles, need to be called after a MatchedProfile update
     public List<Profile> getMatchedProfiles() {
-        return matchedProfiles;
+        return new ArrayList<Profile>(matchedProfiles.values());
     }
 
     // refresh matched profiles from the list of profiles
@@ -252,14 +284,68 @@ public class FirebaseHelper {
         String uid = getUid();
         Profile userProfile = profiles.get(uid);
 
+        // this is not supposed to happen
+        if (userProfile == null) return;
+
         // likes is an array of userIds, iterate through likes to populate matched profiles
         userProfile.getLikes().forEach((id) -> {
             // since profiles is supposed to be a complete set of profiles, so this is guaranteed to be non-null
             Profile p = profiles.get(id);
+<<<<<<< HEAD
             if (profiles.get(id) != null && profiles.get(id).getLikes().contains(uid)) matchedProfiles.add(p);
+=======
+            Log.d(Globals.TAG,  "Their: " + p.getLikes().size());
+            if (profiles.get(id).getLikes() != null && profiles.get(id).getLikes().contains(uid)) matchedProfiles.put(id, p);
+>>>>>>> d14ba2d (chats synchronized + improved match flow)
         });
     }
+    // refresh suggested profiles from the list of profiles
+    private void updateSuggestedProfiles() {
+        profiles.forEach((uid, p) -> {
+            if (isPotentialMatch(p)) {
+                suggestedProfiles.put(uid, p);
+            } else suggestedProfiles.remove(uid);
+        });
+        // clear the current suggestion if the profile is no longer suggested
+        if (currSuggestion != null && suggestedProfiles.get(currSuggestion) == null) currSuggestion = null;
+        if (currSuggestion == null) {
+            for (String uid: suggestedProfiles.keySet()) {
+                if (!uid.equals(currSuggestion)) {
+                    suggestedProfiles.remove(currSuggestion);
+                    currSuggestion = uid;
+                    break;
+                }
+            }
+        }
+    }
+    //
+    // like a profile, the callback is only called when there is a new match
+    public void like(String uid, Utilities.onLikeCallbackInterface callback) {
+        String currId = getUid();
+        Profile userProfile = profiles.get(currId), likedProfile = profiles.get(uid);;
 
+        // first update firestore profile
+        final Map<String, Object> update = new HashMap<>();
+        update.put("likes", FieldValue.arrayUnion(uid));  // arrayUnion would not generate duplicates
+        updateProfile(currId, update);
+        // upon success update local profile
+        List<String> likes = userProfile.getLikes();
+        if (!likes.contains(uid)) likes.add(uid);
+        // lastly check if matched profiles needs an update
+        // * likes might not be initialized when they haven't liked anyone yet
+        if (likedProfile.getLikes() != null && likedProfile.getLikes().contains(currId)) {
+            Log.d(Globals.TAG, "Matched with: " + uid);
+            // update matched profiles if there is a match
+            matchedProfiles.put(uid, likedProfile);
+            // execute callback
+            callback.run(true);
+        } else { callback.run(false); }
+    }
+
+    // unlike a profile
+    public static void unlike(String uid, Utilities.onUnlikeCallbackInterface callback) {
+
+    }
 
     // Chat & notification related functions: !must be logged in
 
@@ -307,7 +393,7 @@ public class FirebaseHelper {
 
                         // TODO replace the userId with username
                         if (dataSnapshot.getValue() != null)
-                            sendPushNotification(dataSnapshot.getValue(String.class), messageTitle, msg.getText());
+                            sendPushNotification(dataSnapshot.getValue(String.class), msg.getSenderId(), messageTitle, msg.getText());
                     }
 
                     @Override
@@ -393,17 +479,6 @@ public class FirebaseHelper {
     }
 
 
-    // like a user
-    public static void like(String uid, Utilities.onLikeCallbackInterface callback) {
-
-    }
-
-    // unlike a user
-    public static void unlike(String uid, Utilities.onUnlikeCallbackInterface callback) {
-
-    }
-
-
     // load the server key with context
     public void loadServerKey(Context ctxt) {
         String string = "";
@@ -427,7 +502,7 @@ public class FirebaseHelper {
     }
 
     // send a push notification to a certain user
-    public void sendPushNotification(String token, String title, String text) {
+    public void sendPushNotification(String token, String uid, String title, String text) {
         if (server_key == null) return;
         Log.d(Globals.TAG, "Sending push notification to " + token);
 
@@ -449,9 +524,14 @@ public class FirebaseHelper {
                 JSONObject body = new JSONObject();
                 body.put("to", token);
                 JSONObject notification = new JSONObject();
-                notification.put("title", title);
+                notification.put("title", title + " sent you a message:");
                 notification.put("body", text);
+                JSONObject data = new JSONObject();
+                data.put("senderId", uid);
+//                data.put("title", title);
+//                data.put("text", text);
                 body.put("notification", notification);
+                body.put("data", data);
 
                 DataOutputStream wr = new DataOutputStream(conn.getOutputStream());
                 wr.write(body.toString().getBytes());
@@ -467,14 +547,14 @@ public class FirebaseHelper {
 
                 bufferedReader.close();
                 Log.d(Globals.TAG, "Push notification sent.");
-                Log.d(Globals.TAG, sb.toString());
+//                Log.d(Globals.TAG, sb.toString());
             } catch (Exception e) {
                 e.printStackTrace();
             }
 
 
             thread.quit();
-        }, 0);
+        }, 1000);
     }
 
     // save the push tokens to realtime database

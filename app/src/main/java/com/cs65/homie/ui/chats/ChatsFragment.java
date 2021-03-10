@@ -11,6 +11,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.view.menu.ActionMenuItemView;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModelProvider;
@@ -36,12 +38,11 @@ import java.util.TreeMap;
 /**
  * A fragment for chats, a view containing all outstanding chats with
  * other users
- *
+ * <p>
  * Users can open a chart with other users from this fragment
  */
 @SuppressWarnings("Convert2Diamond")
-public class ChatsFragment extends Fragment
-{
+public class ChatsFragment extends Fragment {
     private static final int PROFILE_VIEW_ACTIVITY_RESPONSE_CODE = 22564;
 
     private FirebaseHelper mHelper;
@@ -54,42 +55,46 @@ public class ChatsFragment extends Fragment
     private ChatsViewModel vm = null;
 
 
-    public void onActivityResult (
-        int requestCode, int resultCode, Intent data
-    )
-    {
-        if (requestCode == PROFILE_VIEW_ACTIVITY_RESPONSE_CODE)
-        {
+    public void onActivityResult(
+            int requestCode, int resultCode, Intent data
+    ) {
+        if (requestCode == PROFILE_VIEW_ACTIVITY_RESPONSE_CODE) {
             this.inProfile = false;
         }
     }
 
-    public void onCreate(Bundle savedInstanceState)
-    {
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+
+    }
+
+    public void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
 
+        ActionMenuItemView settings = getActivity().findViewById(R.id.menu_item_settingsgear);
+        settings.setVisibility(View.GONE);
+
         // Returned VM cannot be null
         this.vm = new ViewModelProvider(
-            this.requireActivity()).get(ChatsViewModel.class
+                this.requireActivity()).get(ChatsViewModel.class
         );
 
         mHelper = FirebaseHelper.getInstance();
-        this.loadChats(mHelper.getMatchedProfiles());
+//        this.loadChats(mHelper.getMatchedProfiles());
         //this.loadFakeData();
 
     }
 
     public View onCreateView(
-        LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
-    {
+            LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(
-            R.layout.fragment_chats, container, false
+                R.layout.fragment_chats, container, false
         );
     }
 
-    public void onMessagesUpdate(List<Message> messages)
-    {
+    public void onMessagesUpdate(List<Message> messages) {
 
         SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
         String myId = sharedPref.getString("userId", "");
@@ -97,58 +102,53 @@ public class ChatsFragment extends Fragment
         // if the messages list is not empty, get the other user
         // (might be sender or receiver) or the first message, and invalidate
         // that chat recycler view, to update the time and message preview
-        if (!messages.isEmpty())
-        {
+        if (!messages.isEmpty()) {
             String receiverId = messages.get(0).getReceiverId();
-            if (receiverId.equals(myId))
-            {
+            if (receiverId.equals(myId)) {
                 receiverId = messages.get(0).getSenderId();
             }
             int position = this.adapter.getUserPosition(receiverId);
-            if (position >= 0)
-            {
+            if (position >= 0) {
                 this.adapter.notifyItemChanged(position);
             }
         }
 
     }
 
-    public void onViewCreated(View view, Bundle savedInstanceState)
-    {
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+
+        Log.d(Globals.TAG, String.valueOf(mHelper.getMatchedProfiles().size()));
 
         this.viewTextWarning = view.findViewById(R.id.chatsEmptyTextView);
         if (
-            this.viewTextWarning != null
-            && !this.vm.getUsers().getValue().isEmpty()
-        )
-        {
+                this.viewTextWarning != null
+                        && !this.vm.getUsers().getValue().isEmpty()
+        ) {
             this.viewTextWarning.setVisibility(View.GONE);
         }
 
         this.viewRecycler = view.findViewById(R.id.chatsRecyclerView);
-        if (this.viewRecycler != null)
-        {
+        if (this.viewRecycler != null) {
 
             LinearLayoutManager layoutManager
-                = new LinearLayoutManager(this.getContext());
+                    = new LinearLayoutManager(this.getContext());
             this.viewRecycler.addItemDecoration(new DividerItemDecoration(
-                this.requireContext(), layoutManager.getOrientation()
+                    this.requireContext(), layoutManager.getOrientation()
             ));
             this.viewRecycler.setLayoutManager(layoutManager);
             this.adapter = new ChatsRecyclerAdapter(this, this.vm);
             this.viewRecycler.setAdapter(this.adapter);
             this.vm.getUsersMessages().observe(
-                this.getViewLifecycleOwner(), this::invalidateRecycler
+                    this.getViewLifecycleOwner(), this::invalidateRecycler
             );
             // Observe all the messages live data
             //noinspection ConstantConditions
             for (
-                MutableLiveData<List<Message>> messages
-                : this.vm.getUsersMessages().getValue().values()
-            )
-            {
+                    MutableLiveData<List<Message>> messages
+                    : this.vm.getUsersMessages().getValue().values()
+            ) {
                 messages.observe(
-                    this.getViewLifecycleOwner(), this::onMessagesUpdate
+                        this.getViewLifecycleOwner(), this::onMessagesUpdate
                 );
             }
 
@@ -157,35 +157,29 @@ public class ChatsFragment extends Fragment
     }
 
     public void invalidateRecycler(
-        Map<String, MutableLiveData<List<Message>>> usersMessages
-    )
-    {
+            Map<String, MutableLiveData<List<Message>>> usersMessages
+    ) {
 
-        if (this.viewTextWarning != null && !usersMessages.isEmpty())
-        {
+        if (this.viewTextWarning != null && !usersMessages.isEmpty()) {
             this.viewTextWarning.setVisibility(View.GONE);
         }
 
-        if (this.adapter != null)
-        {
+        if (this.adapter != null) {
             this.adapter.notifyDataSetChanged();
             // Any one of the messages may have changed,
             // so we must observe them all
-            for (MutableLiveData<List<Message>> messages : usersMessages.values())
-            {
+            for (MutableLiveData<List<Message>> messages : usersMessages.values()) {
                 messages.observe(
-                    this.getViewLifecycleOwner(), this::onMessagesUpdate
+                        this.getViewLifecycleOwner(), this::onMessagesUpdate
                 );
             }
         }
 
     }
 
-    public void spawnProfileView(String userId)
-    {
+    public void spawnProfileView(String userId) {
 
-        if (this.inProfile)
-        {
+        if (this.inProfile) {
             return;
         }
 
@@ -198,13 +192,12 @@ public class ChatsFragment extends Fragment
         intent.putExtra(ProfileViewFragment.BUNDLE_KEY_USER_ID, userId);
         intent.putExtra(ProfileViewFragment.BUNDLE_KEY_MY_ID, myId);
         this.startActivityForResult(
-            intent, PROFILE_VIEW_ACTIVITY_RESPONSE_CODE
+                intent, PROFILE_VIEW_ACTIVITY_RESPONSE_CODE
         );
 
     }
 
-    private void loadFakeData()
-    {
+    private void loadFakeData() {
 
         Profile profile1 = new Profile();
         profile1.setFirstName("Dave");
@@ -221,14 +214,14 @@ public class ChatsFragment extends Fragment
         message1.setSenderId("43");
         Message message2 = new Message();
         message2.setText(
-            "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do "
-            + "eiusmod tempor incididunt ut labore et dolore magna aliqua. "
-            + "Ut enim ad minim veniam, quis nostrud exercitation ullamco "
-            + "laboris nisi ut aliquip ex ea commodo consequat. Duis aute "
-            + "irure dolor in reprehenderit in voluptate velit esse cillum "
-            + "dolore eu fugiat nulla pariatur. Excepteur sint occaecat "
-            + "cupidatat non proident, sunt in culpa qui officia deserunt "
-            + "mollit anim id est laborum."
+                "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do "
+                        + "eiusmod tempor incididunt ut labore et dolore magna aliqua. "
+                        + "Ut enim ad minim veniam, quis nostrud exercitation ullamco "
+                        + "laboris nisi ut aliquip ex ea commodo consequat. Duis aute "
+                        + "irure dolor in reprehenderit in voluptate velit esse cillum "
+                        + "dolore eu fugiat nulla pariatur. Excepteur sint occaecat "
+                        + "cupidatat non proident, sunt in culpa qui officia deserunt "
+                        + "mollit anim id est laborum."
         );
         message2.setDatetime(Calendar.getInstance().getTime());
         message2.setReceiverId("43");
@@ -258,47 +251,6 @@ public class ChatsFragment extends Fragment
 
     }
 
-    private void loadChats(List<Profile> profiles) {
 
-        if (profiles == null) profiles = new ArrayList<>();
-
-        TreeMap<String, Profile> users = this.vm.getUsers().getValue();
-        TreeMap<String, MutableLiveData<List<Message>>> usersMessages = this.vm.getUsersMessages().getValue();
-
-        // user profiles and chats initialized
-        profiles.forEach((profile) -> {
-            users.put(profile.getId(), profile);
-            usersMessages.put(profile.getId(), new MutableLiveData<List<Message>>());
-        });
-
-        this.vm.getUsersMessages().setValue(usersMessages);
-        this.vm.getUsers().setValue(users);
-
-        // load chats
-        profiles.forEach((profile) -> {
-            // initialize the message list for each profile
-            usersMessages.get(profile.getId()).setValue(new ArrayList<>());
-            List<Message> msgs = usersMessages.get(profile.getId()).getValue();
-
-            mHelper.loadMessages(profile.getId(), (changedMsg -> {
-                if (changedMsg.getTimestamp() == -1) {
-                    // this message is removed
-                    Log.d(Globals.TAG, "Removing message...");
-                    for (int i = 0; i < msgs.size(); i++)
-                        if (msgs.get(i).getMid().equals(changedMsg.getMid())) {
-                            msgs.remove(i);
-                            break;
-                        }
-
-                } else {
-                    // a new message received
-                    msgs.add(changedMsg);
-                }
-//                usersMessages.put(profile.getId(), new MutableLiveData<List<Message>>(msgs));
-                // force a ui update
-                this.vm.getUsersMessages().setValue(usersMessages);
-            }));
-        });
-    }
 
 }

@@ -54,16 +54,16 @@ public class Profile {
 
     public Profile() {
 //        firstName = "Matt";
-        bio = "Diehard tennis player, love hula hooping more than anything.";
+//        bio = "Diehard tennis player, love hula hooping more than anything.";
         gender = 1;
         minPrice = 600;
         maxPrice = 1000;
-        privateBathroom = true;
+        privateBathroom = false;
         address = "Dartmouth College";
         radius = 5; // imperial by default
         hasApartment = false;
-        isPetFriendly = true;
-        isSmoking = true;
+        isPetFriendly = false;
+        isSmoking = false;
 
         likes = new ArrayList<>();
         keywords = new ArrayList<>();
@@ -190,8 +190,8 @@ public class Profile {
         return isPetFriendly;
     }
 
-    public void setisPetFriendly(boolean isPetFriendly) {
-        this.isPetFriendly = isPetFriendly;
+    public void setPetFriendly(boolean petFriendly) {
+        isPetFriendly = petFriendly;
     }
 
     public boolean isSmoking() {

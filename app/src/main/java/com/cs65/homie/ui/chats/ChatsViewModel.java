@@ -1,8 +1,12 @@
 package com.cs65.homie.ui.chats;
 
+import android.util.Log;
+
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import com.cs65.homie.Globals;
+import com.cs65.homie.Utilities;
 import com.cs65.homie.models.Message;
 import com.cs65.homie.models.Profile;
 
@@ -14,25 +18,23 @@ import java.util.TreeMap;
 
 
 @SuppressWarnings("Convert2Diamond")
-public class ChatsViewModel extends ViewModel
-{
+public class ChatsViewModel extends ViewModel {
 
     private final MutableLiveData<TreeMap<String, Profile>> users;
     private final MutableLiveData<
-        TreeMap<String, MutableLiveData<List<Message>>>
-    >  usersMessages;
+            TreeMap<String, MutableLiveData<List<Message>>>
+            > usersMessages;
     private final List<String> usersList = new ArrayList<String>();
 
-    public ChatsViewModel()
-    {
+    public ChatsViewModel() {
 
         this.users = new MutableLiveData<TreeMap<String, Profile>>(
-            new TreeMap<String, Profile>()
+                new TreeMap<String, Profile>()
         );
         this.usersMessages = new MutableLiveData<
-            TreeMap<String, MutableLiveData<List<Message>>>
-        >(
-            new TreeMap<String, MutableLiveData<List<Message>>>()
+                TreeMap<String, MutableLiveData<List<Message>>>
+                >(
+                new TreeMap<String, MutableLiveData<List<Message>>>()
         );
 
         // Since we don't have a destroy event, we can't release
@@ -41,43 +43,37 @@ public class ChatsViewModel extends ViewModel
         // Functionality should be moved to the fragment then
         this.users.observeForever(this::updateUsersList);
 
+        Log.d(Globals.TAG, "ChatsVM constructor finished.");
     }
 
-    public MutableLiveData<List<Message>> getMessages(String id)
-    {
+    public MutableLiveData<List<Message>> getMessages(String id) {
         return this.usersMessages.getValue().get(id);
     }
 
-    public Profile getUser(int i)
-    {
+    public Profile getUser(int i) {
 
-        if (i < this.usersList.size())
-        {
+        if (i < this.usersList.size()) {
             return this.users.getValue().get(this.usersList.get(i));
         }
         return null;
 
     }
 
-    public Profile getUser(String id)
-    {
+    public Profile getUser(String id) {
         return this.users.getValue().get(id);
     }
 
-    public MutableLiveData<TreeMap<String, Profile>> getUsers()
-    {
+    public MutableLiveData<TreeMap<String, Profile>> getUsers() {
         return this.users;
     }
 
     public MutableLiveData<
-        TreeMap<String, MutableLiveData<List<Message>>>
-    > getUsersMessages()
-    {
+            TreeMap<String, MutableLiveData<List<Message>>>
+            > getUsersMessages() {
         return this.usersMessages;
     }
 
-    private void updateUsersList(TreeMap<String, Profile> map)
-    {
+    private void updateUsersList(TreeMap<String, Profile> map) {
         this.usersList.clear();
         this.usersList.addAll(map.keySet());
     }
