@@ -330,7 +330,7 @@ public class ProfileViewFragment extends Fragment
     public void onResume() {
         super.onResume();
 
-        loadProfile(mHelper.getMyProfile());
+        this.getProfile(this.vm.getUserId());
     }
 
     public void setImages(List<Uri> images)

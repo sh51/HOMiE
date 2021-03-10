@@ -210,7 +210,7 @@ public class FirebaseHelper {
     }
     // Get all the profiles
     public List<Profile> getProfiles() {
-        return new ArrayList<Profile>(profiles.values());
+        return new ArrayList<>(profiles.values());
     }
 
     // Get profiles suggestions - these will be displayed on the match screen

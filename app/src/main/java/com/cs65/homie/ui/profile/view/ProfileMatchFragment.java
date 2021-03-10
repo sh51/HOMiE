@@ -5,6 +5,7 @@ import android.content.res.Resources;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -20,6 +21,7 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.cs65.homie.FirebaseHelper;
+import com.cs65.homie.Globals;
 import com.cs65.homie.MainActivity;
 import com.cs65.homie.R;
 import com.cs65.homie.Utilities;
@@ -86,10 +88,12 @@ public class ProfileMatchFragment
             this.currentIndex = this.getArguments().getInt(
                     BUNDLE_KEY_MATCH_PROFILES_INDEX, 0
             );
+            Log.d(Globals.TAG, "currIndex: " + currentIndex);
         } else if (savedInstanceState != null) {
             this.currentIndex = savedInstanceState.getInt(
                     BUNDLE_KEY_MATCH_PROFILES_INDEX, 0
             );
+            Log.d(Globals.TAG, "currIndex: " + currentIndex);
         }
 
         super.vm = new ViewModelProvider(this).get(
@@ -272,7 +276,7 @@ public class ProfileMatchFragment
 
         // Put the next index into the new fragments args
         Bundle args = new Bundle();
-        args.putInt(BUNDLE_KEY_MATCH_PROFILES_INDEX, ++this.currentIndex);
+        args.putInt(BUNDLE_KEY_MATCH_PROFILES_INDEX, (++this.currentIndex % mHelper.getProfiles().size()));
 
         // Get the current fragment from the active manager (this fragment)
         transaction.remove(activeFragManager.getFragments().get(0));
