@@ -1,5 +1,6 @@
 package com.cs65.homie.ui;
 
+import android.content.ClipData;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -217,15 +218,15 @@ public class ProfileSettingsActivity extends AppCompatActivity {
     // TODO ADD FUNCTIONALITY FOR ADDING MULTIPLE IMAGES
     public void onChangeHousingPhotoClicked(View view) {
         Log.d(TAG, "onChangeHousingPhotoClicked");
-//        Intent intent = new Intent();
-//        intent.setType("image/*");
-//        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-//        intent.setAction(Intent.ACTION_GET_CONTENT);
-//        startActivityForResult(Intent.createChooser(intent, "Select Picture"), SELECT_MULTIPLE_IMG);
+        Intent intent = new Intent();
+        intent.setType("image/*");
+        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        startActivityForResult(Intent.createChooser(intent, "Select Picture"), SELECT_MULTIPLE_IMG);
 
-        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        intent.putExtra(MediaStore.EXTRA_OUTPUT, this.houseUri);
-        startActivityForResult(intent, SELECT_MULTIPLE_IMG);
+//        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+//        intent.putExtra(MediaStore.EXTRA_OUTPUT, this.houseUri);
+//        startActivityForResult(intent, SELECT_MULTIPLE_IMG);
     }
 
     @Override
@@ -244,28 +245,44 @@ public class ProfileSettingsActivity extends AppCompatActivity {
             photoView.setImageURI(tempUri);
             photoPath = photoUri.getPath();
         }
-        else if (requestCode == SELECT_MULTIPLE_IMG) {
-            this.housingImgView.setImageURI(houseUri);
-            housePhotoPath = houseUri.getPath();
-        }
-//        else if (requestCode == SELECT_MULTIPLE_IMG && intent != null) {
-//            String[] filePathCol = {MediaStore.Images.Media.DATA};
-//            housing_images = new ArrayList<String> ();
-//            if (intent.getData() != null) {
-//                Uri uri = intent.getData();
-//                Cursor cursor = getContentResolver().query(houseUri, filePathCol, null, null, null);
-//                cursor.moveToFirst();
-//
-//                int ind = cursor.getColumnIndex(filePathCol[0]);
-//                this.housePhotoPath = cursor.getString(ind);
-//                cursor.close();
-//
-//            }
-//            else {
-//
-//            }
-//
+//        else if (requestCode == SELECT_MULTIPLE_IMG) {
+//            this.housingImgView.setImageURI(houseUri);
+//            housePhotoPath = houseUri.getPath();
 //        }
+        else if (requestCode == SELECT_MULTIPLE_IMG && intent != null) {
+            String[] filePathCol = {MediaStore.Images.Media.DATA};
+            housing_images = new ArrayList<String> ();
+            if (intent.getData() != null) {
+                Uri uri = intent.getData();
+                Cursor cursor = getContentResolver().query(houseUri, filePathCol, null, null, null);
+                cursor.moveToFirst();
+
+                int ind = cursor.getColumnIndex(filePathCol[0]);
+                this.housePhotoPath = cursor.getString(ind);
+                this.housing_images.add(this.housePhotoPath);
+                cursor.close();
+
+            }
+            else {
+                if (intent.getClipData() != null) {
+                    ClipData clipData = intent.getClipData();
+                    ArrayList<Uri> uriArrayList = new ArrayList<Uri>();
+                    for (int i = 0; i < clipData.getItemCount(); i++) {
+                        ClipData.Item item = clipData.getItemAt(i);
+                        Uri uri = item.getUri();
+                        uriArrayList.add(uri);
+                        Cursor cursor = getContentResolver().query(uri, filePathCol, null, null, null);
+                        cursor.moveToFirst();
+                        int colInd = cursor.getColumnIndex(filePathCol[0]);
+                        this.housePhotoPath = cursor.getString(colInd);
+                        this.housing_images.add(this.housePhotoPath);
+                        cursor.close();
+
+                    }
+                    Log.d(Globals.TAG, "select images");
+                }
+            }
+        }
     }
 
 
