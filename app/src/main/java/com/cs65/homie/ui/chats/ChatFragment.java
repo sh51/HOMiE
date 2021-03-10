@@ -47,6 +47,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener
     private FirebaseHelper mHelper;
 
     public static final String ARG_KEY_USER_ID  = "CHAT_FRAG_ARG_KEY_USER_ID";
+    @SuppressWarnings("unused")
     public static final String BUNDLE_KEY_KEYBOARD_UP
         = "CHAT_FRAG_BUNDLE_KEY_KEYBOARD_IS_UP";
 
@@ -293,7 +294,6 @@ public class ChatFragment extends Fragment implements View.OnClickListener
             return;
         }
 
-
         // go to definition for description
         mHelper.sendMessage(this.userId, messageText, (msg) -> {
             // scroll to bottom when message sent
@@ -312,11 +312,8 @@ public class ChatFragment extends Fragment implements View.OnClickListener
         // Clear the text in the input
         inputView.setText(null);
 
-        // In practice the message will be sent asynchronously to Firebase
-        // For now, toast
-        Utilities.showErrorToast(
-            R.string.chat_message_sent_toast, this.getActivity()
-        );
+        // TODO Send the message to Firebase asynchronously
+
     }
 
 }

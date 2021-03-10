@@ -71,10 +71,6 @@ public class ProfileMatchFragment
 
     public void onClick(View view)
     {
-
-        // TODO After-matching action, ping to Firebase, "you have a match!"
-        // etc happens here
-        // For now, toasts
         if (view.equals(buttonMatch))
         {
             this.handleMatch();

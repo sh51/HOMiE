@@ -3,11 +3,6 @@ package com.cs65.homie.ui;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.Matrix;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -19,43 +14,28 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
 
 import com.cs65.homie.FirebaseHelper;
-import com.cs65.homie.Globals;
 import com.cs65.homie.ui.login.ui.login.LoginActivity;
 import com.cs65.homie.ui.login.ui.login.RegistrationActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.soundcloud.android.crop.Crop;
 
-import com.cs65.homie.MainActivity;
 import com.cs65.homie.R;
 import com.cs65.homie.Utilities;
 import com.cs65.homie.models.Profile;
-import com.cs65.homie.ui.login.ui.login.RegistrationActivity;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.textfield.TextInputEditText;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.soundcloud.android.crop.Crop;
 
 import java.io.File;
-import java.time.Instant;
-import java.time.temporal.TemporalAdjuster;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 public class ProfileSettingsActivity extends AppCompatActivity {
 
