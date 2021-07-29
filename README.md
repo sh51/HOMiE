@@ -1,3 +1,3 @@
-# Homies
+# HOMiE
 
-Note: An env file that contains the server key is needed to enable push notification.
+A detailed description of this app can be found [here](https://sites.google.com/dartmouth.edu/find-your-homie/).
